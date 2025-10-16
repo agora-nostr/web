@@ -19,12 +19,12 @@ export async function fetchIntroductionPosts(ndk: NDK, inviteRelay?: string): Pr
       relayUrls = [...AGORA_RELAYS];
     }
 
-    // Fetch posts with #introductions hashtag from more than 12 hours ago
+    // Fetch posts with #introduction hashtag from more than 12 hours ago
     const twelveHoursAgo = Math.floor(Date.now() / 1000) - (12 * 60 * 60);
 
     const filter: NDKFilter = {
       kinds: [1],
-      "#t": ["introductions"],
+      "#t": ["introduction"],
       since: twelveHoursAgo,
     };
 

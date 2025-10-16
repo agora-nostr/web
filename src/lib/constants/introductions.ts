@@ -3,7 +3,7 @@
  * Maps language codes to their localized introduction hashtag
  */
 export const INTRODUCTION_HASHTAGS: Record<string, string> = {
-  en: 'introductions',
+  en: 'introduction',
   es: 'bienvenidas',
   fa: 'معرفی',
   km: 'ការណែនាំ',
@@ -12,7 +12,7 @@ export const INTRODUCTION_HASHTAGS: Record<string, string> = {
 
 /**
  * Get the localized introduction hashtag for a given locale
- * Falls back to 'introductions' if locale is not found
+ * Falls back to 'introduction' if locale is not found
  */
 export function getIntroductionHashtag(locale: string | null | undefined): string {
   if (!locale) return INTRODUCTION_HASHTAGS.en;
@@ -24,16 +24,16 @@ export function getIntroductionHashtag(locale: string | null | undefined): strin
 }
 
 /**
- * Get all hashtags for an introduction post (including the base 'introductions')
+ * Get all hashtags for an introduction post (including the base 'introduction')
  * Returns an array of hashtags to be added to the post
  */
 export function getIntroductionHashtags(locale: string | null | undefined): string[] {
   const localizedTag = getIntroductionHashtag(locale);
 
-  // Always include 'introductions', plus the localized version if different
+  // Always include 'introduction', plus the localized version if different
   if (localizedTag === INTRODUCTION_HASHTAGS.en) {
-    return ['introductions'];
+    return ['introduction'];
   }
 
-  return ['introductions', localizedTag];
+  return ['introduction', localizedTag];
 }
