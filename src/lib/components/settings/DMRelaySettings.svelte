@@ -2,44 +2,30 @@
   import { ndk } from '$lib/ndk.svelte';
   import { messagesStore } from '$lib/stores/messages.svelte';
   import { toast } from '$lib/stores/toast.svelte';
-  import { onMount } from 'svelte';
-  import { NDKKind, type NDKFilter } from '@nostr-dev-kit/ndk';
+  import { NDKKind } from '@nostr-dev-kit/ndk';
 
-  let relays = $state<string[]>([]);
-  let loading = $state(true);
+  let activeUser = $derived(ndk.$currentUser);
   let saving = $state(false);
   let newRelay = $state('');
+  let relays = $state<string[]>([]);
 
-  async function loadRelays() {
-    if (!ndk.activeUser) return;
+  // Reactively fetch DM relay list
+  const dmRelayEvents = ndk.$fetchEvents(() => activeUser ? {
+    kinds: [NDKKind.DirectMessageReceiveRelayList],
+    authors: [activeUser.pubkey],
+    limit: 1
+  } : undefined);
 
-    try {
-      loading = true;
-
-      // Fetch DM relay list (kind 10050)
-      const filter: NDKFilter = {
-        kinds: [NDKKind.DirectMessageReceiveRelayList],
-        authors: [ndk.activeUser.pubkey],
-        limit: 1
-      };
-
-      const events = await ndk.fetchEvents(filter);
-      const event = Array.from(events)[0];
-
-      if (event) {
-        // Extract relay URLs from 'relay' tags
-        relays = event.tags
-          .filter(tag => tag[0] === 'relay')
-          .map(tag => tag[1])
-          .filter(url => url);
-      }
-    } catch (error) {
-      console.error('Failed to load DM relays:', error);
-      toast.error('Failed to load DM relays');
-    } finally {
-      loading = false;
+  // Update relays when event loads
+  $effect(() => {
+    const event = dmRelayEvents[0];
+    if (event) {
+      relays = event.tags
+        .filter(tag => tag[0] === 'relay')
+        .map(tag => tag[1])
+        .filter(url => url);
     }
-  }
+  });
 
   async function saveRelays() {
     if (!ndk.activeUser) return;
@@ -93,10 +79,6 @@
   function removeRelay(url: string) {
     relays = relays.filter(r => r !== url);
   }
-
-  onMount(() => {
-    loadRelays();
-  });
 </script>
 
 <div class="space-y-6">
@@ -108,10 +90,10 @@
     </p>
   </div>
 
-  {#if loading}
+  {#if !activeUser}
     <!-- Loading state -->
     <div class="flex items-center justify-center py-8">
-      <svg class="w-6 h-6 text-orange-500 animate-spin" fill="none" viewBox="0 0 24 24">
+      <svg class="w-6 h-6 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
       </svg>
@@ -128,12 +110,12 @@
           bind:value={newRelay}
           onkeydown={(e) => e.key === 'Enter' && addRelay()}
           placeholder="wss://relay.example.com"
-          class="flex-1 px-4 py-2 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          class="flex-1 px-4 py-2 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
         />
         <button
           onclick={addRelay}
           disabled={!newRelay.trim() || relays.length >= 3}
-          class="px-4 py-2 bg-orange-500 hover:bg-orange-500/90 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add
         </button>
@@ -191,7 +173,7 @@
       <button
         onclick={saveRelays}
         disabled={saving || relays.length === 0}
-        class="px-6 py-2 bg-orange-500 hover:bg-orange-500/90 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {#if saving}
           Saving...
