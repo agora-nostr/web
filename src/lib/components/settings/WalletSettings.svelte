@@ -1,8 +1,8 @@
 <script lang="ts">
   import { ndk } from '$lib/ndk.svelte';
   import type { Mint } from '@nostr-dev-kit/svelte';
-  import { NDKCashuWallet } from '@nostr-dev-kit/wallet';
   import MintBrowser from '$lib/components/wallet/MintBrowser.svelte';
+  import { npubCash } from '$lib/stores/npubcash.svelte';
 
   let isAddingMint = $state(false);
   let isAddingRelay = $state(false);
@@ -67,32 +67,10 @@
     isSaving = true;
 
     try {
-      const walletInstance = wallet.wallet;
-
-      // Create wallet if it doesn't exist
-      if (!(walletInstance instanceof NDKCashuWallet)) {
-        const newWallet = await NDKCashuWallet.create(ndk, pendingMints, undefined);
-
-        // Set relays if any
-        if (pendingRelays.length > 0) {
-          const { NDKRelaySet } = await import('@nostr-dev-kit/ndk');
-          newWallet.relaySet = NDKRelaySet.fromRelayUrls(pendingRelays, ndk);
-        }
-
-        await newWallet.publish();
-      } else {
-        // Update existing wallet
-        walletInstance.mints = [...pendingMints];
-
-        if (pendingRelays.length > 0) {
-          const { NDKRelaySet } = await import('@nostr-dev-kit/ndk');
-          walletInstance.relaySet = NDKRelaySet.fromRelayUrls(pendingRelays, ndk);
-        } else {
-          walletInstance.relaySet = undefined;
-        }
-
-        await walletInstance.publish();
-      }
+      await wallet.updateWallet({
+        mints: pendingMints,
+        relays: pendingRelays.length > 0 ? pendingRelays : undefined
+      });
 
       hasPendingChanges = false;
       showSuccess('Changes saved successfully!');
@@ -217,6 +195,10 @@
 
     isBrowsingMints = false;
   }
+
+  function handleNpubCashToggle() {
+    npubCash.setEnabled(!npubCash.enabled);
+  }
 </script>
 
 <div class="space-y-6">
@@ -227,7 +209,7 @@
         Wallet Configuration
       </h2>
       <p class="text-sm text-muted-foreground">
-        Manage your Cashu mints and wallet relays for ecash transactions.
+        Manage your Cashu mints, wallet relays, and Lightning integration.
       </p>
     </div>
     {#if hasPendingChanges}
@@ -450,6 +432,34 @@
           </div>
         </button>
       {/if}
+    </div>
+  </div>
+
+  <!-- npub.cash Lightning Integration -->
+  <div class="border rounded-lg p-4 bg-card">
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <div>
+          <h3 class="text-lg font-semibold text-foreground">
+            npub.cash Lightning Zaps
+          </h3>
+          <p class="text-sm text-muted-foreground">
+            Automatically redeem Lightning zaps received via npub.cash into your wallet.
+          </p>
+        </div>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+        <input
+          type="checkbox"
+          checked={npubCash.enabled}
+          onchange={handleNpubCashToggle}
+          class="sr-only peer"
+        />
+        <div class="w-11 h-6 bg-neutral-300 dark:bg-neutral-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+      </label>
     </div>
   </div>
 
