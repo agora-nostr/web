@@ -15,12 +15,12 @@
   let depositInvoice = $state<string | null>(null);
   let isCheckingPayment = $state(false);
 
-  let availableMints = $derived(wallet.mints || []);
+  let availableMints = $derived(wallet.mints?.map(m => typeof m === 'string' ? m : m.url) || []);
   let selectedMint = $state<string>('');
 
   $effect(() => {
     if (availableMints.length > 0 && !selectedMint) {
-      selectedMint = availableMints[0].url;
+      selectedMint = availableMints[0];
     }
   });
 
@@ -196,7 +196,7 @@
             <label for="mint">Select Mint</label>
             <select id="mint" bind:value={selectedMint}>
               {#each availableMints as mint}
-                <option value={mint.url}>{mint.url}</option>
+                <option value={mint}>{mint}</option>
               {/each}
             </select>
             {#if availableMints.length === 0}

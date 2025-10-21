@@ -22,9 +22,17 @@
 
   // Initialize pending state from wallet
   $effect(() => {
-    if (!hasPendingChanges) {
-      pendingMints = wallet.mints.map(m => typeof m === 'string' ? m : m.url);
-      pendingRelays = wallet.relays;
+    if (!hasPendingChanges && wallet) {
+      const walletMints = wallet.mints.map(m => typeof m === 'string' ? m : m.url);
+      const walletRelays = wallet.relays;
+
+      // Only update if there are actual changes to avoid unnecessary re-renders
+      if (JSON.stringify(pendingMints) !== JSON.stringify(walletMints)) {
+        pendingMints = walletMints;
+      }
+      if (JSON.stringify(pendingRelays) !== JSON.stringify(walletRelays)) {
+        pendingRelays = walletRelays;
+      }
     }
   });
 

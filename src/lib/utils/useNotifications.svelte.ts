@@ -1,5 +1,15 @@
 import type { NDKEvent } from '@nostr-dev-kit/ndk';
 import type { NDKSvelte } from '@nostr-dev-kit/svelte';
+import {
+  KIND_TEXT_NOTE,
+  KIND_REPLY,
+  KIND_REPOST,
+  KIND_GENERIC_REPOST,
+  KIND_REACTION,
+  KIND_ZAP,
+  KIND_INVITE_ACCEPTANCE,
+  NOTIFICATION_KINDS,
+} from '$lib/constants/nostr';
 
 /**
  * Notification type definitions
@@ -49,6 +59,7 @@ export type InviteAcceptanceNotification = BaseNotification & {
   type: 'invite_acceptance';
   event: NDKEvent;
   inviteeEventId: string;
+  inviteePubkey: string; // Primary actor who accepted the invite
 };
 
 export type NotificationGroup =
@@ -63,145 +74,76 @@ export type NotificationGroup =
 export type NotificationFilter = 'all' | 'reply' | 'mention' | 'quote' | 'reaction' | 'repost' | 'zap' | 'invite';
 
 /**
- * Creates a notifications manager that aggregates and groups notifications
+ * Event categorizer - maps events to categories
  */
-export function createNotificationsManager(ndk: NDKSvelte) {
-  const currentUser = ndk.$currentUser;
+function categorizeEvent(
+  event: NDKEvent,
+  userEventIds: Set<string>
+): 'reply' | 'mention' | 'quote' | 'reaction' | 'repost' | 'zap' | 'invite_acceptance' | null {
+  if (event.kind === KIND_REACTION) return 'reaction';
+  if (event.kind === KIND_REPOST || event.kind === KIND_GENERIC_REPOST) return 'repost';
+  if (event.kind === KIND_ZAP) return 'zap';
+  if (event.kind === KIND_INVITE_ACCEPTANCE) return 'invite_acceptance';
 
-  // Subscription for all notification events
-  const notificationsSubscription = ndk.$subscribe(() => {
-    if (!currentUser) return undefined;
+  if (event.kind === KIND_TEXT_NOTE || event.kind === KIND_REPLY) {
+    // Check if it's a quote
+    const qTag = event.tags.find((t) => t[0] === 'q');
+    if (qTag && userEventIds.has(qTag[1])) {
+      return 'quote';
+    }
 
-    return {
-      filters: [
-        {
-          kinds: [1, 1111, 6, 16, 7, 9735, 514], // text, reply, repost, generic-repost, reaction, zap, invite acceptance
-          '#p': [currentUser.pubkey],
-          since: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 30, // last 30 days
-          limit: 500,
-        },
-      ],
-      subId: 'notifications',
-    };
-  });
+    // Check if it's a reply
+    const replyMarker = event.tags.find((t) => t[0] === 'e' && t[3] === 'reply');
+    if (replyMarker && userEventIds.has(replyMarker[1])) {
+      return 'reply';
+    }
 
-  // Subscription for user's own events (to identify replies vs mentions)
-  const userEventsSubscription = ndk.$subscribe(() => {
-    if (!currentUser) return undefined;
+    // It's a mention
+    return 'mention';
+  }
 
-    return {
-      filters: [
-        {
-          kinds: [1, 1111, 30023], // text, reply, article
-          authors: [currentUser.pubkey],
-          since: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 30, // last 30 days
-        },
-      ],
-      subId: 'user-events',
-    };
-  });
+  return null;
+}
 
-  // Build a Set of user's event IDs for quick lookup
-  const userEventIds = $derived.by(() => {
-    const events = Array.from(userEventsSubscription.events ?? []);
-    return new Set(events.map((e) => e.id));
-  });
+/**
+ * Notification processors - strategy pattern for processing different notification types
+ */
+const notificationProcessors = {
+  reply: (events: NDKEvent[]): ReplyNotification[] => {
+    return events.map((event) => ({
+      id: `reply-${event.id}`,
+      type: 'reply' as const,
+      timestamp: event.created_at || 0,
+      event,
+      replyToEventId: event.tags.find((t) => t[0] === 'e' && t[3] === 'reply')?.[1] || '',
+    }));
+  },
 
-  // Cache for fetched target events
-  const targetEventsCache = $state(new Map<string, NDKEvent>());
+  mention: (events: NDKEvent[]): MentionNotification[] => {
+    return events.map((event) => ({
+      id: `mention-${event.id}`,
+      type: 'mention' as const,
+      timestamp: event.created_at || 0,
+      event,
+    }));
+  },
 
-  // Filter state
-  let currentFilter = $state<NotificationFilter>('all');
+  quote: (events: NDKEvent[]): QuoteNotification[] => {
+    return events.map((event) => ({
+      id: `quote-${event.id}`,
+      type: 'quote' as const,
+      timestamp: event.created_at || 0,
+      event,
+      quotedEventId: event.tags.find((t) => t[0] === 'q')?.[1] || '',
+    }));
+  },
 
-  /**
-   * Aggregate raw notification events into groups
-   */
-  const notificationGroups = $derived.by(() => {
-    if (!currentUser) return [];
-
-    const events = Array.from(notificationsSubscription.events ?? []);
-    const groups: NotificationGroup[] = [];
-
-    // Categorize events
-    const replies: NDKEvent[] = [];
-    const mentions: NDKEvent[] = [];
-    const quotes: NDKEvent[] = [];
-    const reposts: NDKEvent[] = [];
-    const reactions: NDKEvent[] = [];
-    const zaps: NDKEvent[] = [];
-    const inviteAcceptances: NDKEvent[] = [];
-
-    events.forEach((event) => {
-      if (event.kind === 7) {
-        reactions.push(event);
-      } else if (event.kind === 6 || event.kind === 16) {
-        reposts.push(event);
-      } else if (event.kind === 9735) {
-        zaps.push(event);
-      } else if (event.kind === 514) {
-        inviteAcceptances.push(event);
-      } else if (event.kind === 1 || event.kind === 1111) {
-        // Check if it's a quote
-        const qTag = event.tags.find((t) => t[0] === 'q');
-        if (qTag && userEventIds.has(qTag[1])) {
-          quotes.push(event);
-          return;
-        }
-
-        // Check if it's a reply
-        const replyMarker = event.tags.find((t) => t[0] === 'e' && t[3] === 'reply');
-        if (replyMarker && userEventIds.has(replyMarker[1])) {
-          replies.push(event);
-        } else {
-          // It's a mention
-          mentions.push(event);
-        }
-      }
-    });
-
-    // Process replies
-    replies.forEach((event) => {
-      const replyToEventId = event.tags.find((t) => t[0] === 'e' && t[3] === 'reply')?.[1] || '';
-      groups.push({
-        id: `reply-${event.id}`,
-        type: 'reply',
-        timestamp: event.created_at || 0,
-        event,
-        replyToEventId,
-      });
-    });
-
-    // Process mentions
-    mentions.forEach((event) => {
-      groups.push({
-        id: `mention-${event.id}`,
-        type: 'mention',
-        timestamp: event.created_at || 0,
-        event,
-      });
-    });
-
-    // Process quotes
-    quotes.forEach((event) => {
-      const quotedEventId = event.tags.find((t) => t[0] === 'q')?.[1] || '';
-      groups.push({
-        id: `quote-${event.id}`,
-        type: 'quote',
-        timestamp: event.created_at || 0,
-        event,
-        quotedEventId,
-      });
-    });
-
-    // Process reactions - GROUP by target event + emoji
+  reaction: (events: NDKEvent[], userEventIds: Set<string>): ReactionNotification[] => {
     const reactionGroups = new Map<string, { targetEventId: string; emoji: string; reactors: Array<{ pubkey: string; event: NDKEvent }>; timestamp: number }>();
 
-    reactions.forEach((reaction) => {
+    events.forEach((reaction) => {
       const targetId = reaction.tags.find((t) => t[0] === 'e')?.[1];
-      if (!targetId) return;
-
-      // Check if this is a reaction to user's event
-      if (!userEventIds.has(targetId)) return;
+      if (!targetId || !userEventIds.has(targetId)) return;
 
       // Normalize emoji: "+" means like/heart
       let emoji = reaction.content || '👍';
@@ -221,32 +163,27 @@ export function createNotificationsManager(ndk: NDKSvelte) {
 
       const group = reactionGroups.get(key)!;
       group.reactors.push({ pubkey: reaction.pubkey, event: reaction });
-      // Update timestamp to most recent reaction
       if (reaction.created_at && reaction.created_at > group.timestamp) {
         group.timestamp = reaction.created_at;
       }
     });
 
-    reactionGroups.forEach((group, key) => {
-      groups.push({
-        id: `reaction-${key}`,
-        type: 'reaction',
-        timestamp: group.timestamp,
-        targetEventId: group.targetEventId,
-        emoji: group.emoji,
-        reactors: group.reactors,
-      });
-    });
+    return Array.from(reactionGroups.entries()).map(([key, group]) => ({
+      id: `reaction-${key}`,
+      type: 'reaction' as const,
+      timestamp: group.timestamp,
+      targetEventId: group.targetEventId,
+      emoji: group.emoji,
+      reactors: group.reactors,
+    }));
+  },
 
-    // Process reposts - GROUP by target event
+  repost: (events: NDKEvent[], userEventIds: Set<string>): RepostNotification[] => {
     const repostGroups = new Map<string, { targetEventId: string; reposts: NDKEvent[]; timestamp: number }>();
 
-    reposts.forEach((repost) => {
+    events.forEach((repost) => {
       const targetId = repost.tags.find((t) => t[0] === 'e')?.[1];
-      if (!targetId) return;
-
-      // Check if this is a repost of user's event
-      if (!userEventIds.has(targetId)) return;
+      if (!targetId || !userEventIds.has(targetId)) return;
 
       if (!repostGroups.has(targetId)) {
         repostGroups.set(targetId, {
@@ -258,31 +195,26 @@ export function createNotificationsManager(ndk: NDKSvelte) {
 
       const group = repostGroups.get(targetId)!;
       group.reposts.push(repost);
-      // Update timestamp to most recent repost
       if (repost.created_at && repost.created_at > group.timestamp) {
         group.timestamp = repost.created_at;
       }
     });
 
-    repostGroups.forEach((group) => {
-      groups.push({
-        id: `repost-${group.targetEventId}`,
-        type: 'repost',
-        timestamp: group.timestamp,
-        targetEventId: group.targetEventId,
-        reposts: group.reposts,
-      });
-    });
+    return Array.from(repostGroups.values()).map((group) => ({
+      id: `repost-${group.targetEventId}`,
+      type: 'repost' as const,
+      timestamp: group.timestamp,
+      targetEventId: group.targetEventId,
+      reposts: group.reposts,
+    }));
+  },
 
-    // Process zaps - GROUP by target event
+  zap: (events: NDKEvent[], userEventIds: Set<string>): ZapNotification[] => {
     const zapGroups = new Map<string, { targetEventId: string; zaps: Array<{ event: NDKEvent; amount: number; sender: string }>; timestamp: number }>();
 
-    zaps.forEach((zap) => {
+    events.forEach((zap) => {
       const targetId = zap.tags.find((t) => t[0] === 'e')?.[1];
-      if (!targetId) return;
-
-      // Check if this is a zap to user's event
-      if (!userEventIds.has(targetId)) return;
+      if (!targetId || !userEventIds.has(targetId)) return;
 
       // Extract amount from bolt11 tag
       const bolt11Tag = zap.tags.find((t) => t[0] === 'bolt11')?.[1];
@@ -308,35 +240,123 @@ export function createNotificationsManager(ndk: NDKSvelte) {
 
       const group = zapGroups.get(targetId)!;
       group.zaps.push({ event: zap, amount, sender });
-      // Update timestamp to most recent zap
       if (zap.created_at && zap.created_at > group.timestamp) {
         group.timestamp = zap.created_at;
       }
     });
 
-    zapGroups.forEach((group) => {
-      groups.push({
-        id: `zap-${group.targetEventId}`,
-        type: 'zap',
-        timestamp: group.timestamp,
-        targetEventId: group.targetEventId,
-        zaps: group.zaps,
-      });
-    });
+    return Array.from(zapGroups.values()).map((group) => ({
+      id: `zap-${group.targetEventId}`,
+      type: 'zap' as const,
+      timestamp: group.timestamp,
+      targetEventId: group.targetEventId,
+      zaps: group.zaps,
+    }));
+  },
 
-    // Process invite acceptances (kind 514)
-    inviteAcceptances.forEach((event) => {
+  invite_acceptance: (events: NDKEvent[]): InviteAcceptanceNotification[] => {
+    return events.map((event) => {
       // The 514 event is published by the invitee, tagging the inviter (us) with 'p' tag
       // and the invite event with 'e' tag
       const inviteEventId = event.tags.find((t) => t[0] === 'e')?.[1] || '';
-      groups.push({
+      return {
         id: `invite-${event.id}`,
-        type: 'invite_acceptance',
+        type: 'invite_acceptance' as const,
         timestamp: event.created_at || 0,
         event,
         inviteeEventId: inviteEventId,
-      });
+        inviteePubkey: event.pubkey, // Primary actor who accepted the invite
+      };
     });
+  },
+};
+
+/**
+ * Creates a notifications manager that aggregates and groups notifications
+ */
+export function createNotificationsManager(ndk: NDKSvelte) {
+  const currentUser = ndk.$currentUser;
+
+  // Subscription for all notification events
+  const notificationsSubscription = ndk.$subscribe(() => {
+    if (!currentUser) return undefined;
+
+    return {
+      filters: [
+        {
+          kinds: [...NOTIFICATION_KINDS],
+          '#p': [currentUser.pubkey],
+          since: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 30, // last 30 days
+          limit: 500,
+        },
+      ],
+      subId: 'notifications',
+    };
+  });
+
+  // Subscription for user's own events (to identify replies vs mentions)
+  const userEventsSubscription = ndk.$subscribe(() => {
+    if (!currentUser) return undefined;
+
+    return {
+      filters: [
+        {
+          kinds: [KIND_TEXT_NOTE, KIND_REPLY, 30023], // text, reply, article
+          authors: [currentUser.pubkey],
+          since: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 30, // last 30 days
+        },
+      ],
+      subId: 'user-events',
+    };
+  });
+
+  // Build a Set of user's event IDs for quick lookup
+  const userEventIds = $derived.by(() => {
+    const events = Array.from(userEventsSubscription.events ?? []);
+    return new Set(events.map((e) => e.id));
+  });
+
+  // Cache for fetched target events
+  const targetEventsCache = $state(new Map<string, NDKEvent>());
+
+  // Filter state
+  let currentFilter = $state<NotificationFilter>('all');
+
+  /**
+   * Aggregate raw notification events into groups using strategy pattern
+   */
+  const notificationGroups = $derived.by(() => {
+    if (!currentUser) return [];
+
+    const events = Array.from(notificationsSubscription.events ?? []);
+    const groups: NotificationGroup[] = [];
+
+    // Categorize events by type
+    const categorizedEvents: Record<string, NDKEvent[]> = {
+      reply: [],
+      mention: [],
+      quote: [],
+      reaction: [],
+      repost: [],
+      zap: [],
+      invite_acceptance: [],
+    };
+
+    events.forEach((event) => {
+      const category = categorizeEvent(event, userEventIds);
+      if (category) {
+        categorizedEvents[category].push(event);
+      }
+    });
+
+    // Process each category using strategy pattern
+    groups.push(...notificationProcessors.reply(categorizedEvents.reply));
+    groups.push(...notificationProcessors.mention(categorizedEvents.mention));
+    groups.push(...notificationProcessors.quote(categorizedEvents.quote));
+    groups.push(...notificationProcessors.reaction(categorizedEvents.reaction, userEventIds));
+    groups.push(...notificationProcessors.repost(categorizedEvents.repost, userEventIds));
+    groups.push(...notificationProcessors.zap(categorizedEvents.zap, userEventIds));
+    groups.push(...notificationProcessors.invite_acceptance(categorizedEvents.invite_acceptance));
 
     // Sort by timestamp (most recent first)
     return groups.sort((a, b) => b.timestamp - a.timestamp);
