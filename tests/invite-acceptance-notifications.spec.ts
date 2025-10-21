@@ -44,18 +44,16 @@ test.describe('Invite Acceptance Notifications', () => {
     await page.getByRole('button', { name: /invites/i }).click();
     await page.waitForTimeout(500);
 
-    // All visible notifications should be invite acceptances
-    // (identified by the green checkmark icon and "accepted your invite" text)
-    const notifications = page.locator('[class*="border-b"]');
-    const count = await notifications.count();
+    // Use data-testid to find invite notifications specifically
+    const inviteNotifications = page.getByTestId('invite-acceptance-notification');
+    const count = await inviteNotifications.count();
 
-    // If there are notifications, they should all be invite type
+    // If there are notifications, verify they contain expected content
     if (count > 0) {
-      // Check for the presence of "accepted your invite" text in at least one notification
-      const inviteText = page.getByText(/accepted your invite/i);
-      const exists = await inviteText.count();
-      // If filtered correctly, we should see this text (or no notifications)
-      expect(exists >= 0).toBeTruthy();
+      const firstNotification = inviteNotifications.first();
+      await expect(firstNotification).toBeVisible();
+      // Should contain "accepted your invite" text
+      await expect(firstNotification.getByText(/accepted your invite/i)).toBeVisible();
     }
   });
 });
@@ -71,17 +69,16 @@ test.describe('Invite Acceptance Notification Component', () => {
     await page.getByRole('button', { name: /invites/i }).click();
     await page.waitForTimeout(500);
 
-    // Check if any notifications exist
-    const notifications = page.locator('text=/accepted your invite/i');
+    // Use data-testid to find invite notifications
+    const notifications = page.getByTestId('invite-acceptance-notification');
     const count = await notifications.count();
 
     if (count > 0) {
-      // First notification should have the green checkmark SVG
       const firstNotification = notifications.first();
       await expect(firstNotification).toBeVisible();
 
-      // Look for SVG with green color (text-green-500 class)
-      const greenIcon = page.locator('svg.text-green-500').first();
+      // Look for SVG with green color inside the notification
+      const greenIcon = firstNotification.locator('svg.text-green-500').first();
       await expect(greenIcon).toBeVisible();
     }
   });
@@ -142,8 +139,8 @@ test.describe('Follow Button Behavior', () => {
     await page.getByRole('button', { name: /invites/i }).click();
     await page.waitForTimeout(500);
 
-    // Look for Follow buttons in notifications
-    const followButtons = page.getByRole('button', { name: /^follow$/i });
+    // Use data-testid to find Follow buttons
+    const followButtons = page.getByTestId('follow-button');
     const count = await followButtons.count();
 
     // If there are invite notifications with Follow buttons
@@ -154,6 +151,9 @@ test.describe('Follow Button Behavior', () => {
       // Check for the icon (should have an SVG)
       const icon = firstFollowButton.locator('svg').first();
       await expect(icon).toBeVisible();
+
+      // Verify it says "Follow"
+      await expect(firstFollowButton).toHaveText(/follow/i);
     }
   });
 
@@ -162,21 +162,24 @@ test.describe('Follow Button Behavior', () => {
     await page.getByRole('button', { name: /invites/i }).click();
     await page.waitForTimeout(500);
 
-    // Look for Follow buttons
-    const followButtons = page.getByRole('button', { name: /^follow$/i });
+    // Use data-testid to find Follow buttons
+    const followButtons = page.getByTestId('follow-button');
     const count = await followButtons.count();
 
     if (count > 0) {
       const button = followButtons.first();
 
-      // Check aria-label exists
+      // Check aria-label exists and contains "Follow"
       const ariaLabel = await button.getAttribute('aria-label');
       expect(ariaLabel).toBeTruthy();
-      expect(ariaLabel).toContain('Follow');
+      expect(ariaLabel).toMatch(/follow/i);
 
-      // Check button type
+      // Check button type is "button"
       const buttonType = await button.getAttribute('type');
       expect(buttonType).toBe('button');
+
+      // Verify button is enabled by default
+      await expect(button).toBeEnabled();
     }
   });
 
@@ -185,24 +188,32 @@ test.describe('Follow Button Behavior', () => {
     await page.getByRole('button', { name: /invites/i }).click();
     await page.waitForTimeout(500);
 
-    // Look for Follow buttons
-    const followButtons = page.getByRole('button', { name: /^follow$/i });
+    // Use data-testid to find Follow buttons
+    const followButtons = page.getByTestId('follow-button');
     const count = await followButtons.count();
 
     if (count > 0) {
       const button = followButtons.first();
 
+      // Listen for custom events
+      const loadingEventPromise = page.evaluate(() => {
+        return new Promise((resolve) => {
+          document.addEventListener('followloading', (e) => resolve(e), { once: true });
+        });
+      });
+
       // Click the Follow button
       await button.click();
 
-      // Immediately check for loading state (spinner or disabled state)
-      // Note: This might be too fast to catch in tests, but we verify the button exists
+      // Wait briefly for loading state or state change
       await page.waitForTimeout(100);
 
-      // After action, button should either show loading or change to "Unfollow"
-      // (depending on success/failure)
+      // Button should be disabled during loading OR text should have changed
+      const isDisabled = await button.isDisabled();
       const buttonText = await button.textContent();
-      expect(buttonText).toBeTruthy();
+
+      // Either button is disabled (loading) OR text changed to "Unfollow" (success)
+      expect(isDisabled || buttonText?.toLowerCase().includes('unfollow')).toBeTruthy();
     }
   });
 
@@ -211,26 +222,30 @@ test.describe('Follow Button Behavior', () => {
     await page.getByRole('button', { name: /invites/i }).click();
     await page.waitForTimeout(500);
 
-    // Look for Follow buttons
-    const followButtons = page.getByRole('button', { name: /^follow$/i });
+    // Use data-testid to find Follow buttons
+    const followButtons = page.getByTestId('follow-button');
     const count = await followButtons.count();
 
     if (count > 0) {
       const button = followButtons.first();
 
-      // Focus the button
+      // Focus the button using keyboard navigation
       await button.focus();
 
       // Verify it's focused
       await expect(button).toBeFocused();
 
-      // Press Enter to activate
+      // Verify button is enabled before interaction
+      await expect(button).toBeEnabled();
+
+      // Press Enter to activate (simulates keyboard interaction)
       await page.keyboard.press('Enter');
 
-      // Button should respond to keyboard interaction
+      // Wait briefly for state change
       await page.waitForTimeout(100);
-      const isEnabled = await button.isEnabled();
-      expect(typeof isEnabled).toBe('boolean');
+
+      // Button should still exist and be either disabled (loading) or have changed text
+      await expect(button).toBeAttached();
     }
   });
 });
