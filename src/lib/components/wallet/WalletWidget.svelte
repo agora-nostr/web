@@ -8,43 +8,58 @@
   type TabView = 'wallet' | 'send' | 'receive' | 'scan';
   let currentTab = $state<TabView>('wallet');
 
-  // Set up back navigation for non-wallet tabs
+  // Set up header for all tabs
   $effect(() => {
-    if (currentTab !== 'wallet') {
-      headerStore.backNav = {
-        onclick: () => currentTab = 'wallet'
-      };
-    } else {
-      headerStore.backNav = null;
-    }
+    headerStore.header = walletHeader;
 
     return () => {
-      headerStore.backNav = null;
+      headerStore.clear();
     };
   });
 </script>
 
-<div class="wallet-container">
-  <!-- Header -->
-  <div class="wallet-header">
-    <h1>
-      {#if currentTab === 'wallet'}
-        Wallet
-      {:else if currentTab === 'send' || currentTab === 'scan'}
-        Send
-      {:else if currentTab === 'receive'}
-        Receive
-      {/if}
-    </h1>
-    {#if currentTab === 'wallet'}
-      <a href="/settings?tab=wallet" class="settings-btn">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      </a>
-    {/if}
+{#snippet walletHeader()}
+  <div class="border-b border-border bg-background">
+    <div class="px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center gap-3">
+        {#if currentTab !== 'wallet'}
+          <button
+            onclick={() => currentTab = 'wallet'}
+            class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-muted transition-colors text-foreground"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        {/if}
+
+        <h1 class="text-2xl font-bold text-foreground flex-1">
+          {#if currentTab === 'wallet'}
+            Wallet
+          {:else if currentTab === 'send' || currentTab === 'scan'}
+            Send
+          {:else if currentTab === 'receive'}
+            Receive
+          {/if}
+        </h1>
+
+        {#if currentTab === 'wallet'}
+          <a
+            href="/settings?tab=wallet"
+            class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-muted transition-colors text-foreground"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </a>
+        {/if}
+      </div>
+    </div>
   </div>
+{/snippet}
+
+<div class="wallet-container">
 
   <!-- Content -->
   <div class="wallet-content">
@@ -83,48 +98,6 @@
 <style>
   .wallet-container {
     width: 100%;
-  }
-
-  .wallet-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-background);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  h1 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0;
-    color: var(--color-foreground);
-    flex: 1;
-  }
-
-  .settings-btn {
-    padding: 0.5rem;
-    background: transparent;
-    color: var(--color-foreground);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    border-radius: 8px;
-    text-decoration: none;
-  }
-
-  .settings-btn:hover {
-    background: var(--color-muted);
-  }
-
-  .settings-btn svg {
-    width: 1.5rem;
-    height: 1.5rem;
   }
 
   .wallet-content {

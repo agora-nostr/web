@@ -397,8 +397,8 @@
       <div class={`w-full lg:flex-1 ${hideRightSidebar ? 'lg:max-w-[900px]' : 'lg:max-w-[600px]'} min-w-0 flex flex-col h-full border-x border-border`}>
         <!-- Page content -->
         <main class="flex-1 pb-20 md:pb-0 bg-background">
-          <!-- Back Navigation - shown at top when provided -->
-          {#if headerStore.backNav}
+          <!-- Back Navigation - shown only when no custom header provided -->
+          {#if !headerStore.header && headerStore.backNav}
             <div class="border-b border-border bg-background">
               <div class="px-4 sm:px-6 lg:px-8 py-3">
                 {#if headerStore.backNav.href}
