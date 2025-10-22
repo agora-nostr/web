@@ -17,6 +17,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import RelayIcon from '$lib/components/RelayIcon.svelte';
 
 	interface Props {
 		isOpen: boolean;
@@ -262,15 +263,7 @@ Looking forward to connecting with you on the open social web!`;
 								<img src="/logo-icon.svg" alt="Agora" class="w-6 h-6 flex-shrink-0" />
 								<span class="text-sm text-muted-foreground flex-1">Select Agora...</span>
 							{:else if selectedRelayUrls.length === 1 && selectedRelayInfo}
-								{#if selectedRelayInfo.info.info?.icon}
-									<img src={selectedRelayInfo.info.info.icon} alt="" class="w-6 h-6 rounded flex-shrink-0" />
-								{:else}
-									<div class="w-6 h-6 rounded bg-muted flex items-center justify-center flex-shrink-0">
-										<svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-										</svg>
-									</div>
-								{/if}
+								<RelayIcon relayUrl={selectedRelayInfo.url} size="lg" />
 								<span class="text-sm text-muted-foreground flex-1">{selectedRelayName}</span>
 							{:else}
 								<img src="/logo-icon.svg" alt="Agora" class="w-6 h-6 flex-shrink-0" />
@@ -303,15 +296,7 @@ Looking forward to connecting with you on the open social web!`;
 												checked={selectedRelayUrls.includes(relay.url)}
 												class="w-4 h-4 text-primary border rounded focus:ring-orange-500 pointer-events-none"
 											/>
-											{#if relayInfo.info?.icon}
-												<img src={relayInfo.info.icon} alt="" class="w-5 h-5 rounded flex-shrink-0" />
-											{:else}
-												<div class="w-5 h-5 rounded bg-muted flex items-center justify-center flex-shrink-0">
-													<svg class="w-3 h-3 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-													</svg>
-												</div>
-											{/if}
+											<RelayIcon relayUrl={relay.url} size="md" />
 											<div class="flex-1 min-w-0">
 												<div class="flex items-center gap-1.5">
 													<div class="text-sm font-medium text-foreground truncate">

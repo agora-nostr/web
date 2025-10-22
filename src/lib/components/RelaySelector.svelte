@@ -8,6 +8,7 @@
   import { ndk } from '$lib/ndk.svelte';
   import { followPacksStore } from '$lib/stores/followPacks.svelte';
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
+  import RelayIcon from './RelayIcon.svelte';
 
   interface Props {
     active?: boolean;
@@ -193,14 +194,8 @@
           </svg>
         </div>
       {/if}
-    {:else if settings.selectedRelay && selectedRelayInfo?.info?.icon}
-      <img src={selectedRelayInfo.info.icon} alt="" class="{iconOnly ? 'w-5 h-5' : 'w-6 h-6'} rounded flex-shrink-0" />
     {:else if settings.selectedRelay}
-      <div class="{iconOnly ? 'w-5 h-5' : 'w-6 h-6'} rounded bg-primary flex items-center justify-center flex-shrink-0">
-        <svg class="{iconOnly ? 'w-3 h-3' : 'w-4 h-4'} text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-        </svg>
-      </div>
+      <RelayIcon relayUrl={settings.selectedRelay} size={iconOnly ? 'md' : 'lg'} />
     {:else}
       <!-- Users icon for "Following" -->
       <svg class="{iconOnly ? 'w-5 h-5 text-muted-foreground' : 'w-6 h-6'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,15 +315,7 @@
             onclick={() => selectRelay(relayUrl)}
             class="w-full px-3 py-2.5 rounded-lg hover:bg-muted transition-colors text-left flex items-center gap-3 {settings.selectedRelay === relayUrl ? 'bg-muted/50' : ''}"
           >
-            {#if relayInfo.info?.icon}
-              <img src={relayInfo.info.icon} alt="" class="w-5 h-5 rounded flex-shrink-0" />
-            {:else}
-              <div class="w-5 h-5 rounded bg-muted flex items-center justify-center flex-shrink-0">
-                <svg class="w-3 h-3 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                </svg>
-              </div>
-            {/if}
+            <RelayIcon {relayUrl} size="md" />
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-1.5">
                 <div class="text-sm font-medium text-foreground truncate">
@@ -364,15 +351,7 @@
               onclick={() => selectRelay(relay.url)}
               class="w-full px-3 py-2.5 rounded-lg hover:bg-muted transition-colors text-left flex items-center gap-3 {settings.selectedRelay === relay.url ? 'bg-muted/50' : ''}"
             >
-              {#if relayInfo.info?.icon}
-                <img src={relayInfo.info.icon} alt="" class="w-5 h-5 rounded flex-shrink-0" />
-              {:else}
-                <div class="w-5 h-5 rounded bg-muted flex items-center justify-center flex-shrink-0">
-                  <svg class="w-3 h-3 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                  </svg>
-                </div>
-              {/if}
+              <RelayIcon relayUrl={relay.url} size="md" />
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-1.5">
                   <div class="text-sm font-medium text-foreground truncate">
