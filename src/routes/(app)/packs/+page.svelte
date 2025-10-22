@@ -146,7 +146,7 @@
   }
 </script>
 
-<div class="max-w-6xl mx-auto px-4 py-8">
+<div class="w-full lg:max-w-6xl mx-auto px-4 py-8">
   <!-- Header -->
   <div class="mb-8">
     <div class="flex items-start justify-between gap-4">

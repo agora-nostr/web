@@ -13,6 +13,7 @@
     "copy-workers": "cp node_modules/@nostr-dev-kit/cache-sqlite-wasm/dist/worker.js static/worker.js"
   },
   "dependencies": {
+    "@capacitor/barcode-scanner": "^2.2.0",
     "@cashu/cashu-ts": "^2.7.2",
     "@nostr-dev-kit/blossom": "file:../NDK-nhlteu/blossom",
     "@nostr-dev-kit/cache-sqlite-wasm": "file:../NDK-nhlteu/cache-sqlite-wasm",
@@ -22,6 +23,7 @@
     "@nostr-dev-kit/svelte": "file:../NDK-nhlteu/svelte",
     "@nostr-dev-kit/wallet": "file:../NDK-nhlteu/wallet",
     "blossom-client-sdk": "^4.1.0",
+    "bolt11": "^1.4.1",
     "bun": "^1.3.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

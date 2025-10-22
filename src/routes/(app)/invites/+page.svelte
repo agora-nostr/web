@@ -81,7 +81,7 @@
 </script>
 
 <div class="min-h-screen bg-neutral-50 dark:bg-background">
-	<div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+	<div class="w-full lg:max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
 		<!-- Header -->
 		<div class="mb-8">
 			<h1 class="text-3xl font-bold text-foreground mb-2">My Invites</h1>

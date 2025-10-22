@@ -1,1 +1,0 @@
-import"./CSbKtK4P.js";import{c as t}from"./D0X4VYcq.js";const o=t(),n={get show(){return o.show},get state(){return o.data||"signup"},open(e="signup"){o.open(e)},close(){o.close()},setState(e){o.open(e)}};export{n as l};

@@ -132,7 +132,7 @@
 			</div>
 		</div>
 
-		<div class="max-w-4xl mx-auto p-4 space-y-6">
+		<div class="w-full lg:max-w-4xl mx-auto p-4 space-y-6">
 			<!-- Top Inviters Podium -->
 			<TopInvitersPodium stats={inviterStats} />
 

@@ -212,7 +212,7 @@
       <p class="mt-4 text-neutral-400">Loading note...</p>
     </div>
   {:else}
-    <main class="max-w-2xl mx-auto">
+    <main class="w-full lg:max-w-2xl mx-auto">
       <!-- Parent Notes (Thread Context) -->
       {#each parentChain as item, index}
         {#if item.type === 'missing'}

@@ -1,1 +1,0 @@
-import{b as r,g as t,s as a}from"./CSbKtK4P.js";class s{#e=r(null);get _header(){return t(this.#e)}set _header(e){a(this.#e,e,!0)}get header(){return this._header}set header(e){this._header=e}clear(){this._header=null}}const i=new s;export{i as h};

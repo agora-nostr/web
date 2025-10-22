@@ -328,7 +328,7 @@
 <div class="max-w-full mx-auto">
   <!-- Header -->
   <div bind:this={headerElement} class="sticky top-0 z-10 bg-background/90 backdrop-blur-xl border-b border-border">
-    <div class="py-2 pl-2 sm:p-4 max-sm:w-screen">
+    <div class="py-2 pl-2 sm:p-4 w-full">
       <div class="flex items-center gap-2">
         <!-- Relay/Following selector icon (always visible) -->
         <div class="flex-shrink-0 relative z-20">
