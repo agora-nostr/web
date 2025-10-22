@@ -4,12 +4,14 @@
   import { t } from 'svelte-i18n';
   import { ndk } from '$lib/ndk.svelte';
   import { sidebarStore } from '$lib/stores/sidebar.svelte';
+  import { headerStore } from '$lib/stores/header.svelte';
   import { layoutMode } from '$lib/stores/layoutMode.svelte';
   import { settings } from '$lib/stores/settings.svelte';
   import { createPackModal } from '$lib/stores/createPackModal.svelte';
   import { createListingModal } from '$lib/stores/createListingModal.svelte';
   import { createInviteModal } from '$lib/stores/createInviteModal.svelte';
   import { createMediaPostModal } from '$lib/stores/createMediaPostModal.svelte';
+  import { createTradeModal } from '$lib/stores/createTradeModal.svelte';
   import { homePageFilter } from '$lib/stores/homePageFilter.svelte';
   import { useRelayInfoCached } from '$lib/utils/relayInfo.svelte';
   import { AGORA_RELAYS, isAgoraRelay, getRelaysToUse } from '$lib/utils/relayUtils';
@@ -319,7 +321,7 @@
             if (path === '/marketplace') {
               createListingModal.open();
             } else if (path === '/trades') {
-              goto('/trades/create');
+              createTradeModal.open();
             } else if (path.startsWith('/packs')) {
               createPackModal.open();
             } else if (path === '/agora/invites') {
@@ -395,6 +397,18 @@
       <div class={`w-full lg:flex-1 ${hideRightSidebar ? 'lg:max-w-[900px]' : 'lg:max-w-[600px]'} min-w-0 flex flex-col h-full border-x border-border`}>
         <!-- Page content -->
         <main class="flex-1 pb-20 md:pb-0 bg-background">
+          <!-- Page Header - shown at top when provided -->
+          {#if headerStore.header}
+            {@render headerStore.header()}
+          {/if}
+
+          <!-- Mobile Sidebar Content - shown before main content on mobile when enabled -->
+          {#if sidebarStore.showOnMobile && sidebarStore.rightSidebar && !hideRightSidebar}
+            <div class="lg:hidden p-3 border-b border-border bg-background">
+              {@render sidebarStore.rightSidebar()}
+            </div>
+          {/if}
+
           {@render children()}
         </main>
       </div>
@@ -462,9 +476,11 @@
   <!-- Mobile Bottom Navigation -->
   <MobileBottomNav />
 
-  <!-- Mobile Compose FAB (only on home page and agora invites) -->
+  <!-- Mobile Compose FAB (only on home page, marketplace, and agora invites) -->
   {#if path === '/'}
     <MobileComposeFAB isHomePage={true} />
+  {:else if path === '/marketplace'}
+    <MobileComposeFAB onclick={() => createListingModal.open()} />
   {:else if path === '/agora/invites'}
     <MobileComposeFAB onclick={() => createInviteModal.open()} />
   {/if}

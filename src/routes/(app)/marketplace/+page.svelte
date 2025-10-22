@@ -3,6 +3,7 @@
   import { NDKKind, NDKEvent } from '@nostr-dev-kit/ndk';
   import type { NDKFilter } from '@nostr-dev-kit/ndk';
   import { goto } from '$app/navigation';
+  import { headerStore } from '$lib/stores/header.svelte';
   import { createListingModal } from '$lib/stores/createListingModal.svelte';
   import CreateListingModal from '$lib/components/CreateListingModal.svelte';
 
@@ -101,15 +102,34 @@
       currency: priceTag[2]
     };
   }
+
+  // Set up custom header
+  $effect(() => {
+    headerStore.header = pageHeader;
+
+    return () => {
+      headerStore.clear();
+    };
+  });
 </script>
 
-<div class="min-h-screen bg-neutral-50 dark:bg-background">
+{#snippet pageHeader()}
   <div class="container mx-auto px-4 py-4 max-w-7xl">
-    <!-- Header -->
     <div class="mb-6">
-      <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent mb-4">
-        Marketplace
-      </h1>
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+          Marketplace
+        </h1>
+        <button
+          onclick={() => createListingModal.open()}
+          class="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-foreground font-medium rounded-lg transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Create Listing</span>
+        </button>
+      </div>
 
       <!-- Search and Filter Bar -->
       <div class="flex gap-2 sm:gap-3">
@@ -143,6 +163,11 @@
         </div>
       </div>
     </div>
+  </div>
+{/snippet}
+
+<div class="min-h-screen bg-neutral-50 dark:bg-background">
+  <div class="container mx-auto px-4 py-4 max-w-7xl">
 
     <!-- Content -->
     {#if isFilteredView}
