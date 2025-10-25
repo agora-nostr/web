@@ -2,7 +2,7 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { t } from 'svelte-i18n';
-  import { ndk } from '$lib/ndk.svelte';
+  import { ndk, relayFeeds } from '$lib/ndk.svelte';
   import { sidebarStore } from '$lib/stores/sidebar.svelte';
   import { headerStore } from '$lib/stores/header.svelte';
   import { layoutMode } from '$lib/stores/layoutMode.svelte';
@@ -29,6 +29,8 @@
   import JournalistsSidebar from './JournalistsSidebar.svelte';
   import MobileBottomNav from './MobileBottomNav.svelte';
   import MobileComposeFAB from './MobileComposeFAB.svelte';
+  import Icon from './Icon.svelte';
+  import Badge from './Badge.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -182,13 +184,9 @@
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {#if sidebarCollapsed}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-            </svg>
+            <Icon name="chevron-right" size="md" />
           {:else}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
+            <Icon name="chevron-left" size="md" />
           {/if}
         </button>
       </div>
@@ -203,9 +201,7 @@
           class="flex items-center {sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-lg transition-colors {path.startsWith('/notifications') ? 'text-primary bg-primary/10' : 'text-foreground hover:bg-muted'}"
           title={sidebarCollapsed ? 'Notifications' : undefined}
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
+          <Icon name="bell" size="lg" />
           {#if !sidebarCollapsed}
             <span class="font-medium">Notifications</span>
           {/if}
@@ -217,26 +213,20 @@
           title={sidebarCollapsed ? $t('navigation.messages') : undefined}
         >
           <div class="flex items-center {sidebarCollapsed ? '' : 'gap-3'}">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
+            <Icon name="message" size="lg" />
             {#if !sidebarCollapsed}
               <span class="font-medium">{$t('navigation.messages')}</span>
             {/if}
           </div>
           {#if messagesStore.totalUnreadCount > 0}
             {#if sidebarCollapsed}
-              <!-- Badge for collapsed sidebar (top-right of icon) -->
-              <div class="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary flex items-center justify-center">
-                <span class="text-[10px] font-bold text-primary-foreground">
-                  {messagesStore.totalUnreadCount > 9 ? '9+' : messagesStore.totalUnreadCount}
-                </span>
-              </div>
+              <Badge size="xs" class="absolute top-1.5 right-1.5">
+                {messagesStore.totalUnreadCount > 9 ? '9+' : messagesStore.totalUnreadCount}
+              </Badge>
             {:else}
-              <!-- Badge for expanded sidebar -->
-              <span class="text-xs px-2 py-1 rounded-full bg-primary text-primary-foreground font-medium">
+              <Badge size="sm">
                 {messagesStore.totalUnreadCount > 99 ? '99+' : messagesStore.totalUnreadCount}
-              </span>
+              </Badge>
             {/if}
           {/if}
         </a>
@@ -247,9 +237,7 @@
             class="flex items-center {sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-lg transition-colors {path.startsWith('/agora/invites') ? 'text-primary bg-primary/10' : 'text-foreground hover:bg-muted'}"
             title={sidebarCollapsed ? 'Community Invites' : undefined}
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
+            <Icon name="users" size="lg" />
             {#if !sidebarCollapsed}
               <span class="font-medium">Community Invites</span>
             {/if}
@@ -261,13 +249,32 @@
           class="flex items-center {sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-lg transition-colors {path.startsWith('/packs') ? 'text-primary bg-primary/10' : 'text-foreground hover:bg-muted'}"
           title={sidebarCollapsed ? $t('navigation.followPacks') : undefined}
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
+          <Icon name="packs" size="lg" />
           {#if !sidebarCollapsed}
             <span class="font-medium">{$t('navigation.followPacks')}</span>
           {/if}
         </a>
+
+        {#if relayFeeds && relayFeeds.relays.length > 0}
+          <a
+            href="/relay-feeds"
+            class="flex items-center {sidebarCollapsed ? 'justify-center p-3' : 'justify-between px-4 py-3'} rounded-lg transition-colors {path.startsWith('/relay-feeds') ? 'text-primary bg-primary/10' : 'text-foreground hover:bg-muted'}"
+            title={sidebarCollapsed ? 'Relay Feeds' : undefined}
+          >
+            <div class="flex items-center {sidebarCollapsed ? '' : 'gap-3'}">
+              <Icon name="relay" size="lg" />
+              {#if !sidebarCollapsed}
+                <span class="font-medium">Relay Feeds</span>
+              {/if}
+            </div>
+            {#if !sidebarCollapsed}
+              <Badge variant="secondary" size="sm" class="gap-1">
+                <Icon name="trending" size="xs" />
+                {relayFeeds.relays.length}
+              </Badge>
+            {/if}
+          </a>
+        {/if}
 
         <a
           href="/wallet"
@@ -275,15 +282,13 @@
           title={sidebarCollapsed ? $t('navigation.wallet') : undefined}
         >
           <div class="flex items-center {sidebarCollapsed ? '' : 'gap-3'}">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
-            </svg>
+            <Icon name="wallet" size="lg" />
             {#if !sidebarCollapsed}
               <span class="font-medium">{$t('navigation.wallet')}</span>
             {/if}
           </div>
           {#if !sidebarCollapsed}
-            <span class="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary font-medium">{formatBalanceLong(wallet.balance)}</span>
+            <Badge variant="secondary" size="sm">{formatBalanceLong(wallet.balance)}</Badge>
           {/if}
         </a>
 
@@ -292,9 +297,7 @@
           class="flex items-center {sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-lg transition-colors {path === '/trades' ? 'text-primary bg-primary/10' : 'text-foreground hover:bg-muted'}"
           title={sidebarCollapsed ? $t('navigation.trades') : undefined}
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-          </svg>
+          <Icon name="trades" size="lg" />
           {#if !sidebarCollapsed}
             <span class="font-medium">{$t('navigation.trades')}</span>
           {/if}
@@ -305,9 +308,7 @@
           class="flex items-center {sidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-lg transition-colors {path === '/marketplace' ? 'text-primary bg-primary/10' : 'text-foreground hover:bg-muted'}"
           title={sidebarCollapsed ? $t('navigation.marketplace') : undefined}
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
+          <Icon name="marketplace" size="lg" />
           {#if !sidebarCollapsed}
             <span class="font-medium">{$t('navigation.marketplace')}</span>
           {/if}
@@ -333,44 +334,32 @@
           title={sidebarCollapsed ? (path === '/marketplace' ? $t('classifieds.createListing') : path === '/trades' ? 'Create Trade' : path.startsWith('/packs') ? 'Create Pack' : path === '/agora/invites' ? 'Create Invite' : path === '/' && homePageFilter.selected === 'images' ? 'Create media post' : $t('navigation.compose')) : undefined}
         >
           {#if path === '/marketplace'}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
+            <Icon name="plus" size="md" />
             {#if !sidebarCollapsed}
               <span>{$t('classifieds.createListing')}</span>
             {/if}
           {:else if path === '/trades'}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
+            <Icon name="plus" size="md" />
             {#if !sidebarCollapsed}
               <span>Create Trade</span>
             {/if}
           {:else if path.startsWith('/packs')}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
+            <Icon name="plus" size="md" />
             {#if !sidebarCollapsed}
               <span>Create Pack</span>
             {/if}
           {:else if path === '/agora/invites'}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
+            <Icon name="invite" size="md" />
             {#if !sidebarCollapsed}
               <span>Create Invite</span>
             {/if}
           {:else if path === '/' && homePageFilter.selected === 'images'}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <Icon name="image" size="md" />
             {#if !sidebarCollapsed}
               <span>Create media post</span>
             {/if}
           {:else}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
+            <Icon name="edit" size="md" />
             {#if !sidebarCollapsed}
               <span>{$t('navigation.compose')}</span>
             {/if}
@@ -407,18 +396,14 @@
                         href={backNav.href}
                         class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-muted transition-colors text-foreground"
                       >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
+                        <Icon name="arrow-left" size="lg" />
                       </a>
                     {:else if backNav.onclick}
                       <button
                         onclick={backNav.onclick}
                         class="inline-flex items-center justify-center p-2 rounded-lg hover:bg-muted transition-colors text-foreground"
                       >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
+                        <Icon name="arrow-left" size="lg" />
                       </button>
                     {/if}
                   {/if}
@@ -448,15 +433,11 @@
                       class="relative flex items-center justify-center p-2 rounded-lg hover:bg-muted transition-colors text-foreground"
                       aria-label="Notifications"
                     >
-                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                      </svg>
+                      <Icon name="bell" size="lg" />
                       {#if notificationsManager.counts.all > 0}
-                        <div class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary flex items-center justify-center">
-                          <span class="text-[10px] font-bold text-primary-foreground">
-                            {notificationsManager.counts.all > 9 ? '9+' : notificationsManager.counts.all}
-                          </span>
-                        </div>
+                        <Badge size="xs" class="absolute -top-1 -right-1">
+                          {notificationsManager.counts.all > 9 ? '9+' : notificationsManager.counts.all}
+                        </Badge>
                       {/if}
                     </a>
 
@@ -466,9 +447,7 @@
                       class="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-muted transition-colors text-foreground"
                       aria-label="Wallet"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
-                      </svg>
+                      <Icon name="wallet" size="md" />
                       <span class="text-xs font-medium">{formatBalance(wallet.balance)}</span>
                     </a>
                   </div>
@@ -487,9 +466,7 @@
                     href={headerStore.backNav.href}
                     class="inline-flex items-center gap-2 text-foreground hover:text-primary transition-colors"
                   >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
+                    <Icon name="arrow-left" size="lg" />
                     {#if headerStore.backNav.label}
                       <span class="font-medium">{headerStore.backNav.label}</span>
                     {/if}
@@ -499,9 +476,7 @@
                     onclick={headerStore.backNav.onclick}
                     class="inline-flex items-center gap-2 text-foreground hover:text-primary transition-colors"
                   >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
+                    <Icon name="arrow-left" size="lg" />
                     {#if headerStore.backNav.label}
                       <span class="font-medium">{headerStore.backNav.label}</span>
                     {/if}
