@@ -5,18 +5,12 @@ import { NDKKind } from '@nostr-dev-kit/ndk';
 
 const meta = {
   title: 'Components/Articles/ArticlePreviewCard',
-  component: ArticlePreviewCard,
+  component: ArticlePreviewCard as any,
   tags: ['autodocs'],
-  argTypes: {
-    variant: {
-      control: { type: 'select' },
-      options: ['default', 'compact'],
-    },
-  },
   parameters: {
     layout: 'padded',
   },
-} satisfies Meta<ArticlePreviewCard>;
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -31,15 +25,13 @@ export const Default: Story = {
 
     const article = articlesSubscription.events?.[0];
 
-    if (!article) return null;
-
     return {
       Component: ArticlePreviewCard,
       props: {
-        article,
+        article: article || undefined,
         variant: 'default',
       },
-    };
+    } as any;
   },
 };
 
@@ -52,15 +44,13 @@ export const Compact: Story = {
 
     const article = articlesSubscription.events?.[0];
 
-    if (!article) return null;
-
     return {
       Component: ArticlePreviewCard,
       props: {
-        article,
+        article: article || undefined,
         variant: 'compact',
       },
-    };
+    } as any;
   },
 };
 
@@ -76,28 +66,9 @@ export const Comparison: Story = {
 
     return {
       Component: ArticlePreviewCard,
-    };
+      props: {
+        article: articles[0] || undefined,
+      },
+    } as any;
   },
-  decorators: [
-    () => ({
-      template: `
-        <div class="space-y-6">
-          {#if articles.length > 0}
-            <div>
-              <h3 class="text-lg font-bold mb-4">Default Variant</h3>
-              <ArticlePreviewCard article={articles[0]} variant="default" />
-            </div>
-            <div>
-              <h3 class="text-lg font-bold mb-4">Compact Variant</h3>
-              <div class="space-y-2">
-                {#each articles as article}
-                  <ArticlePreviewCard {article} variant="compact" />
-                {/each}
-              </div>
-            </div>
-          {/if}
-        </div>
-      `,
-    }),
-  ],
 };

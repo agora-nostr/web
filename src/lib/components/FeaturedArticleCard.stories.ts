@@ -5,12 +5,12 @@ import { NDKKind } from '@nostr-dev-kit/ndk';
 
 const meta = {
   title: 'Components/Articles/FeaturedArticleCard',
-  component: FeaturedArticleCard,
+  component: FeaturedArticleCard as any,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
   },
-} satisfies Meta<FeaturedArticleCard>;
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -24,14 +24,12 @@ export const Default: Story = {
 
     const article = articlesSubscription.events?.[0];
 
-    if (!article) return null;
-
     return {
       Component: FeaturedArticleCard,
       props: {
-        article,
+        article: article || undefined,
       },
-    };
+    } as any;
   },
 };
 
@@ -46,17 +44,9 @@ export const MultipleCards: Story = {
 
     return {
       Component: FeaturedArticleCard,
-    };
+      props: {
+        article: articles[0] || undefined,
+      },
+    } as any;
   },
-  decorators: [
-    () => ({
-      template: `
-        <div class="flex gap-4 overflow-x-auto p-4">
-          {#each articles as article}
-            <FeaturedArticleCard {article} />
-          {/each}
-        </div>
-      `,
-    }),
-  ],
 };

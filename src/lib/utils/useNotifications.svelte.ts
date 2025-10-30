@@ -412,7 +412,6 @@ export function createNotificationsManager(ndk: NDKSvelte) {
 
   // Counts by type
   const counts = $derived.by(() => {
-    console.log('[NotificationsManager] Computing counts');
     const result = {
       all: notificationGroups.length,
       reply: 0,
@@ -432,29 +431,23 @@ export function createNotificationsManager(ndk: NDKSvelte) {
       }
     });
 
-    console.log('[NotificationsManager] Counts:', result);
     return result;
   });
 
   return {
     get notifications() {
-      console.log('[NotificationsManager] Getting notifications accessor');
       return filteredNotifications;
     },
     get filter() {
-      console.log('[NotificationsManager] Getting filter accessor');
       return currentFilter;
     },
     get counts() {
-      console.log('[NotificationsManager] Getting counts accessor');
       return counts;
     },
     get targetEventsCache() {
-      console.log('[NotificationsManager] Getting targetEventsCache accessor');
       return targetEventsCache;
     },
     setFilter(filter: NotificationFilter) {
-      console.log('[NotificationsManager] Setting filter to:', filter);
       currentFilter = filter;
     },
   };

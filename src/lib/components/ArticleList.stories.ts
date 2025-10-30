@@ -5,12 +5,12 @@ import { NDKKind, type NDKArticle } from '@nostr-dev-kit/ndk';
 
 const meta = {
   title: 'Components/Articles/ArticleList',
-  component: ArticleList,
+  component: ArticleList as any,
   tags: ['autodocs'],
   parameters: {
     layout: 'padded',
   },
-} satisfies Meta<ArticleList>;
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -30,7 +30,7 @@ export const RecentArticles: Story = {
       props: {
         articles: (articlesSubscription.events || []) as NDKArticle[],
       },
-    };
+    } as any;
   },
 };
 
@@ -71,7 +71,7 @@ export const FromSpecificAuthors: Story = {
       props: {
         articles: (articlesSubscription.events || []) as NDKArticle[],
       },
-    };
+    } as any;
   },
 };
 
@@ -95,6 +95,6 @@ export const WithHashtag: Story = {
       props: {
         articles: (articlesSubscription.events || []) as NDKArticle[],
       },
-    };
+    } as any;
   },
 };

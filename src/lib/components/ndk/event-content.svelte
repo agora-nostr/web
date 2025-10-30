@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { NDKEvent, NDKSvelte } from '@nostr-dev-kit/ndk';
+  import type { NDKEvent } from '@nostr-dev-kit/ndk';
+  import type { NDKSvelte } from '@nostr-dev-kit/svelte';
   import EventContent from './event/content/event-content.svelte';
   import { goto } from '$app/navigation';
 

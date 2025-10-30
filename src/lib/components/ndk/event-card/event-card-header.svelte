@@ -112,16 +112,13 @@
       {:else if variant === 'compact'}
         <!-- Compact: name and handle inline -->
         <div class="flex items-center gap-2 min-w-0">
-          <UserProfile.Root user={context.event.author}>
+          <UserProfile.Root user={context.event.author} class="flex flex-col items-center">
             <Name
               ndk={context.ndk}
               user={context.event.author}
               profile={profileFetcher.profile}
               field="displayName"
               class="font-semibold text-[15px] text-foreground truncate"
-            />
-            <Nip05
-              class="text-xs text-muted-foreground truncate"
             />
           </UserProfile.Root>
         </div>

@@ -45,7 +45,7 @@
         loading="lazy"
       />
       <!-- Gradient overlay for better text readability -->
-      <div class="absolute inset-0 bg-gradient-to-t from-neutral-900 via-transparent to-transparent opacity-60" />
+      <div class="absolute inset-0 bg-gradient-to-t from-neutral-900 via-transparent to-transparent opacity-60"></div>
     {:else}
       <div class="w-full h-full flex items-center justify-center">
         <svg class="w-16 h-16 text-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -56,18 +56,6 @@
     return null;
   });
 
-  const resolvedPubkey = $derived.by(() => {
-    if (pubkey) return pubkey;
-    if (ndkUser) {
-      try {
-        return ndkUser.pubkey || '';
-      } catch {
-        return '';
-      }
-    }
-    return '';
-  });
-
   // Fetch profile if not provided (reactive to ndkUser changes)
   let profileFetcher = $state<ReturnType<typeof createProfileFetcher> | null>(null);
 
