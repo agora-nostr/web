@@ -1,31 +1,21 @@
-<!--
-  @component UserProfile.Field
-  Displays any field from a user's Nostr profile (about, website, nip05, etc.).
-
-  Supports both context mode (within UserProfile.Root) and standalone mode (with direct props).
-  Renders nothing if the field has no data.
-
-  @example
-  ```svelte
-  <!-- Context mode -->
-  <UserProfile.Root {ndk} {pubkey}>
-    <UserProfile.Field field="about" />
-    <UserProfile.Field field="website" />
-    <UserProfile.Field field="nip05" />
-  </UserProfile.Root>
-
-  <!-- Standalone mode -->
-  <UserProfile.Field {ndk} {user} field="about" />
-  <UserProfile.Field {ndk} {user} {profile} field="website" />
-  ```
--->
+<!-- @ndk-version: user-profile@0.10.0 -->
 <script lang="ts">
+  /**
+   * @component UserProfile.Field
+   * Displays any field from a user's Nostr profile (about, website, nip05, etc.).
+   *
+   * Supports both context mode (within UserProfile.Root) and standalone mode (with direct props).
+   * Renders nothing if the field has no data.
+   *
+   * Note: When field="about", this component delegates to UserProfile.Bio for better styling.
+   */
   import { getContext } from 'svelte';
   import { USER_PROFILE_CONTEXT_KEY, type UserProfileContext } from './context.svelte.js';
   import type { NDKUser, NDKUserProfile } from '@nostr-dev-kit/ndk';
   import type { NDKSvelte } from '@nostr-dev-kit/svelte';
   import { createProfileFetcher } from '@nostr-dev-kit/svelte';
   import { cn } from '$lib/utils';
+  import Bio from './user-profile-bio.svelte';
 
   interface Props {
     /** NDK instance (required for standalone mode) */
@@ -36,9 +26,6 @@
 
     /** Pre-loaded profile (optional, avoids fetch) */
     profile?: NDKUserProfile | null;
-
-    /** User's pubkey (alternative to user in standalone mode) */
-    pubkey?: string;
 
     /** Which profile field to display */
     field: keyof NDKUserProfile;
@@ -57,51 +44,53 @@
     ndk: propNdk,
     user: propUser,
     profile: propProfile,
-    pubkey: propPubkey,
     field,
     size = 'text-sm',
     class: className = '',
     maxLines
   }: Props = $props();
 
-  // Try to get context (will be null if used standalone)
-  const context = getContext<UserProfileContext | null>(USER_PROFILE_CONTEXT_KEY, { optional: true });
+  // Try to get context (will be undefined if used standalone)
+  const context = getContext<UserProfileContext | undefined>(USER_PROFILE_CONTEXT_KEY);
 
   // Resolve NDK and user from props or context
   const ndk = $derived(propNdk || context?.ndk);
-  const ndkUser = $derived(
-    propUser ||
-    context?.ndkUser ||
-    (ndk && propPubkey ? ndk.getUser({ pubkey: propPubkey }) : null)
-  );
+  const ndkUser = $derived(propUser || context?.ndkUser);
 
-  // Use provided profile or fetch if needed
-  const profileFetcher = $derived(
+  // Use provided profile, context profile, or fetch if needed
+  let profileFetcher = $state<ReturnType<typeof createProfileFetcher> | null>(null);
+
+  $effect(() => {
+    if (propProfile !== undefined || context?.profile !== undefined) {
+      profileFetcher = null;
+    } else if (ndkUser && ndk) {
+      profileFetcher = createProfileFetcher(() => ({ user: ndkUser! }), ndk);
+    } else {
+      profileFetcher = null;
+    }
+  });
+
+  const profile = $derived(
     propProfile !== undefined
-      ? null // Don't fetch if profile was provided
-      : (ndkUser && ndk ? createProfileFetcher({ ndk, user: () => ndkUser! }) : null)
+      ? propProfile
+      : context?.profile !== undefined
+        ? context.profile
+        : profileFetcher?.profile
   );
-
-  const profile = $derived(propProfile !== undefined ? propProfile : profileFetcher?.profile);
 
   const fieldValue = $derived(profile?.[field]);
 </script>
 
-{#if fieldValue}
+{#if field === 'about' && context}
+  <Bio class={cn(size, className)} {maxLines} />
+{:else if fieldValue}
   <span
-    class={cn('user-profile-field', size, className)}
+    class={cn(size, className)}
     style:display={maxLines ? '-webkit-box' : undefined}
     style:-webkit-line-clamp={maxLines}
     style:-webkit-box-orient={maxLines ? 'vertical' : undefined}
+    style:overflow={maxLines ? 'hidden' : undefined}
   >
     {fieldValue}
   </span>
 {/if}
-
-<style>
-  .user-profile-field {
-    color: var(--muted-foreground, #6b7280);
-    overflow: hidden;
-    line-height: 1.5;
-  }
-</style>

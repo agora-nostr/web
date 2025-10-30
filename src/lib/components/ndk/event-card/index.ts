@@ -1,0 +1,57 @@
+// @ndk-version: event-card@0.14.0
+/**
+ * EventCard - Composable event display components
+ *
+ * A flexible system for displaying any NDKEvent with customizable layout and actions.
+ *
+ * The `ndk` prop is optional on Root components - if not provided, it will be retrieved from Svelte context.
+ *
+ * @example Basic usage (ndk from context):
+ * ```svelte
+ * <EventCard.Root {event}>
+ *   <EventCard.Header />
+ *   <EventCard.Content />
+ *   <EventCard.Actions>
+ *     <ReactionAction />
+ *   </EventCard.Actions>
+ * </EventCard.Root>
+ * ```
+ *
+ * @example Thread view:
+ * ```svelte
+ * <EventCard.Root {event} {threading}>
+ *   <EventCard.ThreadLine />
+ *   <EventCard.Header variant="compact" />
+ *   <EventCard.Content />
+ * </EventCard.Root>
+ * ```
+ *
+ * @example Using preset blocks (import separately from blocks):
+ * ```svelte
+ * import { SimpleEventCard } from '$lib/ndk/blocks';
+ *
+ * <SimpleEventCard {ndk} {event} />
+ * ```
+ */
+
+// Core components
+import Root from './event-card-root.svelte';
+import Header from './event-card-header.svelte';
+import Content from './event-card-content.svelte';
+import Actions from './event-card-actions.svelte';
+import ThreadLine from './event-card-thread-line.svelte';
+import Dropdown from './event-card-dropdown.svelte';
+
+// Export as namespace for dot notation
+export const EventCard = {
+  Root,
+  Header,
+  Content,
+  Actions,
+  ThreadLine,
+  Dropdown,
+};
+
+// Export types
+export type { EventCardContext } from './context.svelte.js';
+export type { ThreadingMetadata } from '@nostr-dev-kit/svelte';

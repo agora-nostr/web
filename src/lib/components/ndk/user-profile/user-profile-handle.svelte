@@ -1,3 +1,4 @@
+<!-- @ndk-version: user-profile@0.10.0 -->
 <!--
   @component UserProfile.Handle
   Displays user's handle (username with @), reads from UserProfile context.
@@ -16,9 +17,6 @@
   import { cn } from '$lib/utils';
 
   interface Props {
-    /** Text size classes */
-    size?: string;
-
     /** Additional CSS classes */
     class?: string;
 
@@ -30,35 +28,30 @@
   }
 
   let {
-    size = 'text-sm',
     class: className = '',
     showAt = true,
     truncate = true
   }: Props = $props();
 
-  const { pubkey, profileFetcher } = getContext<UserProfileContext>(USER_PROFILE_CONTEXT_KEY);
+  const context = getContext<UserProfileContext>(USER_PROFILE_CONTEXT_KEY);
+  if (!context) {
+    throw new Error('UserProfile.Handle must be used within UserProfile.Root');
+  }
 
-  const handle = $derived(
-    profileFetcher?.profile?.name || pubkey?.slice(0, 8) || 'unknown'
-  );
+  const handle = $derived.by(() => {
+    if (context.profile?.name) return context.profile.name;
+
+    // Fallback to pubkey
+    try {
+      return context.ndkUser?.pubkey?.slice(0, 8) || 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  });
 
   const displayText = $derived(showAt ? `@${handle}` : handle);
 </script>
 
-<span class={cn('user-profile-handle', size, truncate && 'user-profile-handle-truncate', className)}>
+<span class={cn(truncate && 'truncate inline-block max-w-full', className)}>
   {displayText}
 </span>
-
-<style>
-  .user-profile-handle {
-    color: var(--muted-foreground, #6b7280);
-  }
-
-  .user-profile-handle-truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: inline-block;
-    max-width: 100%;
-  }
-</style>

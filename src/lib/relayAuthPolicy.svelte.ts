@@ -93,7 +93,7 @@ async function createAndSignAuthEvent(
     ['challenge', challenge]
   ];
 
-  const signer = ndk?.signer || ndk?.activeUser?.signer;
+  const signer = ndk?.signer;
   if (signer) {
     try {
       await event.sign(signer);

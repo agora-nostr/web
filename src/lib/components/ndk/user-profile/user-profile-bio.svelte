@@ -1,3 +1,4 @@
+<!-- @ndk-version: user-profile@0.10.0 -->
 <!--
   @component UserProfile.Bio
   Displays user's bio/about, reads from UserProfile context.
@@ -16,9 +17,6 @@
   import { cn } from '$lib/utils';
 
   interface Props {
-    /** Text size classes */
-    size?: string;
-
     /** Additional CSS classes */
     class?: string;
 
@@ -27,31 +25,20 @@
   }
 
   let {
-    size = 'text-sm',
     class: className = '',
     maxLines = 3
   }: Props = $props();
 
-  const { profileFetcher } = getContext<UserProfileContext>(USER_PROFILE_CONTEXT_KEY);
+  const context = getContext<UserProfileContext>(USER_PROFILE_CONTEXT_KEY);
+  if (!context) {
+    throw new Error('UserProfile.Bio must be used within UserProfile.Root');
+  }
 
-  const bio = $derived(profileFetcher?.profile?.about || '');
+  const bio = $derived(context.profile?.about || '');
 </script>
 
 {#if bio}
-  <p
-    class={cn('user-profile-bio', size, className)}
-    style:display="-webkit-box"
-    style:-webkit-line-clamp={maxLines}
-    style:-webkit-box-orient="vertical"
-  >
+  <p class={cn(`line-clamp-${maxLines}`, className)}>
     {bio}
   </p>
 {/if}
-
-<style>
-  .user-profile-bio {
-    color: var(--muted-foreground, #6b7280);
-    overflow: hidden;
-    line-height: 1.5;
-  }
-</style>

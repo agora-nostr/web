@@ -1,0 +1,1 @@
+function u(f){const a=Date.now(),l=new Date(f*1e3),c=a-l.getTime(),n=Math.floor(c/1e3),e=Math.floor(n/60),t=Math.floor(e/60),o=Math.floor(t/24),s=Math.floor(o/7),r=Math.floor(o/30),i=Math.floor(o/365);return n<60?"just now":e<60?`${e}m`:t<24?`${t}h`:o<7?`${o}d`:s<4?`${s}w`:r<12?`${r}mo`:`${i}y`}export{u as f};

@@ -1,9 +1,8 @@
 <script lang="ts">
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
   import { ndk } from '$lib/ndk.svelte';
-  import EventContent from '$lib/components/ndk/event-content.svelte';
+  import { EventCard } from './ndk/event-card';
   import ReplyIndicator from './ReplyIndicator.svelte';
-  import EventCardHeader from './EventCardHeader.svelte';
   import EventActions from './EventActions.svelte';
 
   interface Props {
@@ -22,59 +21,45 @@
     onNavigate
   }: Props = $props();
 
-  function navigateToEvent() {
-    if (onNavigate) {
-      onNavigate();
-      return;
-    }
-    // Encode the event as a nevent
-    const neventId = event.encode();
-    window.location.href = `/e/${neventId}`;
-  }
-
   const avatarSize = $derived(
-    variant === 'thread-main' ? 'w-14 h-14' :
-    variant === 'thread-reply' ? 'w-10 h-10' :
-    'w-9 h-9 sm:w-12 sm:h-12'
+    variant === 'thread-main' ? 'lg' as const :
+    variant === 'thread-reply' ? 'md' as const :
+    'sm' as const
   );
 
-  const textSize = $derived(
+  const contentClass = $derived(
     variant === 'thread-main' ? 'text-lg leading-relaxed' : 'text-base'
   );
 
-  const nameSize = $derived(
-    variant === 'thread-main' ? 'text-lg font-bold' : 'text-base font-semibold'
-  );
-
-  const bgClass = $derived(
+  const cardClass = $derived(
     variant === 'thread-main' ? 'bg-card/50' :
     variant === 'default' ? 'hover:bg-card/30' :
     'hover:bg-card/30'
   );
 
-  const clickable = $derived(variant === 'default' || (onNavigate !== undefined));
+  const interactive = $derived(variant === 'default' || (onNavigate !== undefined));
 
   const headerVariant = $derived(variant === 'thread-main' ? 'full' : 'compact');
+
+  const spacingClass = $derived(variant === 'thread-main' ? 'mb-2' : 'mb-1.5');
 </script>
 
-<article
-  class="p-3 sm:p-4 flex flex-col max-sm:max-w-screen {bgClass} transition-colors {clickable ? 'cursor-pointer' : ''} border-b border-border relative min-w-0"
-  onclick={clickable ? navigateToEvent : undefined}
-  role={clickable ? 'button' : undefined}
-  tabindex={clickable ? 0 : undefined}
+<EventCard.Root
+  {ndk}
+  {event}
+  {interactive}
+  onclick={onNavigate}
+  class="p-3 sm:p-4 flex flex-col max-sm:max-w-screen {cardClass} transition-colors min-w-0"
 >
   {#if showThreadLine}
-    <div class="absolute left-[29px] -top-px h-[73px] w-0.5 bg-muted"></div>
-    <div class="absolute left-[29px] top-[73px] bottom-0 w-0.5 bg-muted"></div>
+    <EventCard.ThreadLine forceShow />
   {/if}
 
   <!-- Header Row: Avatar + Name/Handle/Time -->
-  <div class="{variant === 'thread-main' ? 'mb-2' : 'mb-1.5'}">
-    <EventCardHeader
-      {event}
-      avatarClass={avatarSize}
-      nameClass={nameSize}
+  <div class={spacingClass}>
+    <EventCard.Header
       variant={headerVariant}
+      {avatarSize}
     />
   </div>
 
@@ -84,12 +69,12 @@
   {/if}
 
   <!-- Content -->
-  <div class="text-foreground whitespace-pre-wrap break-words {textSize} mb-2 overflow-hidden">
-    <EventContent {ndk} event={event} />
+  <div class="mb-2">
+    <EventCard.Content class={contentClass} />
   </div>
 
   <!-- Actions -->
   {#if showActions}
-    <EventActions {event} variant={variant} />
+    <EventActions {event} {variant} />
   {/if}
-</article>
+</EventCard.Root>

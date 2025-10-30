@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/svelte';
 import ArticleList from './ArticleList.svelte';
 import { ndk } from '$lib/ndk.svelte';
-import { NDKKind } from '@nostr-dev-kit/ndk';
+import { NDKKind, type NDKArticle } from '@nostr-dev-kit/ndk';
 
 const meta = {
   title: 'Components/Articles/ArticleList',
@@ -16,6 +16,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const RecentArticles: Story = {
+  args: {
+    articles: [],
+  },
   render: () => {
     const articlesSubscription = ndk.$subscribe(() => ({
       filters: [{ kinds: [NDKKind.Article], limit: 10 }],
@@ -25,7 +28,7 @@ export const RecentArticles: Story = {
     return {
       Component: ArticleList,
       props: {
-        articles: articlesSubscription.events || [],
+        articles: (articlesSubscription.events || []) as NDKArticle[],
       },
     };
   },
@@ -47,6 +50,9 @@ export const CustomEmptyMessage: Story = {
 
 // Fetch articles from specific authors
 export const FromSpecificAuthors: Story = {
+  args: {
+    articles: [],
+  },
   render: () => {
     const articlesSubscription = ndk.$subscribe(() => ({
       filters: [{
@@ -63,7 +69,7 @@ export const FromSpecificAuthors: Story = {
     return {
       Component: ArticleList,
       props: {
-        articles: articlesSubscription.events || [],
+        articles: (articlesSubscription.events || []) as NDKArticle[],
       },
     };
   },
@@ -71,6 +77,9 @@ export const FromSpecificAuthors: Story = {
 
 // Fetch articles with specific hashtag
 export const WithHashtag: Story = {
+  args: {
+    articles: [],
+  },
   render: () => {
     const articlesSubscription = ndk.$subscribe(() => ({
       filters: [{
@@ -84,7 +93,7 @@ export const WithHashtag: Story = {
     return {
       Component: ArticleList,
       props: {
-        articles: articlesSubscription.events || [],
+        articles: (articlesSubscription.events || []) as NDKArticle[],
       },
     };
   },

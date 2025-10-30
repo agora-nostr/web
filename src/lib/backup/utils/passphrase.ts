@@ -45,7 +45,7 @@ export function validatePassphraseStrength(passphrase: string): PassphraseValida
 
 export async function deriveKeyFromPassphrase(
   passphrase: string,
-  salt: Uint8Array
+  salt: Uint8Array<ArrayBuffer>
 ): Promise<CryptoKey> {
   return withBackupErrorHandling(async () => {
     const encoder = new TextEncoder();

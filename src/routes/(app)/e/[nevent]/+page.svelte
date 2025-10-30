@@ -1,160 +1,61 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { ndk } from '$lib/ndk.svelte';
+  import { createThreadView } from '@nostr-dev-kit/svelte';
+  import type { ThreadView } from '@nostr-dev-kit/svelte';
   import { NDKEvent } from '@nostr-dev-kit/ndk';
   import NoteCard from '$lib/components/NoteCard.svelte';
   import HighlightCard from '$lib/components/HighlightCard.svelte';
   import MissingEventCard from '$lib/components/MissingEventCard.svelte';
 
-  type ThreadItem =
-    | { type: 'event'; event: NDKEvent }
-    | { type: 'missing'; eventId: string; relayHint?: string };
-  
-  let mainEvent = $state<NDKEvent | null>(null);
-  
   // Decode the nevent parameter
   const neventId = $derived($page.params.nevent);
 
+  let thread = $state<ThreadView | null>(null);
+
+  // Initialize thread view when neventId changes
   $effect(() => {
-      if (!neventId) return;
-      
-			ndk.fetchEvent(neventId).then((event) => {
-				mainEvent = event;
-			});
-		});
+    if (!neventId) return;
 
-  // Get the root event ID from the main event's tags
-  const rootEventId = $derived.by(() => {
-    if (!mainEvent) return null;
+    // Clean up previous thread if exists
+    thread = null;
 
-    // Find root tag
-    const rootTag = mainEvent.tags.find(tag => tag[0] === 'e' && tag[3] === 'root');
-    if (rootTag) {
-      return rootTag[1];
-    }
-
-    // If no root tag, check if there's a reply tag (this might be the root itself)
-    const replyTag = mainEvent.tags.find(tag => tag[0] === 'e' && tag[3] === 'reply');
-    if (replyTag) {
-      return replyTag[1];
-    }
-
-    // Fallback for older format - first 'e' tag might be the root
-    const eTags = mainEvent.tags.filter(tag => tag[0] === 'e');
-    if (eTags.length > 0) {
-      return eTags[0][1];
-    }
-
-    return null;
-  });
-
-  // Fetch thread events
-  const threadEvents = ndk.$subscribe(() => {
-    if (!rootEventId) return undefined;
-
-    return {
-      filters: [
-        { ids: [rootEventId] },
-        { kinds: [1, 9802], '#e': [rootEventId] }
-      ],
-      subId: 'thread-events'
-    };
-  });
-
-  // Fetch replies to the main event
-  const replies = ndk.$subscribe(() => {
-    if (!mainEvent?.id) return undefined;
-    return {
-      filters: [
-        { kinds: [1, 9802], '#e': [mainEvent.id] },
-        { kinds: [1, 9802], '#e': [mainEvent.id] },
-      ],
-      subId: 'main-event-replies'
-    };
-  });
-
-  // Build the parent chain (with missing event tracking)
-  const parentChain = $derived.by((): ThreadItem[] => {
-    if (!mainEvent?.id || !threadEvents || threadEvents.events.length === 0) return [];
-
-    const parents: ThreadItem[] = [];
-    const eventMap = new Map(threadEvents.events.map(e => [e.id, e]));
-
-    let currentEvent = mainEvent;
-    let iteration = 0;
-
-    while (currentEvent && iteration < 20) { // Safety limit
-      iteration++;
-
-      // Find the parent of the current event
-      const replyTag = currentEvent.tags.find(tag => tag[0] === 'e' && tag[3] === 'reply');
-      const rootTag = currentEvent.tags.find(tag => tag[0] === 'e' && tag[3] === 'root');
-
-      let parentId: string | null = null;
-      let parentTag: string[] | null = null;
-
-      if (replyTag) {
-        parentId = replyTag[1];
-        parentTag = replyTag;
-      } else if (rootTag && rootTag[1] !== currentEvent.id) {
-        parentId = rootTag[1];
-        parentTag = rootTag;
-      } else {
-        // Fallback: check for any 'e' tags (older format)
-        const eTags = currentEvent.tags.filter(tag => tag[0] === 'e');
-        if (eTags.length > 0) {
-          parentId = eTags[eTags.length - 1][1];
-          parentTag = eTags[eTags.length - 1];
-        }
-      }
-
-      if (parentId) {
-        if (eventMap.has(parentId)) {
-          const parentEvent = eventMap.get(parentId)!;
-          parents.unshift({ type: 'event', event: parentEvent });
-          currentEvent = parentEvent;
-        } else {
-          // Parent event not found - add a missing placeholder
-          const relayHint = parentTag && parentTag[2] ? parentTag[2] : undefined;
-          parents.unshift({ type: 'missing', eventId: parentId, relayHint });
-          break; // Stop here since we can't continue the chain
-        }
-      } else {
-        break;
-      }
-    }
-
-    return parents;
-  });
-
-  // Filter direct replies
-  const directReplies = $derived.by(() => {
-    if (!replies || !mainEvent?.id) return [];
-
-    const repliesArray = replies.events;
-
-    // Filter for direct replies only
-    const directReplies = repliesArray.filter(reply => {
-      const replyTag = reply.tags.find(tag =>
-        tag[0] === 'e' && tag[3] === 'reply'
-      );
-      // If there's a specific reply tag, check if it's replying to our event
-      if (replyTag) {
-        return replyTag[1] === mainEvent?.id;
-      }
-      // Otherwise check if our event is the last 'e' tag (older format)
-      const eTags = reply.tags.filter(tag => tag[0] === 'e');
-      return eTags.length > 0 && eTags[eTags.length - 1][1] === mainEvent?.id;
-    });
-
-    // Sort by creation time (oldest first)
-    return directReplies.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+    // Create the thread view
+    thread = createThreadView(() => ({
+      focusedEvent: neventId
+    }), ndk);
   });
 
   function handleEventNavigation(event: NDKEvent) {
-    const nevent = event.encode();
-    window.location.href = `/e/${nevent}`;
+    // Use focusOn instead of full page reload for better UX
+    if (thread) {
+      thread.focusOn(event);
+      // Update URL without reload
+      const nevent = event.encode();
+      window.history.pushState({}, '', `/e/${nevent}`);
+    }
   }
+
+  // Get the main event from thread.events
+  const mainEvent = $derived.by(() => {
+    if (!thread) return null;
+    const focusedId = thread.focusedEventId;
+    if (!focusedId) return null;
+    const node = thread.events.find(n => n.id === focusedId);
+    return node?.event || null;
+  });
+
+  // Get parent chain (events before the focused event)
+  const parentChain = $derived.by(() => {
+    if (!thread) return [];
+    const focusedId = thread.focusedEventId;
+    if (!focusedId) return [];
+
+    const focusedIndex = thread.events.findIndex(n => n.id === focusedId);
+    if (focusedIndex === -1) return [];
+
+    return thread.events.slice(0, focusedIndex);
+  });
 </script>
 
 <div class="min-h-screen bg-background">
@@ -164,6 +65,7 @@
       <button
         onclick={() => history.back()}
         class="p-2 hover:bg-neutral-900 rounded-lg transition-colors"
+        aria-label="Go back"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -176,33 +78,29 @@
   {#if !mainEvent}
     <div class="flex flex-col items-center justify-center mt-20">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      <p class="mt-4 text-neutral-400">Loading note...</p>
+      <p class="mt-4 text-neutral-400">Loading thread...</p>
     </div>
   {:else}
     <main class="w-full lg:max-w-2xl mx-auto">
       <!-- Parent Notes (Thread Context) -->
-      {#each parentChain as item, index}
-        {#if item.type === 'missing'}
+      {#each parentChain as node, index}
+        {#if !node.event}
           <MissingEventCard
-            eventId={item.eventId}
-            relayHint={item.relayHint}
+            eventId={node.id}
+            relayHint={node.relayHint}
             showThreadLine={index < parentChain.length - 1}
-            onEventFound={(event) => {
-              // Refresh the thread when the missing event is found
-              if (mainEvent) {
-                const nevent = mainEvent.encode();
-                window.location.href = `/e/${nevent}`;
-              }
+            onEventFound={() => {
+              // Thread view automatically updates when missing events are found
             }}
           />
-        {:else if item.event.kind === 9802}
-          <HighlightCard event={item.event} variant="default" />
-        {:else if item.event}
+        {:else if node.event.kind === 9802}
+          <HighlightCard event={node.event} variant="default" />
+        {:else}
           <NoteCard
-            event={item.event}
+            event={node.event}
             variant="thread-parent"
             showThreadLine={index < parentChain.length - 1}
-            onNavigate={() => handleEventNavigation(item.event)}
+            onNavigate={() => node.event && handleEventNavigation(node.event)}
           />
         {/if}
       {/each}
@@ -220,13 +118,13 @@
 
       <!-- Replies -->
       <div>
-        {#if directReplies.length > 0}
+        {#if thread && thread.replies.length > 0}
           <div class="px-4 py-3 border-b border-border">
             <h2 class="font-semibold text-foreground">
-              {directReplies.length} {directReplies.length === 1 ? 'Reply' : 'Replies'}
+              {thread.replies.length} {thread.replies.length === 1 ? 'Reply' : 'Replies'}
             </h2>
           </div>
-          {#each directReplies as reply}
+          {#each thread.replies as reply}
             {#if reply.kind === 9802}
               <HighlightCard event={reply} variant="default" />
             {:else}

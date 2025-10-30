@@ -275,16 +275,12 @@ const notificationProcessors = {
  * Creates a notifications manager that aggregates and groups notifications
  */
 export function createNotificationsManager(ndk: NDKSvelte) {
-  console.log('[NotificationsManager] Creating notifications manager');
-
   // Subscription for all notification events
   const notificationsSubscription = ndk.$subscribe(() => {
     if (!ndk.$currentUser) {
-      console.log('[NotificationsManager] No current user, skipping notifications subscription');
       return undefined;
     }
 
-    console.log('[NotificationsManager] Setting up notifications subscription for user:', ndk.$currentUser.pubkey);
     return {
       filters: [
         {
@@ -301,11 +297,9 @@ export function createNotificationsManager(ndk: NDKSvelte) {
   // Subscription for user's own events (to identify replies vs mentions)
   const userEventsSubscription = ndk.$subscribe(() => {
     if (!ndk.$currentUser) {
-      console.log('[NotificationsManager] No current user, skipping user events subscription');
       return undefined;
     }
 
-    console.log('[NotificationsManager] Setting up user events subscription for user:', ndk.$currentUser.pubkey);
     return {
       filters: [
         {
@@ -320,11 +314,8 @@ export function createNotificationsManager(ndk: NDKSvelte) {
 
   // Build a Set of user's event IDs for quick lookup
   const userEventIds = $derived.by(() => {
-    console.log('[NotificationsManager] Building user event IDs set');
     const events = Array.from(userEventsSubscription.events ?? []);
-    console.log('[NotificationsManager] User events count:', events.length);
     const ids = new Set(events.map((e) => e.id));
-    console.log('[NotificationsManager] User event IDs count:', ids.size);
     return ids;
   });
 

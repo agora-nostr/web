@@ -1,3 +1,4 @@
+<!-- @ndk-version: hashtag-preview@0.3.0 -->
 <script lang="ts">
   interface HashtagProps {
     tag: string;
@@ -26,7 +27,7 @@
 
 <style>
   .hashtag {
-    color: #2563eb;
+    color: var(--primary);
     cursor: pointer;
   }
 

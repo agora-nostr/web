@@ -17,7 +17,7 @@
     <span class="unit">sats</span>
   </div>
 
-  {#if status === 'loading'}
+  <!-- {#if status === 'loading'}
     <div class="status-badge loading">
       <div class="spinner"></div>
       <span>Loading wallet...</span>
@@ -26,7 +26,7 @@
     <div class="status-badge error">
       ⚠️ Error loading wallet
     </div>
-  {/if}
+  {/if} -->
 </div>
 
 <style>

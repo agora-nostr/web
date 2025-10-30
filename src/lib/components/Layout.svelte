@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { setContext } from 'svelte';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { t } from 'svelte-i18n';
@@ -38,6 +39,9 @@
   }
 
   const { children }: Props = $props();
+
+  // Set NDK in Svelte context for child components
+  setContext('ndk', ndk);
 
   const wallet = ndk.$wallet;
   const notificationsManager = createNotificationsManager(ndk);

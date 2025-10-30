@@ -1,3 +1,4 @@
+<!-- @ndk-version: embedded-event@0.4.0 -->
 <script lang="ts">
   import type { NDKSvelte } from '@nostr-dev-kit/svelte';
   import { createEmbeddedEvent } from '@nostr-dev-kit/svelte';
@@ -10,7 +11,7 @@
 
   let { ndk, bech32, class: className = '' }: EmbeddedEventProps = $props();
 
-  const embedded = createEmbeddedEvent({ ndk, bech32: () => bech32 });
+  const embedded = createEmbeddedEvent(() => ({ bech32 }), ndk);
 </script>
 
 <div class="embedded-event {className}">
@@ -39,20 +40,20 @@
   .embedded-event {
     margin: 0.75rem 0;
     padding: 1rem;
-    border: 1px solid #e5e7eb;
-    border-left: 3px solid #2563eb;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
     border-radius: 0.5rem;
-    background: #f9fafb;
+    background: var(--muted);
   }
 
   .loading,
   .error {
-    color: #6b7280;
+    color: var(--muted-foreground);
     font-size: 0.875rem;
   }
 
   .error {
-    color: #dc2626;
+    color: var(--destructive);
   }
 
   .event-preview {
@@ -62,7 +63,6 @@
   }
 
   .event-content {
-    color: #111827;
     line-height: 1.5;
     max-height: 150px;
     overflow: hidden;
@@ -76,7 +76,7 @@
     left: 0;
     right: 0;
     height: 2rem;
-    background: linear-gradient(transparent, #f9fafb);
+    background: linear-gradient(transparent, var(--muted));
   }
 
   .event-meta {
@@ -84,7 +84,7 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.875rem;
-    color: #6b7280;
+    color: var(--muted-foreground);
   }
 
   .event-author {

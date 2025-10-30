@@ -40,9 +40,9 @@
 
     try {
       if (isFollowing) {
-        ndk.$currentUser.unfollow(pubkey, follows);
+        ndk.$currentUser.unfollow(pubkey, follows as unknown as Set<string | NDKUser>);
       } else {
-        ndk.$currentUser.follow(pubkey, follows);
+        ndk.$currentUser.follow(pubkey, follows as unknown as Set<string | NDKUser>);
       }
 
       // Dispatch success event

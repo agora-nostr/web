@@ -1,0 +1,1 @@
+import{W as c,m as _,n as o,au as d,a6 as T,a7 as b,a8 as y,z as E,X as g,a9 as f}from"./Bq750rDx.js";function v(n,i,u=!1){_&&o();var r=new g(n),h=u?d:0;function t(a,s){if(_){const l=T(n)===b;if(a===l){var e=y();E(e),r.anchor=e,f(!1),r.ensure(a,s),f(!0);return}}r.ensure(a,s)}c(()=>{var a=!1;i((s,e=!0)=>{a=!0,t(e,s)}),a||t(!1,null)},h)}export{v as i};

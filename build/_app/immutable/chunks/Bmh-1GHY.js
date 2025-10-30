@@ -1,0 +1,1 @@
+import{b as o}from"./CdRP5_sk.js";import{g as d}from"./uQi_fFEP.js";function s(e,t){if(e.tagValue)return d(e,t,"packs");try{const n=o.decode(e.encode());if(n.type==="naddr"&&n.data.identifier){const r=n.data.identifier,i=t?.profile?.nip05;return i?`/${i}/${r}`:`/${o.npubEncode(e.pubkey)}/${r}`}}catch{}return`/packs/${e.encode()}`}export{s as g};
