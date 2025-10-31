@@ -6,7 +6,7 @@
   import { followPacksStore } from '$lib/stores/followPacks.svelte';
   import { createPackModal } from '$lib/stores/createPackModal.svelte';
   import { mockFollowPacks } from '$lib/data/mockFollowPacks';
-  import { NDKKind, type NDKEvent } from '@nostr-dev-kit/ndk';
+  import { NDKKind, NDKFollowPack } from '@nostr-dev-kit/ndk';
   import Avatar from '$lib/components/ndk/avatar.svelte';
   import NoteCard from '$lib/components/NoteCard.svelte';
   import CreateFollowPackDialog from '$lib/components/CreateFollowPackDialog.svelte';
@@ -19,7 +19,7 @@
   let activeTab = $state<ActiveTab>('feed');
   let isFollowingAll = $state(false);
 
-  let packEvent = $state<NDKEvent | null>(null);
+  let pack = $state<NDKFollowPack | null>(null);
   let isLoading = $state(true);
 
   // Fetch the specific pack event by its bech32 ID
@@ -30,7 +30,10 @@
       // Try to decode and fetch the event
       ndk.fetchEvent(packId).then(event => {
         if (event) {
-          packEvent = event;
+          pack = NDKFollowPack.from(event);
+        } else {
+          // Fallback to mock data only if pack ID matches exactly
+          pack = mockFollowPacks.find(p => p.encode() === packId) || null;
         }
         isLoading = false;
       }).catch(err => {
@@ -38,31 +41,6 @@
         isLoading = false;
       });
     }
-  });
-
-  // Convert event to pack or use mock data
-  let pack = $derived.by(() => {
-    if (packEvent) {
-      return {
-        id: packEvent.id || '',
-        title: packEvent.tagValue('title') || 'Untitled Pack',
-        description: packEvent.tagValue('description'),
-        image: packEvent.tagValue('image'),
-        pubkeys: packEvent.tags.filter(t => t[0] === 'p').map(t => t[1]),
-        encode: () => packEvent.encode(),
-        kind: packEvent.kind || 39089,
-        pubkey: packEvent.pubkey,
-        created_at: packEvent.created_at || 0,
-        author: packEvent.author,
-      };
-    }
-
-    // Fallback to mock data only if pack ID matches exactly
-    if (packId && !isLoading) {
-      return mockFollowPacks.find(p => p.encode() === packId);
-    }
-
-    return null;
   });
 
   let pubkeys = $derived(pack?.pubkeys || []);
@@ -126,8 +104,8 @@
   }
 
   function handleEdit() {
-    if (packEvent) {
-      createPackModal.open(packEvent);
+    if (pack) {
+      createPackModal.open(pack);
     }
   }
 </script>
