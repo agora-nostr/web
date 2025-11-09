@@ -1,7 +1,3 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
   import { getContext } from 'svelte';
   import { USER_CONTEXT_KEY, type UserContext } from './user.context.js';
@@ -10,16 +6,12 @@
   import type { Snippet } from 'svelte';
 
   interface Props {
-    /** Additional CSS classes */
     class?: string;
 
-    /** Fallback image URL */
     fallback?: string;
 
-    /** Alt text for image */
     alt?: string;
 
-    /** Custom fallback snippet to replace the default gradient */
     customFallback?: Snippet;
   }
 
@@ -36,9 +28,6 @@
   }
 
   const imageUrl = $derived(context.profile?.picture || fallback);
-  const displayName = $derived(
-    alt || context.profile?.displayName || context.profile?.name || 'NA'
-  );
 
   const avatarGradient = $derived(
     context.ndkUser?.pubkey
@@ -76,7 +65,7 @@
         class="rounded-full flex items-center justify-center w-full h-full absolute inset-0"
         style="background: {avatarGradient};"
       >
-        {displayName.slice(0, 2).toUpperCase()}
+        {context.ndkUser?.pubkey?.slice(0, 2).toUpperCase() ?? '??'}
       </div>
     {/if}
   {/if}
@@ -85,7 +74,7 @@
   {#if imageUrl}
     <img
       src={imageUrl}
-      alt={displayName}
+      {alt}
       class={cn(
         "rounded-full object-cover block w-full h-full absolute inset-0",
         imageLoaded ? "opacity-100" : "opacity-0"

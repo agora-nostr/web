@@ -5,7 +5,7 @@
   import { MediaQuery } from 'svelte/reactivity';
   import * as Dialog from '$lib/components/ui/dialog';
   import * as Drawer from '$lib/components/ui/drawer';
-  import { UserSearchCombobox } from '$lib/ndk/components/user-search-combobox';
+  import { UserSearchCombobox } from '$lib/ndk/components/user/inputs/search';
 
   interface Props {
     isOpen: boolean;

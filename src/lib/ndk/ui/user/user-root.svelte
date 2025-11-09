@@ -1,36 +1,25 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
   import { setContext } from 'svelte';
   import type { NDKUser, NDKUserProfile } from '@nostr-dev-kit/ndk';
   import type { NDKSvelte } from '@nostr-dev-kit/svelte';
   import { createProfileFetcher } from '@nostr-dev-kit/svelte';
-  import { USER_CONTEXT_KEY, type UserContext } from './user.context.js';
+  import { USER_CONTEXT_KEY } from './user.context.js';
   import type { Snippet } from 'svelte';
   import { cn } from "../../utils/cn.js";
 
   interface Props {
-    /** NDK instance (required) */
     ndk: NDKSvelte;
 
-    /** User instance */
     user?: NDKUser;
 
-    /** User's pubkey (alternative to user) */
     pubkey?: string;
 
-    /** Pre-loaded profile (optional, avoids fetch) */
     profile?: NDKUserProfile;
 
-    /** Click handler */
     onclick?: (e: MouseEvent) => void;
 
-    /** Additional CSS classes */
     class?: string;
 
-    /** Child components */
     children: Snippet;
   }
 

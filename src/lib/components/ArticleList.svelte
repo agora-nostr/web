@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { NDKArticle } from '@nostr-dev-kit/ndk';
-  import ArticlePreviewCard from './ArticlePreviewCard.svelte';
+  import ArticlePreviewCard from './ArticlePreviewCardNew.svelte';
   import EmptyState from './EmptyState.svelte';
 
   interface Props {

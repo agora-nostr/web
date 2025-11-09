@@ -1,0 +1,42 @@
+{
+  "name": "user-card-landscape",
+  "title": "User Card Landscape",
+  "category": "user",
+  "subcategory": "cards",
+  "variant": "landscape",
+  "oneLiner": "A horizontal user card layout",
+  "command": "npx jsrepo add user/cards/landscape",
+  "dependencies": [
+    "@nostr-dev-kit/svelte",
+    "@nostr-dev-kit/ndk"
+  ],
+  "useCases": [
+    "user-lists",
+    "comment-sections",
+    "author-bios"
+  ],
+  "apiDoc": {
+    "name": "UserCardLandscape",
+    "description": "A landscape-oriented user profile card",
+    "props": [
+      {
+        "name": "ndk",
+        "type": "NDKSvelte",
+        "required": true,
+        "description": "NDK instance for fetching user data"
+      },
+      {
+        "name": "pubkey",
+        "type": "string",
+        "required": true,
+        "description": "The user's public key (hex format)"
+      },
+      {
+        "name": "class",
+        "type": "string",
+        "required": false,
+        "description": "Additional CSS classes to apply to the card"
+      }
+    ]
+  }
+}

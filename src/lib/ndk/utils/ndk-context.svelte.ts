@@ -1,7 +1,3 @@
-/*
-	Installed from @nostr/svelte@latest
-*/
-
 /**
  * Shared utilities for NDK context handling across all Root components.
  *
@@ -9,14 +5,14 @@
  * either from props or from Svelte context, reducing boilerplate in Root components.
  */
 
-import { getContext } from "svelte";
-import type { NDKSvelte } from "@nostr-dev-kit/svelte";
+import { getContext } from 'svelte';
+import type { NDKSvelte } from '@nostr-dev-kit/svelte';
 
 /**
  * The context key used for global NDK instance.
  * This should match the key set in +layout.svelte.
  */
-const NDK_CONTEXT_KEY = "ndk";
+const NDK_CONTEXT_KEY = 'ndk';
 
 /**
  * Retrieves NDK instance from either a provided prop or Svelte context.
@@ -38,17 +34,17 @@ const NDK_CONTEXT_KEY = "ndk";
  * ```
  */
 export function getNDKFromContext(providedNdk?: NDKSvelte): NDKSvelte {
-	if (providedNdk) {
-		return providedNdk;
-	}
+  if (providedNdk) {
+    return providedNdk;
+  }
 
-	const contextNdk = getContext<NDKSvelte>(NDK_CONTEXT_KEY);
+  const contextNdk = getContext<NDKSvelte>(NDK_CONTEXT_KEY);
 
-	if (!contextNdk) {
-		throw new Error(
-			"NDK not found. Either provide an `ndk` prop or ensure NDK is set in context via setContext('ndk', ndk) in a parent component.",
-		);
-	}
+  if (!contextNdk) {
+    throw new Error(
+      'NDK not found. Either provide an `ndk` prop or ensure NDK is set in context via setContext(\'ndk\', ndk) in a parent component.'
+    );
+  }
 
-	return contextNdk;
+  return contextNdk;
 }

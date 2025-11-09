@@ -1,21 +1,14 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
   import { cn } from '../../utils/cn.js';
 
   interface Props {
-    /** Direct emoji data (Option 1) */
     emoji?: string;
     url?: string;
     shortcode?: string;
 
-    /** NDKEvent kind:7 reaction (Option 2) */
     event?: NDKEvent;
 
-    /** Additional CSS classes */
     class?: string;
   }
 
@@ -50,12 +43,13 @@
 
 {#if emojiData.url}
   <img
+    data-reaction-display=""
     src={emojiData.url}
     alt={emojiData.shortcode || emojiData.emoji}
     class={cn('inline-block object-contain w-5 h-5', className)}
   />
 {:else}
-  <span class={cn('inline-block leading-none text-xl', className)}>
+  <span data-reaction-display="" class={cn('inline-block leading-none text-xl', className)}>
     {emojiData.emoji}
   </span>
 {/if}

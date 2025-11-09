@@ -2,7 +2,7 @@
   import { ndk } from '$lib/ndk.svelte';
   import { User } from '$lib/ndk/ui/user';
   import EventContent from '$lib/ndk/ui/event-content.svelte';
-  import { FollowButton } from '$lib/ndk/components/actions';
+  import FollowButton from '$lib/ndk/components/follow/buttons/basic/follow-button.svelte';
   import UserDropdown from '$lib/components/UserDropdown.svelte';
   import InvitedByBadge from '$lib/components/InvitedByBadge.svelte';
   import { generateBannerGradient } from '$lib/utils/bannerGradient';
@@ -76,7 +76,7 @@
       <!-- Avatar -->
       <div class="shrink-0">
         <User.Root {ndk} {pubkey}>
-          <User.Avatar size="sm" class="w-24 h-24 sm:w-48 sm:h-48 rounded-full border-4 border-black" />
+          <User.Avatar class="w-24 h-24 sm:w-48 sm:h-48 rounded-full border-4 border-black" />
         </User.Root>
       </div>
 
@@ -153,6 +153,7 @@
     {#if profile?.about}
       <div class="mb-4">
         <EventContent
+          {ndk}
           content={profile.about}
           class="text-muted-foreground"
         />

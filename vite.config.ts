@@ -2,7 +2,9 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [sveltekit()],
+  plugins: [
+    sveltekit()
+  ],
   define: {
     'global': 'globalThis'
   },
@@ -29,7 +31,6 @@ export default defineConfig({
     host: true,
     headers: {
       'Cross-Origin-Embedder-Policy': 'credentialless',
-      'Cross-Origin-Opener-Policy': 'same-origin',
     },
     fs: {
       allow: ['..']

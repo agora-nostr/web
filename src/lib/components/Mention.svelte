@@ -59,7 +59,7 @@
     onclick={handleClick}
   >
     <User.Root {ndk} pubkey={user.pubkey}>
-      <User.Avatar size={16} class="flex-shrink-0" />
+      <User.Avatar class="flex-shrink-0" />
     </User.Root>
     <span class="text-sm">{displayName}</span>
   </a>

@@ -1,8 +1,3 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
-<!-- @ndk-version: hashtag-preview@0.6.0 -->
 <script lang="ts">
 	interface HashtagProps {
 		tag: string;
@@ -20,7 +15,8 @@
 </script>
 
 <span
-	class="hashtag {className}"
+	data-hashtag=""
+	class="text-primary cursor-pointer hover:underline {className}"
 	role="button"
 	tabindex="0"
 	onclick={handleClick}
@@ -28,14 +24,3 @@
 >
 	#{tag}
 </span>
-
-<style>
-	.hashtag {
-		color: var(--primary);
-		cursor: pointer;
-	}
-
-	.hashtag:hover {
-		text-decoration: underline;
-	}
-</style>

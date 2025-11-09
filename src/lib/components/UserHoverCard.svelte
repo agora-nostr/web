@@ -2,7 +2,7 @@
   import { ndk } from '$lib/ndk.svelte';
   import { User } from '$lib/ndk/ui/user';
   import EventContent from '$lib/ndk/ui/event-content.svelte';
-  import { FollowButton } from '$lib/ndk/components/actions';
+  import FollowButton from '$lib/ndk/components/follow/buttons/basic/follow-button.svelte';
   import { generateBannerGradient } from '$lib/utils/bannerGradient';
   import type { NDKUserProfile } from '@nostr-dev-kit/ndk';
 
@@ -106,6 +106,7 @@
             <div class="mb-4">
               <div class="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
                 <EventContent
+                  {ndk}
                   content={profile.about}
                   class="text-muted-foreground"
                 />

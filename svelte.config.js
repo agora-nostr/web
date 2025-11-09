@@ -7,6 +7,15 @@ const config = {
 	compilerOptions: {
 		runes: true
 	},
+	vitePlugin: {
+		dynamicCompileOptions({ filename }) {
+			// Disable runes mode for packages that use legacy Svelte syntax ($$restProps)
+			if (filename?.includes('node_modules/svelte-motion') ||
+					filename?.includes('node_modules/vaul-svelte')) {
+				return { runes: false };
+			}
+		}
+	},
 	kit: {
 		adapter: adapter({
 			fallback: 'index.html'

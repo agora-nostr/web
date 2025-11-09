@@ -134,7 +134,7 @@
 
       if (pack.publishStatus === 'error') {
         const error = pack.publishError;
-        const relayErrors = error?.relayErrors || {};
+        const relayErrors = (error as any)?.relayErrors || {};
         const errorMessages = Object.entries(relayErrors)
           .map(([relay, err]) => `${relay}: ${err}`)
           .join('\n');

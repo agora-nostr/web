@@ -7,7 +7,7 @@
   import ComposeDialog from './ComposeDialog.svelte';
   import ZapButton from './ZapButton.svelte';
   import Icon from './Icon.svelte';
-  import ReactionButton from '$lib/ndk/components/reaction/reaction-button.svelte';
+  import ReactionButton from '$lib/ndk/components/reaction/buttons/basic/reaction-button.svelte';
 
   interface Props {
     event: NDKEvent;

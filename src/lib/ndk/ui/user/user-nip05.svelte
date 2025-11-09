@@ -1,28 +1,36 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
   import { getContext } from 'svelte';
   import { USER_CONTEXT_KEY, type UserContext } from './user.context.js';
+  import type { Snippet } from 'svelte';
 
   const NIP05_REGEX = /^(?:([\w.+-]+)@)?([\w.-]+)$/;
 
+  // Format NIP-05 identifier for display
+  function formatNip05(nip05: string | undefined): string {
+    if (!nip05) return '';
+    return nip05;
+  }
+
   interface Props {
-    /** Show NIP-05 identifier */
     showNip05?: boolean;
-
-    /** Show verification checkmark */
     showVerified?: boolean;
-
-    /** Additional CSS classes */
     class?: string;
+
+    /**
+     * Custom snippet to display verification status
+     * Receives the verification status as a parameter
+     */
+    verificationSnippet?: Snippet<[{
+      status: boolean | null | undefined;
+      isVerifying: boolean;
+    }]>;
   }
 
   let {
     showNip05 = true,
     showVerified = true,
-    class: className = ''
+    class: className = '',
+    verificationSnippet
   }: Props = $props();
 
   const context = getContext<UserContext>(USER_CONTEXT_KEY);
@@ -38,27 +46,8 @@
   // Validate nip05 format
   const isValidFormat = $derived(nip05 ? NIP05_REGEX.test(nip05) : false);
 
-  // Parse nip05 into parts
-  const nip05Parts = $derived.by(() => {
-    if (!nip05) return null;
-    const match = nip05.match(NIP05_REGEX);
-    if (!match) return null;
-    const [_, name = '_', domain] = match;
-    return { name, domain };
-  });
-
-  // Format display text - always hide default username
-  const displayText = $derived.by(() => {
-    if (!nip05Parts) return '';
-    const { name, domain } = nip05Parts;
-
-    // Always hide default username
-    if (name === '_') {
-      return domain;
-    }
-
-    return `${name}@${domain}`;
-  });
+  // Format display text using NDK utility
+  const displayText = $derived(formatNip05(nip05));
 
   // Actual NIP-05 verification state
   // true = verified, false = invalid, null = not verified/error, undefined = not checked yet
@@ -90,12 +79,16 @@
   <span class={className}>
     {displayText}
     {#if showVerified}
-      {#if isVerifying}
-        <span title="Verifying NIP-05...">⋯</span>
-      {:else if verificationStatus === true}
-        <span title="NIP-05 verified">✓</span>
-      {:else if verificationStatus === false}
-        <span title="NIP-05 does not match pubkey">✗</span>
+      {#if verificationSnippet}
+        {@render verificationSnippet({ status: verificationStatus, isVerifying })}
+      {:else}
+        {#if isVerifying}
+          <span title="Verifying NIP-05...">⋯</span>
+        {:else if verificationStatus === true}
+          <span title="NIP-05 verified">✓</span>
+        {:else if verificationStatus === false}
+          <span title="NIP-05 does not match pubkey">✗</span>
+        {/if}
       {/if}
     {/if}
   </span>

@@ -1,0 +1,1 @@
+import{b as t,g as s,s as o}from"./AsQG98fS.js";class d{#e=t("default");get _mode(){return s(this.#e)}set _mode(e){o(this.#e,e,!0)}get mode(){return this._mode}setArticleMode(){this._mode="article"}setProfileMode(){this._mode="profile"}setReadsMode(){this._mode="reads"}setDefaultMode(){this._mode="default"}reset(){this._mode="default"}}const i=new d;export{i as l};

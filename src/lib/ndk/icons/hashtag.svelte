@@ -1,7 +1,3 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
   interface Props {
     size?: number;

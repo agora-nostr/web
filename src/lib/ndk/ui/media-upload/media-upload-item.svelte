@@ -1,7 +1,3 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { MediaUploadResult } from './createMediaUpload.svelte';

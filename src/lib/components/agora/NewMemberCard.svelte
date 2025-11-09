@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ndk } from '$lib/ndk.svelte';
 	import User from '../User.svelte';
-	import { FollowButton } from '$lib/ndk/components/actions';
+	import FollowButton from '$lib/ndk/components/follow/buttons/basic/follow-button.svelte';
 	import { formatTimeAgo } from '$lib/utils/formatTime';
 	import type { NDKUser, NDKUserProfile } from '@nostr-dev-kit/ndk';
 

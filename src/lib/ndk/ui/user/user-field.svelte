@@ -1,7 +1,3 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
   import { getContext } from 'svelte';
   import { USER_CONTEXT_KEY, type UserContext } from './user.context.js';
@@ -10,10 +6,8 @@
   import Bio from './user-bio.svelte';
 
   interface Props {
-    /** Which profile field to display */
     field: keyof NDKUserProfile;
 
-    /** Additional CSS classes */
     class?: string;
   }
 

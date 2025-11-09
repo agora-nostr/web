@@ -2,7 +2,7 @@
   import { ndk } from '$lib/ndk.svelte';
   import { NDKFollowPack, NDKSubscriptionCacheUsage, type NDKFilter, filterFromId } from '@nostr-dev-kit/ndk';
   import { COMMUNITY_RELAYS, FOLLOW_PACK_KIND, COMMUNITY_METADATA, HARDCODED_COMMUNITY_PACKS } from '$lib/config/followPacks';
-  import { FollowPackCompact } from '$lib/ndk/components/follow-pack-compact';
+  import { FollowPackCompact } from '$lib/ndk/components/follow/packs/compact';
 
   interface Props {
     selectedCommunity: string | null;

@@ -1,0 +1,1 @@
+import{G as d,I as n,J as u,K as c,L as p}from"./AsQG98fS.js";function y(s,o,r){d(()=>{var a=n(()=>o(s,r?.())||{});if(r&&a?.update){var t=!1,f={};u(()=>{var e=r();c(e),t&&p(f,e)&&(f=e,a.update(e))}),t=!0}if(a?.destroy)return()=>a.destroy()})}export{y as a};

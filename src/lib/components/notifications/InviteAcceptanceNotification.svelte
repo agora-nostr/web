@@ -2,7 +2,7 @@
 	import type { InviteAcceptanceNotification } from '$lib/utils/useNotifications.svelte';
 	import { ndk } from '$lib/ndk.svelte';
 	import User from '../User.svelte';
-	import { FollowButton } from '$lib/ndk/components/actions';
+	import FollowButton from '$lib/ndk/components/follow/buttons/basic/follow-button.svelte';
 	import NotificationBase from './NotificationBase.svelte';
 	import TimeAgo from '../TimeAgo.svelte';
 	import type { NDKUserProfile } from '@nostr-dev-kit/ndk';

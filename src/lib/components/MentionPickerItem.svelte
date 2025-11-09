@@ -33,7 +33,7 @@
   }`}
 >
   <User.Root {ndk} {pubkey}>
-    <User.Avatar size={32} class="flex-shrink-0" />
+    <User.Avatar class="flex-shrink-0" />
   </User.Root>
   <div class="flex-1 min-w-0 text-left">
     <div class="text-sm font-medium text-foreground truncate">

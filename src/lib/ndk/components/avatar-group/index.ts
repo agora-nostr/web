@@ -1,7 +1,3 @@
-/*
-	Installed from @nostr/svelte@latest
-*/
-
 /**
  * AvatarGroup - Display multiple user avatars
  *
@@ -11,7 +7,7 @@
  * @example Basic usage:
  * ```svelte
  * <script>
- *   import { AvatarGroup } from '../avatar-group';
+ *   import { AvatarGroup } from '/registry/components/avatar-group';
  * </script>
  *
  * <AvatarGroup {ndk} pubkeys={['pubkey1', 'pubkey2', 'pubkey3']} />
@@ -32,7 +28,7 @@
  * @example Using the builder directly:
  * ```svelte
  * <script>
- *   import { createAvatarGroup } from '@nostr-dev-kit/svelte';
+ *   import { createAvatarGroup } from '../../builders/avatar-group/index.svelte.js';
  *
  *   const avatarGroup = createAvatarGroup(() => ({
  *     pubkeys: ['pubkey1', 'pubkey2', 'pubkey3'],
@@ -46,7 +42,7 @@
  * ```
  */
 
-import AvatarGroup from "../avatar-group/avatar-group.svelte";
+import AvatarGroup from './avatar-group.svelte';
 
 export { AvatarGroup };
 export default AvatarGroup;

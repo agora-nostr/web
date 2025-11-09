@@ -1,7 +1,3 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
   import type { EmojiData } from './createEmojiPicker.svelte.js';
   import { Reaction } from '../../ui/reaction';
@@ -13,19 +9,14 @@
   }
 
   interface Props {
-    /** Emoji data to display */
     emoji: EmojiData;
 
-    /** Callback when emoji is selected */
     onSelect: (emoji: EmojiData) => void;
 
-    /** Additional CSS classes */
     class?: string;
 
-    /** Child snippet for custom element rendering */
     child?: Snippet<[{ props: any } & EmojiSnippetProps]>;
 
-    /** Content snippet for custom content */
     children?: Snippet<[EmojiSnippetProps]>;
   }
 
@@ -53,7 +44,7 @@
 {#if child}
   {@render child({ props: mergedProps, ...snippetProps })}
 {:else}
-  <button {...mergedProps}>
+  <button data-emoji-picker-item="" {...mergedProps}>
     {#if children}
       {@render children(snippetProps)}
     {:else}

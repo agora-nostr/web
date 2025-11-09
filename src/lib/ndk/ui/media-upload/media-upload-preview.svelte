@@ -1,17 +1,11 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
 	import { mergeProps } from '../../utils/merge-props.js';
 	import type { Snippet } from 'svelte';
 	import type { MediaUploadResult } from './createMediaUpload.svelte';
 
 	interface Props {
-		/** The upload result to preview */
 		upload: MediaUploadResult;
 
-		/** Advanced: Custom rendering with merged props (bits-ui pattern) */
 		child?: Snippet<[{
 			props: Record<string, any>;
 			isImage: boolean;
@@ -20,7 +14,6 @@
 			upload: MediaUploadResult;
 		}]>;
 
-		/** Custom rendering with type helpers */
 		children?: Snippet<[{
 			isImage: boolean;
 			isVideo: boolean;
@@ -28,13 +21,10 @@
 			upload: MediaUploadResult;
 		}]>;
 
-		/** Additional CSS classes */
 		class?: string;
 
-		/** Show upload progress indicator */
 		showProgress?: boolean;
 
-		/** Show error state */
 		showError?: boolean;
 
 		[key: string]: any;

@@ -1,17 +1,13 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
-<!-- @ndk-version: embedded-event@0.9.0 -->
 <script lang="ts">
+	import { setContext, getContext } from 'svelte';
 	import type { NDKSvelte } from '@nostr-dev-kit/svelte';
-	import { createEmbeddedEvent } from '@nostr-dev-kit/svelte';
-	import { defaultContentRenderer, type ContentRenderer } from './content-renderer.svelte.js';
+	import type { NDKEvent } from '@nostr-dev-kit/ndk';
+	import { defaultContentRenderer, type ContentRenderer } from './content-renderer';
+	import { CONTENT_RENDERER_CONTEXT_KEY, type ContentRendererContext } from './content-renderer/content-renderer.context.js';
 
 	interface EmbeddedEventProps {
 		ndk: NDKSvelte;
 		bech32: string;
-		variant?: 'inline' | 'card' | 'compact';
 		renderer?: ContentRenderer;
 		class?: string;
 	}
@@ -19,19 +15,48 @@
 	let {
 		ndk,
 		bech32,
-		variant = 'card',
-		renderer = defaultContentRenderer,
+		renderer: rendererProp,
 		class: className = ''
 	}: EmbeddedEventProps = $props();
 
-	const embedded = createEmbeddedEvent(() => ({ bech32 }), ndk);
+	// Use renderer from prop, or from context, or fallback to default
+	const rendererContext = getContext<ContentRendererContext | undefined>(CONTENT_RENDERER_CONTEXT_KEY);
+	const renderer = $derived(rendererProp ?? rendererContext?.renderer ?? defaultContentRenderer);
 
-	// Lookup handler from registry
+	// Set renderer in context so nested components can access it
+	setContext(CONTENT_RENDERER_CONTEXT_KEY, { get renderer() { return renderer } });
+
+	// Fetch event from bech32
+	let event = $state<NDKEvent | undefined>(undefined);
+	let loading = $state(true);
+	let error = $state<Error | undefined>(undefined);
+
+	$effect(() => {
+		loading = true;
+		error = undefined;
+		event = undefined;
+
+		ndk.fetchEvent(bech32).then(fetchedEvent => {
+			event = fetchedEvent ?? undefined;
+			loading = false;
+		}).catch(err => {
+			error = err;
+			loading = false;
+		});
+	});
+
+	const embedded = $derived({ event, loading, error });
+
+	// Lookup handler from registry for this specific kind
 	let handlerInfo = $derived(renderer.getKindHandler(embedded.event?.kind));
 
-	let Handler = $derived(handlerInfo?.component);
+	// Use kind-specific handler
+	let KindHandler = $derived(handlerInfo?.component);
 
-	// Wrap event using NDK wrapper class if available
+	// Use fallback if no kind-specific handler
+	let FallbackHandler = $derived(renderer.fallbackComponent);
+
+	// Wrap event using NDK wrapper class if available (only for kind-specific handlers)
 	let wrappedEvent = $derived(
 		embedded.event && handlerInfo?.wrapper?.from
 			? handlerInfo.wrapper.from(embedded.event)
@@ -40,117 +65,21 @@
 </script>
 
 {#if embedded.loading}
-	<div class="embedded-loading {className}">
-		<div class="loading-spinner"></div>
+	<div class="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted text-sm {className}">
+		<div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
 		<span>Loading event...</span>
 	</div>
 {:else if embedded.error}
-	<div class="embedded-error {className}">
+	<div class="p-3 rounded-lg border border-border bg-muted text-sm text-destructive {className}">
 		<span>Failed to load event</span>
 	</div>
-{:else if Handler && wrappedEvent}
-	<Handler {ndk} event={wrappedEvent} {variant} />
+{:else if KindHandler && wrappedEvent}
+	<!-- Kind-specific handler -->
+	<KindHandler {ndk} event={wrappedEvent} />
+{:else if FallbackHandler && wrappedEvent}
+	<!-- Fallback handler - no variant -->
+	<FallbackHandler {ndk} event={wrappedEvent} class={className} />
 {:else if wrappedEvent}
-	<!-- NO HANDLER: Render minimal fallback (raw) -->
-	<div class="embedded-fallback {className}" data-variant={variant}>
-		<div class="fallback-header">
-			<span class="kind-badge">Kind {wrappedEvent.kind}</span>
-			<span class="event-id">{bech32.slice(0, 16)}...</span>
-		</div>
-		{#if wrappedEvent.content}
-			<div class="fallback-content">
-				{wrappedEvent.content.slice(0, 200)}{wrappedEvent.content.length > 200 ? '...' : ''}
-			</div>
-		{:else}
-			<div class="fallback-content fallback-empty">(empty)</div>
-		{/if}
-	</div>
+	<!-- NO HANDLER: Show raw bech32. Users can register generic-embedded if they want it. -->
+	<code>{bech32}</code>
 {/if}
-
-<style>
-	.embedded-loading,
-	.embedded-error,
-	.embedded-fallback {
-		padding: 0.75rem;
-		border-radius: 0.5rem;
-		border: 1px solid var(--border);
-		background: var(--muted);
-		font-size: 0.875rem;
-	}
-
-	.embedded-loading {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.loading-spinner {
-		width: 1rem;
-		height: 1rem;
-		border: 2px solid var(--primary);
-		border-top-color: transparent;
-		border-radius: 50%;
-		animation: spin 0.6s linear infinite;
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	.embedded-error {
-		color: var(--destructive);
-	}
-
-	.embedded-fallback {
-		background: var(--card);
-	}
-
-	.fallback-header {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 0.5rem;
-		font-size: 0.75rem;
-	}
-
-	.kind-badge {
-		padding: 0.25rem 0.5rem;
-		background: var(--primary);
-		color: var(--primary-foreground);
-		border-radius: 0.25rem;
-		font-weight: 600;
-	}
-
-	.event-id {
-		color: var(--muted-foreground);
-		font-family: monospace;
-	}
-
-	.fallback-content {
-		color: var(--foreground);
-		line-height: 1.5;
-		white-space: pre-wrap;
-		word-break: break-word;
-	}
-
-	.fallback-empty {
-		color: var(--muted-foreground);
-		font-style: italic;
-	}
-
-	.embedded-fallback[data-variant='compact'] {
-		padding: 0.5rem;
-		font-size: 0.8125rem;
-	}
-
-	.embedded-fallback[data-variant='compact'] .fallback-content {
-		font-size: 0.75rem;
-	}
-
-	.embedded-fallback[data-variant='inline'] {
-		padding: 0.5rem;
-		display: inline-block;
-	}
-</style>

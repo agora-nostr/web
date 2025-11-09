@@ -21,8 +21,7 @@
   import { createMediaPostModal } from '$lib/stores/createMediaPostModal.svelte';
   import { homePageFilter } from '$lib/stores/homePageFilter.svelte';
   import { page } from '$app/stores';
-    import { EventCard } from '$lib/ndk/components/event-card';
-    import EventCardClassic from '$lib/ndk/components/event-card/event-card-classic.svelte';
+    import EventCardClassic from '$lib/ndk/components/event/cards/classic/event-card-classic.svelte';
 
   type MediaFilter = 'conversations' | 'images' | 'videos' | 'articles';
   let selectedFilter = $state<MediaFilter>('conversations');

@@ -94,7 +94,7 @@
 
       if (muteList.publishStatus === 'error') {
         const error = muteList.publishError as any;
-        const relayErrors = error?.relayErrors || {};
+        const relayErrors = (error as any)?.relayErrors || {};
         const errorMessages = Object.entries(relayErrors)
           .map(([relay, err]) => `${relay}: ${err}`)
           .join('\n');

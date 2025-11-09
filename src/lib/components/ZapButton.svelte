@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { NDKEvent } from '@nostr-dev-kit/ndk';
+  import { type NDKEvent, NDKZapper } from '@nostr-dev-kit/ndk';
   import { ndk } from '$lib/ndk.svelte';
-  import { zap, getZapSender, hasZappedBy } from '@nostr-dev-kit/svelte';
+  import { getZapSender, hasZappedBy } from '@nostr-dev-kit/svelte';
   import { toast } from '$lib/stores/toast.svelte';
   import { settings } from '$lib/stores/settings.svelte';
   import ZapAmountModal from './ZapAmountModal.svelte';
@@ -48,7 +48,9 @@
     isZapping = true;
 
     try {
-      await zap(ndk, event, amount * 1000);
+      // Create a zapper instance and send the zap
+      const zapper = new NDKZapper(event, amount * 1000, "msat");
+      await zapper.zap();
       zapSuccess = true;
       setTimeout(() => zapSuccess = false, 2000);
       toast.success(`Zapped ${amount} sats!`);

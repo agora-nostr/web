@@ -1,7 +1,3 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { NDKSvelte } from '@nostr-dev-kit/svelte';
@@ -38,12 +34,6 @@
 	setContext(FOLLOW_PACK_CONTEXT_KEY, context);
 </script>
 
-<div class="follow-pack-root {className}">
+<div class="contents {className}">
 	{@render children()}
 </div>
-
-<style>
-	.follow-pack-root {
-		display: contents;
-	}
-</style>

@@ -1,7 +1,3 @@
-<!--
-	Installed from @nostr/svelte@latest
--->
-
 <script lang="ts">
 	import type { NDKSvelte } from '@nostr-dev-kit/svelte';
 	import type { Snippet } from 'svelte';
@@ -16,6 +12,7 @@
 		uploads?: MediaUploadResult[];
 		children: Snippet;
 		class?: string;
+		[key: string]: any;
 	}
 
 	let {
@@ -25,7 +22,8 @@
 		maxFiles,
 		uploads = $bindable([]),
 		children,
-		class: className
+		class: className,
+		...restProps
 	}: Props = $props();
 
 	const options: MediaUploadOptions = {
@@ -48,6 +46,6 @@
 	setContext('mediaUpload', mediaUpload);
 </script>
 
-<div class={className}>
+<div class={className} {...restProps}>
 	{@render children()}
 </div>

@@ -26,7 +26,7 @@ class MessagesStore {
         this.refreshConversations();
       });
 
-      this.messenger.on('error', (error) => {
+      this.messenger.on('error', (error: unknown) => {
         console.error('Messenger error:', error);
       });
 

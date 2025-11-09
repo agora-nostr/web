@@ -26,7 +26,7 @@
   class="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 hover:bg-primary/30 text-foreground rounded-full text-xs transition-colors"
 >
   <User.Root {ndk} {pubkey}>
-    <User.Avatar size={14} class="flex-shrink-0" />
+    <User.Avatar class="w-3.5 h-3.5 flex-shrink-0" />
   </User.Root>
   <span class="max-w-[100px] truncate">
     {displayName}
