@@ -167,7 +167,7 @@
         open = true;
       }
     }}>
-    <Dialog.Content class="md:max-w-2xl !overflow-visible">
+    <Dialog.Content class="md:max-w-2xl !overflow-visible" showCloseButton={false}>
       <!-- Header -->
       <div class="flex items-center justify-between -mx-6 -mt-6 px-4 py-3 mb-4 border-b border-border">
         <Button
@@ -185,7 +185,7 @@
         <Button
           onclick={publishNote}
           disabled={!content.trim() || isPublishing || selectedRelayUrls.length === 0}
-          class="rounded-full"
+          class="rounded-full px-6"
           size="sm"
         >
           {isPublishing ? 'Publishing...' : 'Post'}
@@ -291,19 +291,10 @@
           </div>
         </div>
       {/if}
-
-      <!-- Footer hint -->
-      <div class="-mx-6 px-4 py-3 border-t border-border">
-        <p class="text-xs text-muted-foreground">
-          Press <kbd class="px-1.5 py-0.5 bg-muted rounded text-muted-foreground">Esc</kbd> to cancel,
-          <kbd class="px-1.5 py-0.5 bg-muted rounded text-muted-foreground">⌘</kbd> +
-          <kbd class="px-1.5 py-0.5 bg-muted rounded text-muted-foreground">Enter</kbd> to post
-        </p>
-      </div>
     </Dialog.Content>
   </Dialog.Root>
 {:else}
-  <Drawer.Root {open} onOpenChange={(isOpen) => {
+  <Drawer.Root {open} onOpenChange={(isOpen: boolean) => {
       if (!isOpen) {
         handleClose();
       } else {
@@ -328,7 +319,7 @@
         <Button
           onclick={publishNote}
           disabled={!content.trim() || isPublishing || selectedRelayUrls.length === 0}
-          class="rounded-full"
+          class="rounded-full px-6"
           size="sm"
         >
           {isPublishing ? 'Publishing...' : 'Post'}
@@ -448,15 +439,6 @@
           </div>
         </div>
       {/if}
-
-      <!-- Footer hint -->
-      <div class="px-4 py-3 border-t border-border shrink-0">
-        <p class="text-xs text-muted-foreground">
-          Press <kbd class="px-1.5 py-0.5 bg-muted rounded text-muted-foreground">Esc</kbd> to cancel,
-          <kbd class="px-1.5 py-0.5 bg-muted rounded text-muted-foreground">⌘</kbd> +
-          <kbd class="px-1.5 py-0.5 bg-muted rounded text-muted-foreground">Enter</kbd> to post
-        </p>
-      </div>
     </Drawer.Content>
   </Drawer.Root>
 {/if}
