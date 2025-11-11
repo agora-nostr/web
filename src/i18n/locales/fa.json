@@ -54,7 +54,7 @@
   },
   "trades": {
     "title": "معاملات",
-    "description": "تجارت امن همتا به همتا با حفاظت از سپرده",
+    "description": "تجارت امن همتا به همتا بر اساس اعتبار",
     "noTrades": "هنوز هیچ معامله‌ای وجود ندارد. برای شروع معامله، نیازمندی‌ها را مرور کنید!",
     "browseClassifieds": "مرور نیازمندی‌ها",
     "statuses": {
@@ -318,8 +318,8 @@
       },
       "p2p": {
         "title": "P2P Trading",
-        "description": "Trade directly with verified members. Escrow protected.",
-        "escrowProtected": "Escrow protected"
+        "description": "Trade directly with trusted community members.",
+        "reputationBased": "بر اساس اعتبار"
       },
       "news": {
         "title": "Real News",

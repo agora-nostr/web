@@ -54,7 +54,7 @@
   },
   "trades": {
     "title": "Kutengeserana",
-    "description": "Kutengeserana kwe P2P kwakachengeteka nekudzivirirwa kwe escrow",
+    "description": "Kutengeserana kwe P2P kwakachengeteka kwakatarwa pamusoro pemukurumbira",
     "noTrades": "Hapasati pane kutengeserana. Tarisa zvokutengesera kuti utange kutengeserana!",
     "browseClassifieds": "Tarisa Zvokutengesera",
     "statuses": {
@@ -318,8 +318,8 @@
       },
       "p2p": {
         "title": "P2P Trading",
-        "description": "Trade directly with verified members. Escrow protected.",
-        "escrowProtected": "Escrow protected"
+        "description": "Trade directly with trusted community members.",
+        "reputationBased": "Kwakatarwa pamusoro pemukurumbira"
       },
       "news": {
         "title": "Real News",

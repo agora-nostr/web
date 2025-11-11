@@ -94,7 +94,7 @@
 </script>
 
 {#if isDesktop.current}
-<Dialog.Root {open} onOpenChange={(newOpen) => {
+<Dialog.Root {open} onOpenChange={(newOpen: boolean) => {
     open = newOpen;
     if (!newOpen) onClose();
   }}>
@@ -144,7 +144,7 @@
             <p class="font-medium mb-1">Trade Safely</p>
             <ul class="space-y-1 text-xs">
               <li>• Never release funds before confirming payment</li>
-              <li>• Use escrow when available</li>
+              <li>• Trade with people you trust or are well-connected to</li>
               <li>• Communicate only through secure channels</li>
               <li>• Report suspicious behavior immediately</li>
             </ul>
@@ -200,7 +200,7 @@
   </Dialog.Content>
 </Dialog.Root>
 {:else}
-<Drawer.Root {open} onOpenChange={(newOpen) => {
+<Drawer.Root {open} onOpenChange={(newOpen: boolean) => {
     open = newOpen;
     if (!newOpen) onClose();
   }}>
@@ -250,7 +250,7 @@
             <p class="font-medium mb-1">Trade Safely</p>
             <ul class="space-y-1 text-xs">
               <li>• Never release funds before confirming payment</li>
-              <li>• Use escrow when available</li>
+              <li>• Trade with people you trust or are well-connected to</li>
               <li>• Communicate only through secure channels</li>
               <li>• Report suspicious behavior immediately</li>
             </ul>

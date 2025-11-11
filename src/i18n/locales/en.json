@@ -54,7 +54,7 @@
   },
   "trades": {
     "title": "Trades",
-    "description": "Secure P2P trading with escrow protection",
+    "description": "Secure P2P trading based on reputation",
     "noTrades": "No trades yet. Browse classifieds to start trading!",
     "browseClassifieds": "Browse Classifieds",
     "statuses": {
@@ -361,6 +361,27 @@
     }
   },
   "onboarding": {
+    "step1Community": {
+      "title": "Your Voice Matters",
+      "subtitle": "Join a community where every voice counts. Connect with leaders, share stories, and build the future together.",
+      "titleMobile": "Your Voice Matters",
+      "subtitleMobile": "Choose your community to connect with local voices",
+      "chooseCommunity": "Choose Your Community",
+      "selectDescription": "Select where you want to connect and contribute",
+      "communityLeaders": "community leaders",
+      "continue": "Continue"
+    },
+    "step2FollowPacks": {
+      "quote": "We're not just surviving—we're building the future our community deserves. One voice at a time.",
+      "quoteName": "María Rodríguez",
+      "quoteTitle": "Community Organizer · Caracas",
+      "title": "Build Your Network",
+      "subtitle": "Follow curated packs from the {community} community",
+      "loading": "Loading follow packs...",
+      "noPacksAvailable": "No follow packs available for this community yet",
+      "continue": "Continue",
+      "skip": "Skip"
+    },
     "step3Features": {
       "title": "What You Can Do Here",
       "subtitle": "Your community, your marketplace, your news — all in one place",
@@ -375,8 +396,8 @@
       },
       "p2p": {
         "title": "P2P Trading",
-        "description": "Trade directly with verified members. Escrow protected.",
-        "escrowProtected": "Escrow protected"
+        "description": "Trade directly with trusted community members.",
+        "reputationBased": "Reputation based"
       },
       "news": {
         "title": "Real News",
@@ -402,6 +423,12 @@
         "checking": "Checking availability...",
         "available": "✓ Username is available",
         "notAvailable": "Username is not available"
+      },
+      "upload": {
+        "notAvailable": "Upload not available. Please ensure you are logged in.",
+        "invalidFile": "Please select an image file",
+        "sizeTooLarge": "Image size must be less than 5MB",
+        "failed": "Failed to upload banner. Please try again."
       }
     },
     "step5Introduction": {
@@ -464,6 +491,10 @@
         "earnSats": "Share your stories and earn sats for valuable content"
       },
       "enterAgora": "Enter Agora"
+    },
+    "pictureUpload": {
+      "invalidFile": "Please select an image file",
+      "uploadFailed": "Upload failed"
     }
   }
 }

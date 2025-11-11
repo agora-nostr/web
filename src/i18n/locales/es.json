@@ -54,7 +54,7 @@
   },
   "trades": {
     "title": "Intercambios",
-    "description": "Intercambios P2P seguros con protección de depósito",
+    "description": "Intercambios P2P seguros basados en reputación",
     "noTrades": "No hay intercambios todavía. ¡Explora los clasificados para empezar!",
     "browseClassifieds": "Explorar Clasificados",
     "statuses": {
@@ -317,8 +317,8 @@
       },
       "p2p": {
         "title": "Intercambio P2P",
-        "description": "Intercambia directamente con miembros verificados. Protegido por depósito en garantía.",
-        "escrowProtected": "Protegido por depósito en garantía"
+        "description": "Intercambia directamente con miembros confiables de la comunidad.",
+        "reputationBased": "Basado en reputación"
       },
       "news": {
         "title": "Noticias Reales",

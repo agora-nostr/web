@@ -54,7 +54,7 @@
   },
   "trades": {
     "title": "ការជួញដូរ",
-    "description": "ការជួញដូរ P2P ប្រកបដោយសុវត្ថិភាពជាមួយនឹងការការពារ escrow",
+    "description": "ការជួញដូរ P2P ប្រកបដោយសុវត្ថិភាពផ្អែកលើកេរ្តិ៍ឈ្មោះ",
     "noTrades": "មិនទាន់មានការជួញដូរណាមួយទេ។ រកមើលការផ្សាយពាណិជ្ជកម្មដើម្បីចាប់ផ្តើមជួញដូរ!",
     "browseClassifieds": "រកមើលការផ្សាយពាណិជ្ជកម្ម",
     "statuses": {
@@ -318,8 +318,8 @@
       },
       "p2p": {
         "title": "P2P Trading",
-        "description": "Trade directly with verified members. Escrow protected.",
-        "escrowProtected": "Escrow protected"
+        "description": "Trade directly with trusted community members.",
+        "reputationBased": "ផ្អែកលើកេរ្តិ៍ឈ្មោះ"
       },
       "news": {
         "title": "Real News",
