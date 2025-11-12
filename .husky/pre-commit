@@ -1,0 +1,101 @@
+#!/usr/bin/env sh
+
+# Pre-commit hook that uses Claude CLI to review changes
+# Set ENABLE_AI_REVIEW=1 in your environment to enable this check
+# Example: ENABLE_AI_REVIEW=1 git commit -m "your message"
+
+if [ "$ENABLE_AI_REVIEW" != "1" ]; then
+  echo "✓ AI review skipped (set ENABLE_AI_REVIEW=1 to enable)"
+  exit 0
+fi
+
+echo "🤖 Running Claude AI pre-commit review..."
+
+# Get staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "✓ No files to review"
+  exit 0
+fi
+
+# Get the diff of staged changes
+DIFF=$(git diff --cached)
+
+# Create the review prompt
+PROMPT="You are a code reviewer for a Svelte/SvelteKit + Nostr application.
+
+Review these staged changes and check for:
+
+1. **Styling violations**:
+   - Hardcoded hex colors (should use theme tokens like text-foreground, bg-background)
+   - @apply directives (deprecated in Tailwind v4)
+   - Unnecessary :global() usage
+   - Inconsistent spacing values
+
+2. **Code quality issues**:
+   - Unused variables or imports
+   - Console logs left in production code
+   - Missing error handling
+   - Security vulnerabilities (XSS, injection)
+
+3. **Nostr/NDK specific**:
+   - Incorrect event kind numbers (e.g., GenericReply is kind 1111, not 1)
+   - Improper event publishing patterns
+
+Rate issues with:
+- **BLOCKING**: Must fix before commit
+- **WARNING**: Should fix soon
+- **INFO**: Nice to fix
+
+If you find BLOCKING issues, start your response with 'BLOCKING ISSUES FOUND'.
+If no issues found, respond with 'No issues found'.
+
+Staged files:
+$STAGED_FILES
+
+Changes:
+\`\`\`diff
+$DIFF
+\`\`\`"
+
+# Run Claude CLI to analyze the changes
+echo "📝 Analyzing changes with Claude..."
+REVIEW_RESULT=$(echo "$PROMPT" | claude 2>&1)
+
+# Check if Claude CLI command succeeded
+if [ $? -ne 0 ]; then
+  echo "⚠️  Warning: Claude CLI failed"
+  echo "Proceeding with commit..."
+  exit 0
+fi
+
+# Check for BLOCKING issues
+if echo "$REVIEW_RESULT" | grep -qi "BLOCKING ISSUES FOUND"; then
+  echo ""
+  echo "❌ BLOCKING ISSUES FOUND:"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "$REVIEW_RESULT"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "Please fix the BLOCKING issues and try again."
+  echo "To skip this check: git commit --no-verify"
+  exit 1
+fi
+
+# Check if no issues were found
+if echo "$REVIEW_RESULT" | grep -qi "No issues found"; then
+  echo "✓ No issues found - changes look good!"
+  exit 0
+fi
+
+# Show the review if there are any issues
+echo ""
+echo "💡 Review suggestions:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "$REVIEW_RESULT"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Proceeding with commit..."
+
+exit 0

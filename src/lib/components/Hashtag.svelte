@@ -138,7 +138,7 @@
 <style>
   /* Inline hashtag styles */
   .hashtag-inline {
-    color: var(--hashtag-color, #fb923c);
+    color: var(--hashtag-color, var(--color-primary));
     text-decoration: none;
     font-weight: 500;
     transition: opacity 0.2s;
@@ -155,8 +155,8 @@
     align-items: center;
     gap: 0.125rem;
     padding: 0.25rem 0.625rem;
-    background: var(--hashtag-background, #fed7aa);
-    border: 1px solid var(--hashtag-border, #fdba74);
+    background: var(--hashtag-background, var(--color-primary-100));
+    border: 1px solid var(--hashtag-border, var(--color-primary-200));
     border-radius: 9999px;
     font-size: 0.875rem;
     font-weight: 500;
@@ -166,40 +166,18 @@
   }
 
   .hashtag-pill:hover {
-    background: var(--hashtag-hover-background, #fdba74);
-    border-color: var(--hashtag-hover-border, #fb923c);
+    background: var(--hashtag-hover-background, var(--color-primary-200));
+    border-color: var(--hashtag-hover-border, var(--color-primary));
     transform: translateY(-1px);
   }
 
   .hashtag-prefix {
-    color: var(--hashtag-prefix-color, #fb923c);
+    color: var(--hashtag-prefix-color, var(--color-primary));
     font-weight: 400;
   }
 
   .hashtag-text {
-    color: var(--hashtag-text-color, #ea580c);
+    color: var(--hashtag-text-color, var(--color-primary-700));
   }
 
-  /* Dark mode support */
-  :global(.dark) .hashtag-pill {
-    background: var(--hashtag-background, #431407);
-    border-color: var(--hashtag-border, #7c2d12);
-  }
-
-  :global(.dark) .hashtag-pill:hover {
-    background: var(--hashtag-hover-background, #7c2d12);
-    border-color: var(--hashtag-hover-border, #ea580c);
-  }
-
-  :global(.dark) .hashtag-inline {
-    color: var(--hashtag-color, #fb923c);
-  }
-
-  :global(.dark) .hashtag-prefix {
-    color: var(--hashtag-prefix-color, #fdba74);
-  }
-
-  :global(.dark) .hashtag-text {
-    color: var(--hashtag-text-color, #fb923c);
-  }
 </style>

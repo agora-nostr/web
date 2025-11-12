@@ -274,81 +274,170 @@
   }
 
   :global(.article-content h1) {
-    @apply text-3xl sm:text-4xl font-bold mt-12 mb-6 font-serif;
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+    font-family: var(--font-serif);
     color: hsl(var(--foreground));
+  }
+
+  @media (min-width: 640px) {
+    :global(.article-content h1) {
+      font-size: 2.25rem;
+    }
   }
 
   :global(.article-content h2) {
-    @apply text-2xl sm:text-3xl font-bold mt-10 mb-5 font-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 2.5rem;
+    margin-bottom: 1.25rem;
+    font-family: var(--font-serif);
     color: hsl(var(--foreground));
+  }
+
+  @media (min-width: 640px) {
+    :global(.article-content h2) {
+      font-size: 1.875rem;
+    }
   }
 
   :global(.article-content h3) {
-    @apply text-xl sm:text-2xl font-bold mt-8 mb-4 font-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-family: var(--font-serif);
     color: hsl(var(--foreground));
   }
 
+  @media (min-width: 640px) {
+    :global(.article-content h3) {
+      font-size: 1.5rem;
+    }
+  }
+
   :global(.article-content p) {
-    @apply text-lg leading-[1.8] mb-6 font-serif;
+    font-size: 1.125rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+    font-family: var(--font-serif);
     color: hsl(var(--foreground));
   }
 
   :global(.article-content a) {
-    @apply text-blue-600 dark:text-blue-400 underline underline-offset-2 hover:text-blue-800 dark:hover:text-blue-300 transition-colors;
+    color: oklch(0.55 0.2 250);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.15s;
+  }
+
+  :global(.article-content a:hover) {
+    color: oklch(0.45 0.2 250);
+  }
+
+  :global(.dark .article-content a) {
+    color: oklch(0.7 0.15 250);
+  }
+
+  :global(.dark .article-content a:hover) {
+    color: oklch(0.8 0.15 250);
   }
 
   :global(.article-content img) {
-    @apply w-full rounded-lg shadow-sm my-8;
+    width: 100%;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
   }
 
   :global(.article-content ul) {
-    @apply list-disc pl-6 mb-6 space-y-2 text-lg font-serif;
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.125rem;
+    font-family: var(--font-serif);
     color: hsl(var(--foreground));
+  }
+
+  :global(.article-content ul > * + *) {
+    margin-top: 0.5rem;
   }
 
   :global(.article-content ol) {
-    @apply list-decimal pl-6 mb-6 space-y-2 text-lg font-serif;
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.125rem;
+    font-family: var(--font-serif);
     color: hsl(var(--foreground));
   }
 
+  :global(.article-content ol > * + *) {
+    margin-top: 0.5rem;
+  }
+
   :global(.article-content li) {
-    @apply leading-[1.8];
+    line-height: 1.8;
   }
 
   :global(.article-content blockquote) {
-    @apply border-l-4 pl-6 my-8 italic text-xl font-serif leading-[1.8];
+    border-left: 4px solid;
     border-color: hsl(var(--border));
+    padding-left: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+    font-size: 1.25rem;
+    font-family: var(--font-serif);
+    line-height: 1.8;
     color: hsl(var(--muted-foreground));
   }
 
   :global(.article-content code) {
-    @apply px-1.5 py-0.5 rounded text-sm font-mono;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     background-color: hsl(var(--muted));
     color: hsl(var(--foreground));
   }
 
   :global(.article-content pre) {
-    @apply mb-6 overflow-hidden rounded-lg;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    border-radius: 0.5rem;
   }
 
   :global(.article-content pre code) {
-    @apply block border rounded-lg p-4 overflow-x-auto text-sm font-mono leading-relaxed;
-    background-color: hsl(var(--background));
+    display: block;
+    border: 1px solid;
     border-color: hsl(var(--border));
+    border-radius: 0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    line-height: 1.625;
+    background-color: hsl(var(--background));
   }
 
   :global(.article-content hr) {
-    @apply my-12 border-t;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    border-top: 1px solid;
     border-color: hsl(var(--border));
   }
 
   :global(.article-content strong) {
-    @apply font-bold;
+    font-weight: 700;
     color: hsl(var(--foreground));
   }
 
   :global(.article-content em) {
-    @apply italic;
+    font-style: italic;
   }
 
   /* Nostr highlight styles */
@@ -356,8 +445,8 @@
     background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
     border-bottom: 2px solid color-mix(in srgb, var(--color-primary) 60%, transparent);
     color: hsl(var(--foreground));
-    @apply transition-all duration-200;
-    @apply cursor-pointer;
+    transition: all 0.2s;
+    cursor: pointer;
     padding: 0.125rem 0;
     pointer-events: auto;
     user-select: none;

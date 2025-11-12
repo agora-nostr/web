@@ -25,6 +25,7 @@
   const displayName = $derived(profile?.name || profile?.displayName || 'Anon');
 
   function logout() {
+    if (!ndk.$sessions) return;
     ndk.$sessions.logout();
   }
 </script>

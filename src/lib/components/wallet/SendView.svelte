@@ -10,7 +10,7 @@
   let token = $state<string | null>(null);
   let error = $state('');
 
-  const balance = $derived(wallet.balance || 0);
+  const balance = $derived(wallet?.balance || 0);
   const amountNum = $derived(Number(amount) || 0);
   const canSend = $derived(amountNum > 0 && amountNum <= balance && !isSending);
 
@@ -20,6 +20,10 @@
 
   async function handleSend() {
     if (!canSend) return;
+    if (!wallet) {
+      error = 'Wallet not available';
+      return;
+    }
 
     isSending = true;
     error = '';

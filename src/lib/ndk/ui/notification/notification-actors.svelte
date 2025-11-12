@@ -14,14 +14,18 @@
 		size?: number;
 		spacing?: 'tight' | 'normal' | 'loose';
 		snippet?: Snippet<[{ pubkeys: string[]; count: number }]>;
+		children?: Snippet;
+		class?: string;
 	}
 
-	let { max = 5, size = 32, spacing = 'tight', snippet }: Props = $props();
+	let { max = 5, size = 32, spacing = 'tight', snippet, children, class: className }: Props = $props();
 
 	const context = getContext<NotificationContext>(NOTIFICATION_CONTEXT_KEY);
 </script>
 
-{#if snippet}
+{#if children}
+	{@render children()}
+{:else if snippet}
 	{@render snippet({ pubkeys: context.actors, count: context.actors.length })}
 {:else}
 	<AvatarGroup ndk={context.ndk} pubkeys={context.actors} {max} {size} {spacing} />

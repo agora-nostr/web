@@ -22,9 +22,10 @@
 		renderer?: ContentRenderer;
 		snippet?: Snippet<[{ event: NDKEvent }]>;
 		class?: string;
+		children?: Snippet;
 	}
 
-	let { renderer, snippet, class: className }: Props = $props();
+	let { renderer, snippet, class: className, children }: Props = $props();
 
 	const context = getContext<NotificationContext>(NOTIFICATION_CONTEXT_KEY);
 
@@ -45,7 +46,9 @@
 	setContext(CONTENT_RENDERER_CONTEXT_KEY, { get renderer() { return activeRenderer } });
 </script>
 
-{#if snippet}
+{#if children}
+	{@render children()}
+{:else if snippet}
 	{@render snippet({ event: context.targetEvent })}
 {:else}
 	<EmbeddedEvent

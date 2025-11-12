@@ -10,7 +10,7 @@
       minAmount: number;
       maxAmount: number;
     };
-    onChange: (filters: any) => void;
+    onChange: (filters: TradeFiltersProps['filters']) => void;
   }
 
   let { filters, onChange }: TradeFiltersProps = $props();

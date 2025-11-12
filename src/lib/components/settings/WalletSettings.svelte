@@ -62,6 +62,11 @@
   }
 
   async function saveChanges() {
+    if (!wallet) {
+      showError(new Error('Wallet not available'));
+      return;
+    }
+
     clearMessages();
     isSaving = true;
 

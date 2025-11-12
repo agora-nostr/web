@@ -17,6 +17,7 @@
     variant?: 'default' | 'thread-parent' | 'thread-main' | 'thread-reply';
     showThreadLine?: boolean;
     onNavigate?: () => void;
+    compact?: boolean;
   }
 
   const {
@@ -24,7 +25,8 @@
     showActions = true,
     variant = 'default',
     showThreadLine = false,
-    onNavigate
+    onNavigate,
+    compact = false
   }: Props = $props();
 
   let showReplyModal = $state(false);

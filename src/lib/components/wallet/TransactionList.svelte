@@ -2,7 +2,7 @@
   import { ndk } from '$lib/ndk.svelte';
 
   const wallet = ndk.$wallet;
-  const transactions = $derived(wallet.transactions || []);
+  const transactions = $derived(wallet?.transactions || []);
 
   function formatDate(timestamp: number): string {
     const date = new Date(timestamp * 1000);
@@ -92,11 +92,11 @@
     min-width: 24px;
     height: 24px;
     padding: 0 0.5rem;
-    background: rgba(249, 115, 22, 0.15);
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
     border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 600;
-    color: #f97316;
+    color: var(--color-primary);
   }
 
   .empty-state {
@@ -161,13 +161,13 @@
   }
 
   .tx-icon.receive {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
-    color: #10b981;
+    background: linear-gradient(135deg, oklch(0.7 0.15 160 / 0.2) 0%, oklch(0.6 0.15 160 / 0.2) 100%);
+    color: oklch(0.7 0.15 160);
   }
 
   .tx-icon.send {
-    background: linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.2) 100%);
-    color: #f97316;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 20%, transparent) 0%, color-mix(in srgb, var(--color-primary-700) 20%, transparent) 100%);
+    color: var(--color-primary);
   }
 
   .tx-info {
@@ -206,10 +206,10 @@
   }
 
   .tx-amount.receive {
-    color: #10b981;
+    color: oklch(0.7 0.15 160);
   }
 
   .tx-amount.send {
-    color: #f97316;
+    color: var(--color-primary);
   }
 </style>

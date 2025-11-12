@@ -394,7 +394,7 @@
                 : 'bg-background text-muted-foreground hover:bg-card'
             }`}
           >
-            {isOwnProfile ? $t('profile.tabs.byYou') : $t('profile.tabs.byUser', { username: profile?.name || profile?.displayName || pubkey.slice(0, 8) })}
+            {isOwnProfile ? $t('profile.tabs.byYou') : $t('profile.tabs.byUser', { username: profile?.name || profile?.displayName || pubkey?.slice(0, 8) || 'user' } as any)}
           </button>
           <button
             onclick={() => packFilter = 'appears'}
@@ -404,7 +404,7 @@
                 : 'bg-background text-muted-foreground hover:bg-card'
             }`}
           >
-            {isOwnProfile ? $t('profile.tabs.withYou') : $t('profile.tabs.withUser', { username: profile?.name || profile?.displayName || pubkey.slice(0, 8) })}
+            {isOwnProfile ? $t('profile.tabs.withYou') : $t('profile.tabs.withUser', { username: profile?.name || profile?.displayName || pubkey?.slice(0, 8) || 'user' } as any)}
           </button>
         </div>
 
@@ -419,11 +419,11 @@
             {packFilter === 'created'
               ? (isOwnProfile
                   ? $t('profile.emptyStates.noPacksCreatedOwn')
-                  : $t('profile.emptyStates.noPacksCreatedUser', { username: profile?.name || 'user' }))
+                  : $t('profile.emptyStates.noPacksCreatedUser', { username: profile?.name || 'user' } as any))
               : packFilter === 'appears'
               ? (isOwnProfile
                   ? $t('profile.emptyStates.noPacksAppearsOwn')
-                  : $t('profile.emptyStates.noPacksAppearsUser', { username: profile?.name || 'user' }))
+                  : $t('profile.emptyStates.noPacksAppearsUser', { username: profile?.name || 'user' } as any))
               : $t('profile.emptyStates.noPacksFound')}
           </div>
         {/if}

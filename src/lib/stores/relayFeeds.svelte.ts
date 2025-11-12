@@ -1,14 +1,14 @@
 import { NDKRelayFeedList } from '@nostr-dev-kit/ndk';
-import type NDK from '@nostr-dev-kit/ndk';
+import type { NDKSvelte } from '@nostr-dev-kit/svelte';
 
 class RelayFeedsStore {
-  constructor(private ndk: NDK) {}
+  constructor(private ndk: NDKSvelte) {}
 
   get list(): NDKRelayFeedList | null {
-    const session = this.ndk.$sessions;
-    if (!session) return null;
+    const relayFeedEvent = this.ndk.$sessions?.getSessionEvent(10012);
+    if (!relayFeedEvent) return null;
 
-    return session.relayFeedList || null;
+    return relayFeedEvent as NDKRelayFeedList;
   }
 
   get relays(): string[] {
@@ -55,11 +55,6 @@ class RelayFeedsStore {
     list.tags.push(['relay', relayUrl]);
 
     await list.publish();
-
-    const session = this.ndk.$sessions;
-    if (session) {
-      session.relayFeedList = list;
-    }
   }
 
   async removeRelay(relayUrl: string): Promise<void> {
@@ -87,11 +82,6 @@ class RelayFeedsStore {
     list.tags.push(['a', relaySetNaddr]);
 
     await list.publish();
-
-    const session = this.ndk.$sessions;
-    if (session) {
-      session.relayFeedList = list;
-    }
   }
 
   async removeRelaySet(relaySetNaddr: string): Promise<void> {
@@ -107,6 +97,6 @@ class RelayFeedsStore {
   }
 }
 
-export function createRelayFeedsStore(ndk: NDK) {
+export function createRelayFeedsStore(ndk: NDKSvelte) {
   return new RelayFeedsStore(ndk);
 }

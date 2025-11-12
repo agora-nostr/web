@@ -11,13 +11,12 @@ export default defineConfig({
   resolve: {
     conditions: ['svelte', 'browser', 'import', 'default'],
     alias: {
-      'svelte-toolbelt': '/Users/pablofernandez/tenex/Voces-v53qhx/node_modules/svelte-toolbelt/dist/index.js',
-      'runed': '/Users/pablofernandez/tenex/Voces-v53qhx/node_modules/runed/dist/index.js'
+      'svelte-toolbelt': '/Users/pablofernandez/tenex/Voces-v53qhx/node_modules/svelte-toolbelt/dist/index.js'
     },
     mainFields: ['svelte', 'browser', 'module', 'jsnext:main', 'jsnext', 'main']
   },
   ssr: {
-    noExternal: ['svelte-toolbelt', 'runed']
+    noExternal: ['svelte-toolbelt', '@nostr-dev-kit/blossom']
   },
   optimizeDeps: {
     exclude: ['@nostr-dev-kit/cache-sqlite-wasm']

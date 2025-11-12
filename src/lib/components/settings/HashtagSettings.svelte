@@ -7,6 +7,10 @@
 
   async function addHashtag() {
     if (!newHashtag.trim()) return;
+    if (!hashtagInterests) {
+      error = 'Hashtag interests not available';
+      return;
+    }
 
     isAdding = true;
     error = null;
@@ -23,6 +27,11 @@
   }
 
   async function removeHashtag(hashtag: string) {
+    if (!hashtagInterests) {
+      error = 'Hashtag interests not available';
+      return;
+    }
+
     try {
       await hashtagInterests.removeHashtag(hashtag);
     } catch (err) {
@@ -81,7 +90,11 @@
   <div class="space-y-3">
     <h3 class="text-sm font-medium text-muted-foreground">Followed Hashtags</h3>
 
-    {#if hashtagInterests.isLoading}
+    {#if !hashtagInterests}
+      <div class="text-center py-8 text-muted-foreground">
+        <p class="text-sm">Hashtag interests not available</p>
+      </div>
+    {:else if hashtagInterests.isLoading}
       <div class="flex items-center justify-center py-8 text-muted-foreground">
         <svg class="w-5 h-5 animate-spin mr-2" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -2,11 +2,13 @@ import NDKCacheSqliteWasm from "@nostr-dev-kit/cache-sqlite-wasm";
 import { createNDK } from '@nostr-dev-kit/svelte';
 import { LocalStorage } from '@nostr-dev-kit/sessions';
 import { NDKEvent, NDKKind, NDKBlossomList, NDKInterestList, NDKRelayFeedList } from '@nostr-dev-kit/ndk';
-import { browser } from '$app/environment';
+// import { browser } from '$app/environment';
 import { createAuthPolicyWithConfirmation } from './relayAuthPolicy.svelte';
 import { createHashtagInterestsStore } from './stores/hashtagInterests.svelte';
 import { createRelayFeedsStore } from './stores/relayFeeds.svelte';
 import { CACHE_WORKER_VERSION } from './worker-version';
+
+const browser = true;
 
 const DEFAULT_RELAYS = [
   'wss://relay.primal.net',

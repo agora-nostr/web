@@ -81,7 +81,7 @@
       icon: 'wallet',
       label: 'Wallet',
       active: (path) => path.startsWith('/wallet'),
-      rightContent: () => wallet.balance > 0 ? formatBalance(wallet.balance) : null
+      rightContent: () => wallet?.balance && wallet.balance > 0 ? formatBalance(wallet.balance) : null
     },
     {
       type: 'link',

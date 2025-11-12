@@ -14,7 +14,7 @@
 
   let searchValue = $state('');
 
-  let followsList = $derived(Array.from(ndk.$sessions.follows));
+  let followsList = $derived(Array.from(ndk.$sessions?.follows ?? []));
 
   // Get available follows (excluding already selected trustees)
   const availableFollows = $derived.by(() =>

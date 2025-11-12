@@ -1,5 +1,5 @@
 <script lang="ts">
-  import QRCode from 'qrcode';
+  import QRCode from "qrcode";
 
   interface Props {
     value: string;
@@ -20,15 +20,15 @@
 
     try {
       // Create a temporary element to get computed RGB values from CSS variables
-      const tempEl = document.createElement('div');
-      tempEl.style.display = 'none';
+      const tempEl = document.createElement("div");
+      tempEl.style.display = "none";
       document.body.appendChild(tempEl);
 
       // Apply CSS variables and get computed colors
-      tempEl.style.color = 'var(--color-foreground)';
+      tempEl.style.color = "var(--color-foreground)";
       const foreground = getComputedStyle(tempEl).color;
 
-      tempEl.style.color = 'var(--color-background)';
+      tempEl.style.color = "var(--color-background)";
       const background = getComputedStyle(tempEl).color;
 
       document.body.removeChild(tempEl);
@@ -37,23 +37,14 @@
         width: size,
         margin: 2,
         color: {
-          dark: foreground || '#000000',
-          light: background || '#ffffff'
-        }
+          dark: "#000000",
+          light: "#ffffff",
+        },
       });
     } catch (err) {
-      console.error('QR Code generation failed:', err);
+      console.error("QR Code generation failed:", err);
     }
   }
 </script>
 
 <canvas bind:this={canvas}></canvas>
-
-<style>
-  canvas {
-    border-radius: 12px;
-    background: white;
-    padding: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-</style>

@@ -13,16 +13,19 @@
 	interface Props {
 		snippet?: Snippet<[{ timestamp: number; formatted: string }]>;
 		class?: string;
+		children?: Snippet;
 	}
 
-	let { snippet, class: className }: Props = $props();
+	let { snippet, class: className, children }: Props = $props();
 
 	const context = getContext<NotificationContext>(NOTIFICATION_CONTEXT_KEY);
 
 	const formatted = createTimeAgo(context.notification.mostRecentAt);
 </script>
 
-{#if snippet}
+{#if children}
+	{@render children()}
+{:else if snippet}
 	{@render snippet({
 		timestamp: context.notification.mostRecentAt,
 		formatted

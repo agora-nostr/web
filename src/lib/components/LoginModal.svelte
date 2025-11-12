@@ -18,6 +18,11 @@
       return;
     }
 
+    if (!ndk.$sessions) {
+      error = 'Sessions not available';
+      return;
+    }
+
     try {
       isLoggingIn = true;
       error = '';
@@ -34,6 +39,11 @@
   async function loginWithNsec() {
     if (!nsecInput.trim()) {
       error = 'Please enter your nsec';
+      return;
+    }
+
+    if (!ndk.$sessions) {
+      error = 'Sessions not available';
       return;
     }
 

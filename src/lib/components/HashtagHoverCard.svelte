@@ -15,13 +15,13 @@
   const { hashtag, isVisible, position, onMouseEnter, onMouseLeave }: Props = $props();
 
   // Check if hashtag is followed
-  const isFollowing = $derived(hashtagInterests.interests.includes(hashtag.toLowerCase()));
+  const isFollowing = $derived(hashtagInterests?.interests.includes(hashtag.toLowerCase()) ?? false);
 
   let isTogglingFollow = $state(false);
 
   async function toggleFollow(e: MouseEvent) {
     e.stopPropagation();
-    if (isTogglingFollow) return;
+    if (!hashtagInterests || isTogglingFollow) return;
 
     isTogglingFollow = true;
     try {

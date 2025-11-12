@@ -48,7 +48,7 @@
 
       <!-- Hashtags scroll container OR Title -->
       <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1 min-w-0 max-w-full">
-      {#if hashtagInterests.interests.length > 0}
+      {#if hashtagInterests && hashtagInterests.interests.length > 0}
         {#each hashtagInterests.interests as hashtag}
           <button
             onclick={() => hashtagFilter.toggleHashtag(hashtag)}

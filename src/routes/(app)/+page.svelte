@@ -284,7 +284,7 @@
   // Get the title to display in the header
   const headerTitle = $derived.by(() => {
     // If showing hashtag filters, return null to show hashtags instead
-    if (hashtagInterests.interests.length > 0) return null;
+    if (hashtagInterests?.interests.length > 0) return null;
 
     // If a relay URL parameter is present, show relay name
     if (relayParam) {

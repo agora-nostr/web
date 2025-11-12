@@ -28,6 +28,8 @@
 
   const notesFeed = createLazyFeed(ndk, () => {
     const currentHashtag = hashtag;
+    if (!currentHashtag) return { filters: [] };
+
     const filter: NDKFilter = {
       kinds: [NDKKind.Text],
       '#t': [currentHashtag.toLowerCase()],
@@ -45,6 +47,8 @@
 
   const mediaFeed = createLazyFeed(ndk, () => {
     const currentHashtag = hashtag;
+    if (!currentHashtag) return { filters: [] };
+
     const filter: NDKFilter = {
       kinds: [NDKKind.Text, NDKKind.Image, NDKKind.Video, NDKKind.ShortVideo],
       '#t': [currentHashtag.toLowerCase()],
@@ -62,6 +66,8 @@
 
   const articlesFeed = createLazyFeed(ndk, () => {
     const currentHashtag = hashtag;
+    if (!currentHashtag) return { filters: [] };
+
     const filter: NDKFilter = {
       kinds: [NDKKind.Article],
       '#t': [currentHashtag.toLowerCase()],

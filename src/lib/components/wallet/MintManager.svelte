@@ -1,10 +1,10 @@
 <script lang="ts">
   import { ndk } from '$lib/ndk.svelte';
 
-  const mints = $derived(ndk.$wallet.mints);
+  const mints = $derived(ndk.$wallet?.mints ?? []);
   const mintBalances = $derived.by(() => {
     const balances = new Map<string, number>();
-    ndk.$wallet.mintBalances.forEach(mint => {
+    ndk.$wallet?.mintBalances.forEach(mint => {
       balances.set(mint.url, mint.balance);
     });
     return balances;
@@ -15,6 +15,11 @@
   let error = $state<string | null>(null);
 
   async function addMint() {
+    if (!ndk.$wallet) {
+      error = 'Wallet not available';
+      return;
+    }
+
     if (!newMintUrl.trim()) {
       error = 'Please enter a mint URL';
       return;
@@ -43,6 +48,8 @@
   }
 
   async function removeMint(mint: string) {
+    if (!ndk.$wallet) return;
+
     if (confirm(`Remove mint: ${mint}?`)) {
       try {
         const currentMints = mints;

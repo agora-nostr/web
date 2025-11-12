@@ -22,6 +22,8 @@
   }
 
   async function handlePayInvoice(invoice: string) {
+    if (!ndk.$wallet) throw new Error('Wallet not available');
+
     try {
       await ndk.$wallet.lnPay({
         pr: invoice,

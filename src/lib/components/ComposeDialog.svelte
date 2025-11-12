@@ -92,9 +92,9 @@
       if (event.publishStatus === 'error') {
         const error = event.publishError;
         console.error('Publish error object:', error);
-        console.error('Relay errors:', error?.relayErrors);
+        console.error('Relay errors:', (error as any)?.relayErrors);
 
-        const relayErrors = error?.relayErrors || {};
+        const relayErrors = (error as any)?.relayErrors || {};
         const relayErrorEntries = Object.entries(relayErrors);
 
         if (relayErrorEntries.length > 0) {
@@ -206,7 +206,7 @@
                   @{replyToProfile.name || replyTo.pubkey.slice(0, 8)}
                 </span>
               </div>
-              <p class="text-muted-foreground text-sm line-clamp-3">
+              <p class="text-muted-foreground text-sm line-clamp-3 break-all">
                 {replyTo.content}
               </p>
             </div>

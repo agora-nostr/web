@@ -3,8 +3,8 @@
   import { NDKWalletStatus } from '@nostr-dev-kit/wallet';
 
   const wallet = ndk.$wallet;
-  const balance = $derived(wallet.balance || 0);
-  const status = $derived(wallet.status === NDKWalletStatus.READY ? 'idle' : wallet.status === NDKWalletStatus.ERROR ? 'error' : 'loading');
+  const balance = $derived(wallet?.balance || 0);
+  const status = $derived(wallet?.status === NDKWalletStatus.READY ? 'idle' : wallet?.status === NDKWalletStatus.FAILED ? 'error' : 'loading');
 
   function formatBalance(sats: number): string {
     return new Intl.NumberFormat('en-US').format(sats);
@@ -52,7 +52,7 @@
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-700) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

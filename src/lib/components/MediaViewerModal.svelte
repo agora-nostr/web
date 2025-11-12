@@ -157,7 +157,7 @@
         </div>
 
         <!-- Right side - Comments (fixed width) -->
-        <div class="w-[400px] bg-[#1a1a1a] border-l border-neutral-800 flex flex-col shrink-0">
+        <div class="w-[400px] bg-card border-l border-neutral-800 flex flex-col shrink-0">
           <!-- Header -->
           <div class="border-b border-neutral-800 p-4">
             <div class="flex items-start gap-3">
@@ -206,13 +206,13 @@
           </div>
 
           <!-- Comment form -->
-          <div class="border-t border-neutral-800 p-4 bg-[#1a1a1a]">
+          <div class="border-t border-neutral-800 p-4 bg-card">
             {#if errorMessage}
               <div class="mb-3 p-2 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm">
                 {errorMessage}
               </div>
             {/if}
-            <CommentForm article={event as any} onCommentPublished={addComment} onError={handleError} />
+            <CommentForm article={event} onCommentPublished={addComment} onError={handleError} />
           </div>
         </div>
       </div>
@@ -365,7 +365,7 @@
               {errorMessage}
             </div>
           {/if}
-          <CommentForm article={event as any} onCommentPublished={addComment} onError={handleError} />
+          <CommentForm article={event} onCommentPublished={addComment} onError={handleError} />
         </div>
       </div>
     </div>

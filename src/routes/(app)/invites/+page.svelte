@@ -23,7 +23,7 @@
 	async function loadInvites(pubkey: string) {
 		try {
 			const filter: NDKFilter = {
-				kinds: [513],
+				kinds: [513 as NDKKind],
 				authors: [pubkey]
 			};
 

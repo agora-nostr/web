@@ -15,7 +15,7 @@
   let depositInvoice = $state<string | null>(null);
   let isCheckingPayment = $state(false);
 
-  let availableMints = $derived(wallet.mints || []);
+  let availableMints = $derived(wallet?.mints || []);
   let selectedMint = $state<string>('');
 
   $effect(() => {
@@ -26,6 +26,10 @@
 
   async function handleReceive() {
     if (!tokenInput.trim()) return;
+    if (!wallet) {
+      error = 'Wallet not available';
+      return;
+    }
 
     isProcessing = true;
     error = '';
@@ -53,6 +57,11 @@
 
     if (!selectedMint) {
       error = 'No mint selected';
+      return;
+    }
+
+    if (!wallet) {
+      error = 'Wallet not available';
       return;
     }
 

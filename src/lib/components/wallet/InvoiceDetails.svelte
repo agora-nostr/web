@@ -215,7 +215,7 @@
   }
 
   .invoice-header {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark, #2563eb) 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-700) 100%);
     border-radius: 16px;
     padding: 2rem;
     text-align: center;

@@ -20,7 +20,7 @@
     listing.author.fetchProfile().then(p => { profile = p; });
   });
 
-  const isOwner = $derived(ndk.$sessions.current?.pubkey === listing?.pubkey);
+  const isOwner = $derived(ndk.$sessions?.current?.pubkey === listing?.pubkey);
 
   function handleShare() {
     if (typeof navigator.clipboard !== 'undefined') {

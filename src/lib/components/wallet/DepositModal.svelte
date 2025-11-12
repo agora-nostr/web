@@ -16,6 +16,11 @@
   let error = $state<string | null>(null);
 
   async function handleDeposit() {
+    if (!ndk.$wallet) {
+      error = 'Wallet not available';
+      return;
+    }
+
     isLoading = true;
     error = null;
 

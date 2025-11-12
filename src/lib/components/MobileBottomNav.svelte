@@ -60,6 +60,7 @@
   }
 
   function handleLogout() {
+    if (!ndk.$sessions) return;
     ndk.$sessions.logout();
     closeDropdown();
   }

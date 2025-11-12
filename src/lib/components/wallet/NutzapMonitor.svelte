@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ndk } from '$lib/ndk.svelte';
 
-  const nutzaps = $derived(ndk.$wallet.nutzaps);
+  const nutzaps = $derived(ndk.$wallet?.nutzaps ?? { pending: [], redeemed: [], failed: [] });
   const pendingCount = $derived(nutzaps.pending.length);
   const redeemedCount = $derived(nutzaps.redeemed.length);
   const failedCount = $derived(nutzaps.failed.length);

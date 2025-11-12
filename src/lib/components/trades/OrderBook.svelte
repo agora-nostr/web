@@ -44,7 +44,7 @@
       relayUrls?: string[];
       exclusiveRelay?: boolean;
     } = {
-      filters: [{ kinds: [38383], limit: 100 }],
+      filters: [{ kinds: [38383 as number], limit: 100 }],
       closeOnEose: false,
       subId: 'p2p'
     };

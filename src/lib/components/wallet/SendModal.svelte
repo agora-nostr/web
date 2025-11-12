@@ -20,6 +20,11 @@
       return;
     }
 
+    if (!ndk.$wallet) {
+      error = 'Wallet not available';
+      return;
+    }
+
     isSending = true;
     error = null;
     success = false;

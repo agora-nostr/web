@@ -51,7 +51,7 @@
 
     try {
       // Toggle reaction (uses ❤️ by default)
-      await reactionAction.toggle();
+      await reactionAction.react("+");
       console.log('Reaction toggled!');
     } catch (error) {
       console.error('Failed to react:', error);
@@ -63,7 +63,7 @@
     if (!reactionAction) return;
 
     try {
-      await reactionAction.add(emoji);
+      await reactionAction.react(emoji);
       console.log(`Added ${emoji} reaction!`);
     } catch (error) {
       console.error('Failed to add reaction:', error);
@@ -75,7 +75,7 @@
     if (!followAction) return;
 
     try {
-      await followAction.toggle();
+      await followAction.follow();
       console.log('Follow toggled!');
     } catch (error) {
       console.error('Failed to follow/unfollow:', error);
@@ -105,10 +105,10 @@
         <button
           onclick={handleReaction}
           class="btn btn-sm"
-          class:btn-primary={reactionAction.hasReacted}
+          class:btn-primary={reactionAction.get("+")?.hasReacted}
         >
-          {reactionAction.hasReacted ? '❤️' : '🤍'}
-          {reactionAction.count}
+          {reactionAction.get("+")?.hasReacted ? '❤️' : '🤍'}
+          {reactionAction.totalCount}
         </button>
 
         <button onclick={() => handleEmojiReaction('👍')} class="btn btn-sm">
@@ -120,7 +120,7 @@
         </button>
 
         <div class="text-sm text-muted-foreground">
-          Reactions: {JSON.stringify(reactionAction.reactions)}
+          Reactions: {JSON.stringify(reactionAction.all)}
         </div>
       </div>
     </div>
@@ -140,9 +140,6 @@
 
         <div class="text-sm text-muted-foreground">
           Following: {followAction.isFollowing}
-          {#if followAction.followsYou}
-            <span class="ml-2 text-primary">Follows you</span>
-          {/if}
         </div>
       </div>
     </div>
