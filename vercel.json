@@ -1,5 +1,5 @@
 {
   "framework": "sveltekit",
   "buildCommand": "npm run build",
-  "installCommand": "npm ci --prefer-offline"
+  "installCommand": "npm install --no-optional=false"
 }
