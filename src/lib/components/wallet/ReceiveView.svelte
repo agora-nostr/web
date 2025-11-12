@@ -15,7 +15,7 @@
   let depositInvoice = $state<string | null>(null);
   let isCheckingPayment = $state(false);
 
-  let availableMints = $derived(wallet.mints?.map(m => typeof m === 'string' ? m : m.url) || []);
+  let availableMints = $derived(wallet.mints || []);
   let selectedMint = $state<string>('');
 
   $effect(() => {

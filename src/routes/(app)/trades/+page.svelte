@@ -4,10 +4,11 @@
   import { ndk } from '$lib/ndk.svelte';
   import { sidebarStore } from '$lib/stores/sidebar.svelte';
   import { headerStore } from '$lib/stores/header.svelte';
-  import { createTradeModal } from '$lib/stores/createTradeModal.svelte';
   import OrderBook from '$lib/components/trades/OrderBook.svelte';
   import CreateOrderModal from '$lib/components/trades/CreateOrderModal.svelte';
   import TradeFilters from '$lib/components/trades/TradeFilters.svelte';
+
+  let showCreateOrderModal = $state(false);
 
   const filters = $derived({
     currency: $page.url.searchParams.get('currency') || 'all',
@@ -55,7 +56,7 @@
 
         {#if ndk.$currentUser}
           <button
-            onclick={() => createTradeModal.open()}
+            onclick={() => showCreateOrderModal = true}
             class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,4 +88,4 @@
 </div>
 
 <!-- Create Order Modal -->
-<CreateOrderModal bind:open={createTradeModal.show} onClose={createTradeModal.close} />
+<CreateOrderModal bind:open={showCreateOrderModal} onClose={() => showCreateOrderModal = false} />

@@ -1,15 +1,11 @@
 <script lang="ts">
-  import { MediaQuery } from 'svelte/reactivity';
   import { ndk } from '$lib/ndk.svelte';
   import type { NDKCashuDeposit } from '@nostr-dev-kit/wallet';
   import QRCode from './QRCode.svelte';
   import * as Dialog from '$lib/components/ui/dialog';
-  import * as Drawer from '$lib/components/ui/drawer';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
-
-  const isDesktop = new MediaQuery('(min-width: 768px)');
 
   let { isOpen = $bindable(false) } = $props();
 
@@ -63,8 +59,7 @@
   }
 </script>
 
-{#if isDesktop.current}
-  <Dialog.Root open={isOpen} onOpenChange={(newOpen: boolean) => {
+<Dialog.Root open={isOpen} onOpenChange={(newOpen: boolean) => {
       isOpen = newOpen;
       if (!newOpen) close();
     }}>
@@ -136,87 +131,3 @@
       </Dialog.Footer>
     </Dialog.Content>
   </Dialog.Root>
-{:else}
-  <Drawer.Root open={isOpen} onOpenChange={(newOpen: boolean) => {
-      isOpen = newOpen;
-      if (!newOpen) close();
-    }}>
-    <Drawer.Content>
-      {#if !invoice}
-        <Drawer.Header class="text-left">
-          <Drawer.Title>Deposit Funds</Drawer.Title>
-        </Drawer.Header>
-
-        <div class="px-4 space-y-4 overflow-y-auto pb-4">
-          <div>
-            <Label for="amount-mobile">Amount (sats)</Label>
-            <Input
-              id="amount-mobile"
-              type="number"
-              bind:value={amount}
-              min="1"
-              step="100"
-              class="mt-2"
-            />
-          </div>
-
-          {#if error}
-            <div class="p-3 bg-red-900/20 border border-red-800 rounded-lg text-red-400 text-sm">
-              {error}
-            </div>
-          {/if}
-        </div>
-
-        <Drawer.Footer class="pt-2">
-          <Button
-            onclick={handleDeposit}
-            disabled={isLoading || amount < 1}
-            class="w-full"
-          >
-            {isLoading ? 'Creating Invoice...' : 'Create Invoice'}
-          </Button>
-          <Button variant="outline" onclick={close} class="w-full">
-            Close
-          </Button>
-        </Drawer.Footer>
-      {:else}
-        <Drawer.Header class="text-left">
-          <Drawer.Title>Pay Invoice</Drawer.Title>
-        </Drawer.Header>
-
-        <div class="px-4 space-y-4 overflow-y-auto pb-4">
-          {#if invoice}
-            <div class="flex justify-center">
-              <QRCode value={invoice} size={256} />
-            </div>
-          {/if}
-
-          <div class="bg-card border border-border rounded-lg p-3 break-all text-sm text-muted-foreground">
-            {invoice}
-          </div>
-
-          <p class="text-center text-muted-foreground text-sm">Waiting for payment...</p>
-
-          {#if error}
-            <div class="p-3 bg-red-900/20 border border-red-800 rounded-lg text-red-400 text-sm">
-              {error}
-            </div>
-          {/if}
-        </div>
-
-        <Drawer.Footer class="pt-2">
-          <Button
-            onclick={() => copyToClipboard(invoice || '')}
-            variant="outline"
-            class="w-full"
-          >
-            Copy Invoice
-          </Button>
-          <Button variant="outline" onclick={close} class="w-full">
-            Close
-          </Button>
-        </Drawer.Footer>
-      {/if}
-    </Drawer.Content>
-  </Drawer.Root>
-{/if}

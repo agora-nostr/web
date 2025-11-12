@@ -1,4 +1,3 @@
-// @ts-expect-error - @nostr-dev-kit/messages package.json declares types but doesn't include .d.ts files in npm publish
 import { NDKMessenger, CacheModuleStorage, type NDKConversation, type NDKMessage } from '@nostr-dev-kit/messages';
 import { ndk } from '../ndk.svelte';
 
@@ -19,7 +18,7 @@ class MessagesStore {
 
       // Create messenger instance with persistent storage
       const storage = new CacheModuleStorage(ndk.cacheAdapter!, ndk.$currentUser.pubkey);
-      this.messenger = new NDKMessenger(ndk, storage);
+      this.messenger = new NDKMessenger(ndk, { storage });
 
       // Listen for new messages
       this.messenger.on('message', (message: NDKMessage) => {

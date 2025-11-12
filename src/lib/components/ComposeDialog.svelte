@@ -9,7 +9,6 @@
   import { browser } from '$app/environment';
   import { MediaQuery } from 'svelte/reactivity';
   import * as Dialog from '$lib/components/ui/dialog';
-  import * as Drawer from '$lib/components/ui/drawer';
   import { Button } from '$lib/components/ui/button';
   import { Label } from '$lib/components/ui/label';
   import ContentComposer from '$lib/components/ContentComposer.svelte';
@@ -159,15 +158,14 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-{#if isDesktop.current}
-  <Dialog.Root {open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        handleClose();
-      } else {
-        open = true;
-      }
-    }}>
-    <Dialog.Content class="md:max-w-2xl !overflow-visible" showCloseButton={false}>
+<Dialog.Root {open} onOpenChange={(isOpen) => {
+    if (!isOpen) {
+      handleClose();
+    } else {
+      open = true;
+    }
+  }}>
+  <Dialog.Content class="md:max-w-2xl !overflow-visible" hideClose={true}>
       <!-- Header -->
       <div class="flex items-center justify-between -mx-6 -mt-6 px-4 py-3 mb-4 border-b border-border">
         <Button
@@ -293,152 +291,3 @@
       {/if}
     </Dialog.Content>
   </Dialog.Root>
-{:else}
-  <Drawer.Root {open} onOpenChange={(isOpen: boolean) => {
-      if (!isOpen) {
-        handleClose();
-      } else {
-        open = true;
-      }
-    }}>
-    <Drawer.Content class="h-[95vh] flex flex-col !overflow-visible">
-      <!-- Header -->
-      <div class="flex items-center justify-between px-4 py-3 mb-4 border-b border-border shrink-0">
-        <Button
-          variant="ghost"
-          size="icon"
-          onclick={handleClose}
-          disabled={isPublishing}
-          class="h-10 w-10"
-        >
-          <Icon name="close" size="lg" />
-        </Button>
-        <Drawer.Title class="text-lg">
-          {replyTo ? 'Reply' : quotedEvent ? 'Quote' : 'Compose'}
-        </Drawer.Title>
-        <Button
-          onclick={publishNote}
-          disabled={!content.trim() || isPublishing || selectedRelayUrls.length === 0}
-          class="rounded-full px-6"
-          size="sm"
-        >
-          {isPublishing ? 'Publishing...' : 'Post'}
-        </Button>
-      </div>
-
-      <!-- Reply context (if replying) -->
-      {#if replyTo && replyToProfile}
-        <div class="px-4 py-3 mb-4 border-b border-border bg-card/50 shrink-0">
-          <div class="flex gap-3">
-            <User.Root {ndk} pubkey={replyTo.pubkey}>
-              <User.Avatar class="w-10 h-10" />
-            </User.Root>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="font-semibold text-foreground text-sm">
-                  {replyToProfile.displayName || replyToProfile.name || `${replyTo.pubkey.slice(0, 8)}...`}
-                </span>
-                <span class="text-muted-foreground text-xs">
-                  @{replyToProfile.name || replyTo.pubkey.slice(0, 8)}
-                </span>
-              </div>
-              <p class="text-muted-foreground text-sm line-clamp-3">
-                {replyTo.content}
-              </p>
-            </div>
-          </div>
-        </div>
-      {/if}
-
-      <!-- Compose area -->
-      <div class="relative mb-4 flex-1 flex flex-col overflow-hidden px-4">
-        <div class="flex-1 overflow-hidden">
-          <ContentComposer
-            bind:this={composerRef}
-            bind:value={content}
-            bind:selectedMentions
-            placeholder={replyTo ? 'Write your reply...' : quotedEvent ? 'Add your thoughts...' : "What's on your mind?"}
-            autofocus={true}
-            disabled={isPublishing}
-            class="flex-1 overflow-hidden"
-          >
-            {#snippet relayButton()}
-              <div class="relative">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onclick={() => isRelayDropdownOpen = !isRelayDropdownOpen}
-                  disabled={isPublishing}
-                  class="h-8 w-8"
-                  title="Select relays"
-                >
-                  {#if selectedRelayUrls.length <= 2 && selectedRelayUrls.length > 0}
-                    <div class="flex items-center -space-x-1">
-                      {#each selectedRelayUrls as relayUrl}
-                        {@const relay = allRelays.find(r => r.url === relayUrl)}
-                        {@const relayInfo = relay ? useRelayInfoCached(relay.url) : null}
-                        {#if relayInfo?.info?.icon}
-                          <img src={relayInfo.info.icon} alt="" class="w-5 h-5 rounded border border-background" />
-                        {:else}
-                          <div class="w-5 h-5 rounded bg-muted flex items-center justify-center border border-background">
-                            <Icon name="relay" size="xs" class="text-muted-foreground" />
-                          </div>
-                        {/if}
-                      {/each}
-                    </div>
-                  {:else}
-                    <div class="relative">
-                      <Icon name="relay" size="md" />
-                      {#if selectedRelayUrls.length > 2}
-                        <span class="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] font-medium rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5">
-                          {selectedRelayUrls.length}
-                        </span>
-                      {/if}
-                    </div>
-                  {/if}
-                </Button>
-
-                <!-- Relay Dropdown -->
-                {#if isRelayDropdownOpen}
-                  <div
-                    use:portal
-                    role="presentation"
-                    onclick={handleRelayDropdownClickOutside}
-                    onkeydown={(e) => e.key === 'Escape' && handleRelayDropdownClickOutside()}
-                    class="fixed inset-0 bg-black/50 z-[1002] flex items-center justify-center transition-opacity"
-                  >
-                    <div
-                      role="dialog"
-                      tabindex="-1"
-                      onclick={(e) => e.stopPropagation()}
-                      onkeydown={(e) => e.stopPropagation()}
-                      class="bg-popover border border-border rounded-lg shadow-xl w-80 max-h-[400px] overflow-y-auto"
-                    >
-                      <RelayPublishDropdownContent
-                        {selectedRelayUrls}
-                        bind:isProtected
-                        onToggleRelay={toggleRelay}
-                        onSelectOnly={selectOnlyRelay}
-                      />
-                    </div>
-                  </div>
-                {/if}
-              </div>
-            {/snippet}
-          </ContentComposer>
-        </div>
-      </div>
-
-      <!-- Quoted event (if quoting) -->
-      {#if quotedEvent}
-        <div class="px-4 py-3 mb-4 border-y border-border bg-muted/30 shrink-0">
-          <div class="text-xs text-muted-foreground mb-2">Quoting</div>
-          <div class="border border-border rounded-lg overflow-hidden bg-card">
-            <NoteCard event={quotedEvent} showActions={false} />
-          </div>
-        </div>
-      {/if}
-    </Drawer.Content>
-  </Drawer.Root>
-{/if}

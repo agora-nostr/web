@@ -123,7 +123,7 @@
       <div
         class="h-full bg-background dark:bg-white transition-all duration-300 ease-out"
         style={`width: ${progressPercentage}%`}
-      />
+      ></div>
     </div>
   </div>
 
@@ -132,6 +132,7 @@
     <button
       onclick={goBack}
       class="fixed top-6 left-6 z-50 w-9 h-9 bg-card border border rounded-full flex items-center justify-center hover:bg-accent transition-colors"
+      aria-label="Go back"
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -170,7 +171,7 @@
         onUpdateProfile={(d) => onboardingStore.setProfileData(d)}
         onNext={handleStep4Next}
         inviteRelay={inviteData?.inviteRelay}
-        {signer}
+        signer={signer ?? undefined}
       />
     {/if}
 

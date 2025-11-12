@@ -1,14 +1,11 @@
 <script lang="ts">
   import { ndk } from '$lib/ndk.svelte';
 
-  const mints = $derived(ndk.$wallet.mints.map(m => typeof m === 'string' ? m : m.url));
-  const mintBalances = $derived(() => {
+  const mints = $derived(ndk.$wallet.mints);
+  const mintBalances = $derived.by(() => {
     const balances = new Map<string, number>();
-    mints.forEach(mint => {
-      const walletInstance = ndk.$wallet.wallet;
-      if (walletInstance?.mintBalance) {
-        balances.set(mint, walletInstance.mintBalance(mint));
-      }
+    ndk.$wallet.mintBalances.forEach(mint => {
+      balances.set(mint.url, mint.balance);
     });
     return balances;
   });
