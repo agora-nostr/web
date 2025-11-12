@@ -156,6 +156,7 @@
           <button
             onclick={() => activeSection = null}
             class="p-2 hover:bg-neutral-200/50 dark:hover:bg-muted/30 rounded-lg transition-all"
+            aria-label="Back to settings"
           >
             <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -168,7 +169,9 @@
       </div>
 
       <div class="py-6">
-        <svelte:component this={currentSection.component} />
+        {#if currentSection.component}
+          <currentSection.component />
+        {/if}
       </div>
     {:else}
       <!-- List View -->

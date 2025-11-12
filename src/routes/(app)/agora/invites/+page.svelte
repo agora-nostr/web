@@ -2,13 +2,11 @@
 	import { ndk } from '$lib/ndk.svelte';
 	import { settings } from '$lib/stores/settings.svelte';
 	import { headerStore } from '$lib/stores/header.svelte';
-	import { createInviteModal } from '$lib/stores/createInviteModal.svelte';
 	import { isAgoraRelay } from '$lib/utils/relayUtils';
 	import { NDKSubscriptionCacheUsage } from '@nostr-dev-kit/ndk';
 	import TopInvitersPodium from '$lib/components/agora/TopInvitersPodium.svelte';
 	import IntroductionCard from '$lib/components/agora/IntroductionCard.svelte';
 	import NewMemberCard from '$lib/components/agora/NewMemberCard.svelte';
-	import CreateInviteModal from '$lib/components/invite/CreateInviteModal.svelte';
 	import PageHeader from '$lib/components/headers/PageHeader.svelte';
 
 	const selectedRelay = $derived(settings.selectedRelay);
@@ -188,9 +186,4 @@
 				{/if}
 		</div>
 	</div>
-
-	<CreateInviteModal
-		bind:isOpen={createInviteModal.show}
-		onClose={() => createInviteModal.close()}
-	/>
 {/if}

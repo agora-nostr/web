@@ -1,4 +1,4 @@
-import type { NDKRelay, NDKAuthPolicy } from '@nostr-dev-kit/ndk';
+import type { NDKRelay, NDKAuthPolicy, NDKSigner } from '@nostr-dev-kit/ndk';
 import { NDKEvent, NDKKind } from '@nostr-dev-kit/ndk';
 import type NDK from '@nostr-dev-kit/ndk';
 import createDebug from 'debug';
@@ -113,7 +113,7 @@ async function createAndSignAuthEvent(
         resolve(false);
       }, 5000); // 5 second timeout
 
-      const handleSignerReady = async (readySigner: any) => {
+      const handleSignerReady = async (readySigner: NDKSigner) => {
         clearTimeout(timeout);
         try {
           await event.sign(readySigner);

@@ -65,14 +65,14 @@
 
   // Form state
   let formData = $state({
-    name: profile?.name || '',
-    displayName: profile?.displayName || '',
-    about: profile?.about || '',
-    picture: profile?.image || '',
-    banner: profile?.banner || '',
-    nip05: profile?.nip05 || '',
-    lud16: profile?.lud16 || '',
-    website: profile?.website || '',
+    name: '',
+    displayName: '',
+    about: '',
+    picture: '',
+    banner: '',
+    nip05: '',
+    lud16: '',
+    website: '',
     hashtags: '' // Comma-separated hashtags
   });
 

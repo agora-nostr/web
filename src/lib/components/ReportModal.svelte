@@ -1,15 +1,11 @@
 <script lang="ts">
-  import { MediaQuery } from 'svelte/reactivity';
   import { NDKEvent, NDKUser } from '@nostr-dev-kit/ndk';
   import { ndk } from '$lib/ndk.svelte';
   import { toast } from '$lib/stores/toast.svelte';
   import * as Dialog from '$lib/components/ui/dialog';
-  import * as Drawer from '$lib/components/ui/drawer';
   import { Button } from '$lib/components/ui/button';
   import { Textarea } from '$lib/components/ui/textarea';
   import { t } from 'svelte-i18n';
-
-  const isDesktop = new MediaQuery('(min-width: 768px)');
 
   interface Props {
     target: NDKUser | NDKEvent;
@@ -92,8 +88,7 @@
   });
 </script>
 
-{#if isDesktop.current}
-  <Dialog.Root bind:open>
+<Dialog.Root bind:open>
     <Dialog.Content class="max-w-md">
       <Dialog.Header>
         <Dialog.Title>{$t('report.title')}</Dialog.Title>
@@ -170,86 +165,3 @@
       </div>
     </Dialog.Content>
   </Dialog.Root>
-{:else}
-  <Drawer.Root bind:open>
-    <Drawer.Content>
-      <Drawer.Header class="text-left">
-        <Drawer.Title>{$t('report.title')}</Drawer.Title>
-        <Drawer.Description>
-          {$t('report.description')}
-        </Drawer.Description>
-      </Drawer.Header>
-
-      <div class="space-y-4 py-4 px-4">
-        <!-- Report Type Selection -->
-        <div>
-          <label class="text-sm font-medium mb-2 block">
-            {$t('report.selectReason')}
-          </label>
-          <div class="space-y-2">
-            {#each reportTypes as type}
-              <label class="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-muted cursor-pointer transition-colors">
-                <input
-                  type="radio"
-                  name="reportType"
-                  value={type.value}
-                  bind:group={selectedReportType}
-                  disabled={isSubmitting}
-                  class="w-4 h-4"
-                />
-                <span class="text-sm">{$t(type.labelKey)}</span>
-              </label>
-            {/each}
-          </div>
-        </div>
-
-        <!-- Additional Information -->
-        <div>
-          <label for="report-additional-info" class="text-sm font-medium mb-2 block">
-            {$t('report.additionalInfo')} {$t('common.optional')}
-          </label>
-          <Textarea
-            id="report-additional-info"
-            bind:value={additionalInfo}
-            placeholder={$t('report.additionalInfoPlaceholder')}
-            disabled={isSubmitting}
-            class="resize-none"
-            rows={3}
-          />
-        </div>
-
-        <!-- Warning -->
-        <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-          <p class="text-sm text-yellow-600 dark:text-yellow-400">
-            {$t('report.warning')}
-          </p>
-        </div>
-      </div>
-
-      <Drawer.Footer class="pt-2">
-        <div class="flex gap-3">
-          <Button
-            variant="outline"
-            onclick={handleClose}
-            disabled={isSubmitting}
-            class="flex-1"
-          >
-            {$t('common.cancel')}
-          </Button>
-          <Button
-            onclick={handleSubmit}
-            disabled={!selectedReportType || isSubmitting}
-            variant="destructive"
-            class="flex-1"
-          >
-            {#if isSubmitting}
-              {$t('report.submitting')}
-            {:else}
-              {$t('report.submit')}
-            {/if}
-          </Button>
-        </div>
-      </Drawer.Footer>
-    </Drawer.Content>
-  </Drawer.Root>
-{/if}

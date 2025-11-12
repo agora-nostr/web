@@ -1,9 +1,7 @@
 <script lang="ts">
   import { NDKEvent } from '@nostr-dev-kit/ndk';
   import { toast } from '$lib/stores/toast.svelte';
-  import { MediaQuery } from 'svelte/reactivity';
   import * as Dialog from '$lib/components/ui/dialog';
-  import * as Drawer from '$lib/components/ui/drawer';
   import { Button } from '$lib/components/ui/button';
   import RelayBadge from './RelayBadge.svelte';
   import ReportModal from './ReportModal.svelte';
@@ -16,8 +14,6 @@
   }
 
   let { event }: Props = $props();
-
-  const isDesktop = new MediaQuery('(min-width: 768px)');
 
   let showOptionsMenu = $state(false);
   let showRawEventModal = $state(false);
@@ -71,7 +67,7 @@
 
       if (!muteList) {
         // Create new mute list
-        muteList = new NDKEvent(ndk as any);
+        muteList = new NDKEvent(ndk);
         muteList.kind = 10000;
         muteList.content = '';
         muteList.tags = [];
@@ -216,61 +212,32 @@
 </div>
 
 <!-- Raw Event Modal -->
-{#if isDesktop.current}
-  <Dialog.Root bind:open={showRawEventModal}>
-    <Dialog.Content class="max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-      <Dialog.Header>
-        <Dialog.Title>Raw Event</Dialog.Title>
-        <Dialog.Description>
-          JSON representation of this Nostr event
-        </Dialog.Description>
-      </Dialog.Header>
+<Dialog.Root bind:open={showRawEventModal}>
+  <Dialog.Content class="max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+    <Dialog.Header>
+      <Dialog.Title>Raw Event</Dialog.Title>
+      <Dialog.Description>
+        JSON representation of this Nostr event
+      </Dialog.Description>
+    </Dialog.Header>
 
-      <div class="flex-1 overflow-auto bg-muted/50 rounded-lg p-4 font-mono text-sm">
-        <pre class="whitespace-pre-wrap break-words">{event.inspect}</pre>
-      </div>
+    <div class="flex-1 overflow-auto bg-muted/50 rounded-lg p-4 font-mono text-sm">
+      <pre class="whitespace-pre-wrap break-words">{event.inspect}</pre>
+    </div>
 
-      <Dialog.Footer class="flex justify-end gap-2">
-        <Button
-          variant="outline"
-          onclick={() => copyToClipboard(event.inspect, 'raw event')}
-        >
-          Copy to Clipboard
-        </Button>
-        <Button onclick={() => showRawEventModal = false}>
-          Close
-        </Button>
-      </Dialog.Footer>
-    </Dialog.Content>
-  </Dialog.Root>
-{:else}
-  <Drawer.Root bind:open={showRawEventModal}>
-    <Drawer.Content>
-      <Drawer.Header class="text-left">
-        <Drawer.Title>Raw Event</Drawer.Title>
-        <Drawer.Description>
-          JSON representation of this Nostr event
-        </Drawer.Description>
-      </Drawer.Header>
-
-      <div class="px-4 flex-1 overflow-auto bg-muted/50 rounded-lg p-4 font-mono text-sm">
-        <pre class="whitespace-pre-wrap break-words">{event.inspect}</pre>
-      </div>
-
-      <Drawer.Footer class="pt-2">
-        <Button
-          variant="outline"
-          onclick={() => copyToClipboard(event.inspect, 'raw event')}
-        >
-          Copy to Clipboard
-        </Button>
-        <Button onclick={() => showRawEventModal = false}>
-          Close
-        </Button>
-      </Drawer.Footer>
-    </Drawer.Content>
-  </Drawer.Root>
-{/if}
+    <Dialog.Footer class="flex justify-end gap-2">
+      <Button
+        variant="outline"
+        onclick={() => copyToClipboard(event.inspect, 'raw event')}
+      >
+        Copy to Clipboard
+      </Button>
+      <Button onclick={() => showRawEventModal = false}>
+        Close
+      </Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
 
 <ReportModal
   target={event}

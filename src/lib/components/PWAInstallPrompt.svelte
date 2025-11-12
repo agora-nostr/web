@@ -1,7 +1,7 @@
 <script lang="ts">
   import { pwaStore } from '$lib/stores/pwa.svelte';
   import { fly } from 'svelte/transition';
-  import * as Drawer from '$lib/components/ui/drawer';
+  import * as Dialog from '$lib/components/ui/dialog';
 
   // Only show on mobile devices when not installed
   const shouldShow = $derived(
@@ -89,17 +89,17 @@
   </div>
 {/if}
 
-<Drawer.Root bind:open={showIOSInstructions}>
-  <Drawer.Content>
-    <Drawer.Header class="text-left">
-      <Drawer.Title>Install Agora on iOS</Drawer.Title>
-      <Drawer.Description>
+<Dialog.Root bind:open={showIOSInstructions}>
+  <Dialog.Content>
+    <Dialog.Header class="text-left">
+      <Dialog.Title>Install Agora on iOS</Dialog.Title>
+      <Dialog.Description>
         Follow these steps to add Agora to your home screen
-      </Drawer.Description>
-    </Drawer.Header>
+      </Dialog.Description>
+    </Dialog.Header>
 
     <!-- Instructions -->
-    <div class="px-4 pb-4 space-y-6">
+    <div class="space-y-6">
       <!-- Step 1 -->
       <div class="flex gap-4">
         <div class="flex-shrink-0 w-10 h-10 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold">
@@ -146,13 +146,13 @@
       </div>
     </div>
 
-    <Drawer.Footer>
+    <Dialog.Footer>
       <button
         onclick={closeIOSInstructions}
         class="w-full bg-primary hover:bg-accent-dark text-foreground font-semibold py-3 px-4 rounded-xl transition-colors"
       >
         Got it!
       </button>
-    </Drawer.Footer>
-  </Drawer.Content>
-</Drawer.Root>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>

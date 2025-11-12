@@ -102,6 +102,7 @@
       <button
         onclick={handleBack}
         class="p-2 rounded-lg hover:bg-neutral-800/50 transition-colors text-neutral-400 hover:text-white"
+        aria-label="Back to messages"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -138,7 +139,7 @@
         </button>
       {:else}
         <div class="flex-1">
-          <div class="h-5 w-32 bg-neutral-800 rounded animate-pulse" />
+          <div class="h-5 w-32 bg-neutral-800 rounded animate-pulse"></div>
         </div>
       {/if}
     </div>

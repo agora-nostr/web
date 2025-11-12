@@ -35,9 +35,13 @@
 
       success = { amount: 0 };
       tokenInput = '';
-    } catch (e: any) {
-      error = e.message || 'Failed to receive token';
-      console.error(e);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error = err.message;
+      } else {
+        error = 'Failed to receive token';
+      }
+      console.error(err);
     } finally {
       isProcessing = false;
     }
@@ -82,9 +86,13 @@
       const bolt11 = await deposit.start();
       depositInvoice = bolt11;
 
-    } catch (e: any) {
-      error = e.message || 'Failed to create mint request';
-      console.error(e);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error = err.message;
+      } else {
+        error = 'Failed to create mint request';
+      }
+      console.error(err);
     } finally {
       isProcessing = false;
     }
@@ -102,9 +110,13 @@
 
     try {
       await depositInstance.check();
-    } catch (e: any) {
-      error = e.message || 'Failed to check payment status';
-      console.error(e);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error = err.message;
+      } else {
+        error = 'Failed to check payment status';
+      }
+      console.error(err);
     } finally {
       isCheckingPayment = false;
     }
@@ -669,22 +681,6 @@
 
   .copy-icon {
     font-size: 1.1rem;
-  }
-
-  .checking-status {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    padding: 2rem 1rem;
-    background: var(--color-muted);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-  }
-
-  .checking-status p {
-    margin: 0;
-    color: var(--color-foreground);
   }
 
   .spinner {

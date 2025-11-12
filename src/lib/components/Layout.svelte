@@ -8,12 +8,6 @@
   import { headerStore } from '$lib/stores/header.svelte';
   import { layoutMode } from '$lib/stores/layoutMode.svelte';
   import { settings } from '$lib/stores/settings.svelte';
-  import { createPackModal } from '$lib/stores/createPackModal.svelte';
-  import { createListingModal } from '$lib/stores/createListingModal.svelte';
-  import { createInviteModal } from '$lib/stores/createInviteModal.svelte';
-  import { createMediaPostModal } from '$lib/stores/createMediaPostModal.svelte';
-  import { createTradeModal } from '$lib/stores/createTradeModal.svelte';
-  import { homePageFilter } from '$lib/stores/homePageFilter.svelte';
   import { useRelayInfoCached } from '$lib/utils/relayInfo.svelte';
   import { AGORA_RELAYS, isAgoraRelay, getRelaysToUse } from '$lib/utils/relayUtils';
   import { messagesStore } from '$lib/stores/messages.svelte';
@@ -33,6 +27,9 @@
   import Icon from './Icon.svelte';
   import Badge from './Badge.svelte';
   import UserSearchModal from './UserSearchModal.svelte';
+  import ComposeDialog from './ComposeDialog.svelte';
+  import CreateListingModal from './CreateListingModal.svelte';
+  import CreateInviteModal from './invite/CreateInviteModal.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -42,6 +39,9 @@
   const { children }: Props = $props();
 
   let isSearchModalOpen = $state(false);
+  let isComposeModalOpen = $state(false);
+  let isCreateListingModalOpen = $state(false);
+  let isCreateInviteModalOpen = $state(false);
 
   // Set NDK in Svelte context for child components
   setContext('ndk', ndk);
@@ -345,60 +345,6 @@
             <span class="font-medium">{$t('navigation.marketplace')}</span>
           {/if}
         </a>
-
-        {#if ndk.$currentPubkey}
-        <button
-          onclick={() => {
-            if (path === '/marketplace') {
-              createListingModal.show = true;
-            } else if (path === '/trades') {
-              createTradeModal.show = true;
-            } else if (path.startsWith('/packs')) {
-              createPackModal.show = true;
-            } else if (path === '/agora/invites') {
-              createInviteModal.show = true;
-            } else if (path === '/' && homePageFilter.selected === 'images') {
-              createMediaPostModal.show = true;
-            } else {
-              goto('/compose');
-            }
-          }}
-          class="w-full flex items-center justify-center {sidebarCollapsed ? 'p-3' : 'gap-2 px-6 py-3'} bg-primary hover:bg-primary/90 text-foreground font-semibold rounded-full transition-colors mt-4"
-          title={sidebarCollapsed ? (path === '/marketplace' ? $t('classifieds.createListing') : path === '/trades' ? 'Create Trade' : path.startsWith('/packs') ? 'Create Pack' : path === '/agora/invites' ? 'Create Invite' : path === '/' && homePageFilter.selected === 'images' ? 'Create media post' : $t('navigation.compose')) : undefined}
-        >
-          {#if path === '/marketplace'}
-            <Icon name="plus" size="md" />
-            {#if !sidebarCollapsed}
-              <span>{$t('classifieds.createListing')}</span>
-            {/if}
-          {:else if path === '/trades'}
-            <Icon name="plus" size="md" />
-            {#if !sidebarCollapsed}
-              <span>Create Trade</span>
-            {/if}
-          {:else if path.startsWith('/packs')}
-            <Icon name="plus" size="md" />
-            {#if !sidebarCollapsed}
-              <span>Create Pack</span>
-            {/if}
-          {:else if path === '/agora/invites'}
-            <Icon name="invite" size="md" />
-            {#if !sidebarCollapsed}
-              <span>Create Invite</span>
-            {/if}
-          {:else if path === '/' && homePageFilter.selected === 'images'}
-            <Icon name="image" size="md" />
-            {#if !sidebarCollapsed}
-              <span>Create media post</span>
-            {/if}
-          {:else}
-            <Icon name="edit" size="md" />
-            {#if !sidebarCollapsed}
-              <span>{$t('navigation.compose')}</span>
-            {/if}
-          {/if}
-        </button>
-        {/if}
       </nav>
 
       <!-- Login/User Section -->
@@ -555,13 +501,22 @@
 
   <!-- Mobile Compose FAB (only on home page, marketplace, and agora invites) -->
   {#if path === '/'}
-    <MobileComposeFAB isHomePage={true} />
+    <MobileComposeFAB onclick={() => isComposeModalOpen = true} />
   {:else if path === '/marketplace'}
-    <MobileComposeFAB onclick={() => createListingModal.open()} />
+    <MobileComposeFAB onclick={() => isCreateListingModalOpen = true} />
   {:else if path === '/agora/invites'}
-    <MobileComposeFAB onclick={() => createInviteModal.open()} />
+    <MobileComposeFAB onclick={() => isCreateInviteModalOpen = true} />
   {/if}
 </div>
 
 <!-- User Search Modal -->
 <UserSearchModal isOpen={isSearchModalOpen} onClose={() => isSearchModalOpen = false} />
+
+<!-- Compose Modal -->
+<ComposeDialog bind:open={isComposeModalOpen} />
+
+<!-- Create Listing Modal -->
+<CreateListingModal bind:open={isCreateListingModalOpen} />
+
+<!-- Create Invite Modal -->
+<CreateInviteModal bind:isOpen={isCreateInviteModalOpen} onClose={() => isCreateInviteModalOpen = false} />

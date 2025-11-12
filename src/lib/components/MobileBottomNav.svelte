@@ -10,7 +10,6 @@
   import { t } from 'svelte-i18n';
   import type { NDKUserProfile } from '@nostr-dev-kit/ndk';
   import { createNotificationsManager } from '$lib/utils/useNotifications.svelte';
-  import { formatBalance } from '$lib/utils/formatBalance';
   import Icon from './Icon.svelte';
   import Badge from './Badge.svelte';
 
@@ -52,8 +51,7 @@
     if (ndk.$currentUser) {
       showDropdown = !showDropdown;
     } else {
-      loginModal.show = true;
-      loginModal.state = 'signup';
+      loginModal.open('signup');
     }
   }
 
@@ -87,6 +85,14 @@
     } else {
       settings.setTheme('light');
     }
+  }
+
+  function handleNavigation(path: string) {
+    if (!ndk.$currentUser) {
+      loginModal.open('signup');
+      return;
+    }
+    goto(path);
   }
 
   $effect(() => {
@@ -123,8 +129,8 @@
     </a>
 
     <!-- Messages -->
-    <a
-      href="/messages"
+    <button
+      onclick={() => handleNavigation('/messages')}
       class="flex items-center justify-center p-3 rounded-lg transition-colors {isActive('/messages') ? 'text-primary' : 'text-muted-foreground'} relative"
       aria-label="Messages"
     >
@@ -132,11 +138,11 @@
       {#if messagesStore.totalUnreadCount > 0}
         <Badge indicator class="absolute top-1.5 right-1.5" />
       {/if}
-    </a>
+    </button>
 
     <!-- Notifications -->
-    <a
-      href="/notifications"
+    <button
+      onclick={() => handleNavigation('/notifications')}
       class="flex items-center justify-center p-3 rounded-lg transition-colors {isActive('/notifications') ? 'text-primary' : 'text-muted-foreground'} relative"
       aria-label="Notifications"
     >
@@ -144,16 +150,16 @@
       {#if notificationsManager.counts.all > 0}
         <Badge indicator class="absolute top-1.5 right-1.5" />
       {/if}
-    </a>
+    </button>
 
     <!-- Wallet -->
-    <a
-      href="/wallet"
+    <button
+      onclick={() => handleNavigation('/wallet')}
       class="flex items-center justify-center p-3 rounded-lg transition-colors {isActive('/wallet') ? 'text-primary' : 'text-muted-foreground'}"
       aria-label="Wallet"
     >
       <Icon name="wallet" size="lg" />
-    </a>
+    </button>
 
     <!-- Profile / User Menu -->
     <button

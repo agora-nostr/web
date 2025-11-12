@@ -2,8 +2,9 @@
   import { ndk } from '$lib/ndk.svelte';
   import { goto } from '$app/navigation';
   import { headerStore } from '$lib/stores/header.svelte';
-  import { createPackModal } from '$lib/stores/createPackModal.svelte';
   import { type NDKFollowPack } from '@nostr-dev-kit/ndk';
+
+  let showCreatePackModal = $state(false);
   import { User } from '$lib/ndk/ui/user';
   import CreateFollowPackDialog from '$lib/components/CreateFollowPackDialog.svelte';
   import LoadMoreTrigger from '$lib/components/LoadMoreTrigger.svelte';
@@ -147,7 +148,7 @@
 
 {#snippet createPackAction()}
   <button
-    onclick={() => createPackModal.show = true}
+    onclick={() => showCreatePackModal = true}
     class="px-4 py-2.5 bg-primary hover:bg-accent-dark text-foreground rounded-lg transition-colors font-medium text-sm flex items-center gap-2 flex-shrink-0"
   >
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -315,6 +316,6 @@
   </div>
 
   <CreateFollowPackDialog
-    bind:open={createPackModal.show}
+    bind:open={showCreatePackModal}
   />
 </div>

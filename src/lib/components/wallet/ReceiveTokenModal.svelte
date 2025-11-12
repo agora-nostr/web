@@ -1,14 +1,10 @@
 <script lang="ts">
-  import { MediaQuery } from 'svelte/reactivity';
   import { ndk } from '$lib/ndk.svelte';
   import * as Dialog from '$lib/components/ui/dialog';
-  import * as Drawer from '$lib/components/ui/drawer';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
   import { Textarea } from '$lib/components/ui/textarea';
-
-  const isDesktop = new MediaQuery('(min-width: 768px)');
 
   let { isOpen = $bindable(false) } = $props();
 
@@ -50,128 +46,63 @@
   }
 </script>
 
-{#if isDesktop.current}
-  <Dialog.Root open={isOpen} onOpenChange={(newOpen: boolean) => {
-      isOpen = newOpen;
-      if (!newOpen) close();
-    }}>
-    <Dialog.Content class="max-w-md">
-      <Dialog.Header>
-        <Dialog.Title>Receive Cashu Token</Dialog.Title>
-      </Dialog.Header>
+<Dialog.Root open={isOpen} onOpenChange={(newOpen: boolean) => {
+    isOpen = newOpen;
+    if (!newOpen) close();
+  }}>
+  <Dialog.Content class="max-w-md">
+    <Dialog.Header>
+      <Dialog.Title>Receive Cashu Token</Dialog.Title>
+    </Dialog.Header>
 
-      {#if success}
-        <div class="p-4 bg-green-900/20 border border-green-800 rounded-lg text-green-400 text-center">
-          ✓ Token received successfully!
-        </div>
-      {/if}
+    {#if success}
+      <div class="p-4 bg-green-900/20 border border-green-800 rounded-lg text-green-400 text-center">
+        ✓ Token received successfully!
+      </div>
+    {/if}
 
-      <div class="space-y-4">
-        <div>
-          <Label for="token">Cashu Token</Label>
-          <Textarea
-            id="token"
-            bind:value={token}
-            placeholder="Paste Cashu token here (cashuA...)"
-            rows={4}
-            class="mt-2 resize-none"
-          />
-        </div>
-
-        <div>
-          <Label for="description">Description (optional)</Label>
-          <Input
-            id="description"
-            type="text"
-            bind:value={description}
-            placeholder="e.g., Coffee payment"
-            class="mt-2"
-          />
-        </div>
-
-        <Button
-          onclick={handleReceive}
-          disabled={isReceiving || !token.trim() || success}
-          class="w-full"
-        >
-          {isReceiving ? 'Receiving...' : success ? 'Received!' : 'Receive Token'}
-        </Button>
-
-        {#if error}
-          <div class="p-3 bg-red-900/20 border border-red-800 rounded-lg text-red-400 text-sm">
-            {error}
-          </div>
-        {/if}
+    <div class="space-y-4">
+      <div>
+        <Label for="token">Cashu Token</Label>
+        <Textarea
+          id="token"
+          bind:value={token}
+          placeholder="Paste Cashu token here (cashuA...)"
+          rows={4}
+          class="mt-2 resize-none"
+        />
       </div>
 
-      <Dialog.Footer>
-        <Button variant="ghost" onclick={close} class="w-full">
-          Close
-        </Button>
-      </Dialog.Footer>
-    </Dialog.Content>
-  </Dialog.Root>
-{:else}
-  <Drawer.Root open={isOpen} onOpenChange={(newOpen: boolean) => {
-      isOpen = newOpen;
-      if (!newOpen) close();
-    }}>
-    <Drawer.Content>
-      <Drawer.Header class="text-left">
-        <Drawer.Title>Receive Cashu Token</Drawer.Title>
-      </Drawer.Header>
-
-      {#if success}
-        <div class="px-4 mb-4">
-          <div class="p-4 bg-green-900/20 border border-green-800 rounded-lg text-green-400 text-center">
-            ✓ Token received successfully!
-          </div>
-        </div>
-      {/if}
-
-      <div class="px-4 space-y-4">
-        <div>
-          <Label for="token-mobile">Cashu Token</Label>
-          <Textarea
-            id="token-mobile"
-            bind:value={token}
-            placeholder="Paste Cashu token here (cashuA...)"
-            rows={4}
-            class="mt-2 resize-none"
-          />
-        </div>
-
-        <div>
-          <Label for="description-mobile">Description (optional)</Label>
-          <Input
-            id="description-mobile"
-            type="text"
-            bind:value={description}
-            placeholder="e.g., Coffee payment"
-            class="mt-2"
-          />
-        </div>
-
-        <Button
-          onclick={handleReceive}
-          disabled={isReceiving || !token.trim() || success}
-          class="w-full"
-        >
-          {isReceiving ? 'Receiving...' : success ? 'Received!' : 'Receive Token'}
-        </Button>
-
-        {#if error}
-          <div class="p-3 bg-red-900/20 border border-red-800 rounded-lg text-red-400 text-sm">
-            {error}
-          </div>
-        {/if}
+      <div>
+        <Label for="description">Description (optional)</Label>
+        <Input
+          id="description"
+          type="text"
+          bind:value={description}
+          placeholder="e.g., Coffee payment"
+          class="mt-2"
+        />
       </div>
 
-      <Drawer.Footer class="pt-2">
-        <Button variant="ghost" onclick={close} class="w-full">
-          Close
-        </Button>
-      </Drawer.Footer>
-    </Drawer.Content>
-  </Drawer.Root>
-{/if}
+      <Button
+        onclick={handleReceive}
+        disabled={isReceiving || !token.trim() || success}
+        class="w-full"
+      >
+        {isReceiving ? 'Receiving...' : success ? 'Received!' : 'Receive Token'}
+      </Button>
+
+      {#if error}
+        <div class="p-3 bg-red-900/20 border border-red-800 rounded-lg text-red-400 text-sm">
+          {error}
+        </div>
+      {/if}
+    </div>
+
+    <Dialog.Footer>
+      <Button variant="ghost" onclick={close} class="w-full">
+        Close
+      </Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>

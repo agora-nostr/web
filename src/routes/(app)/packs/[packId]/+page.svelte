@@ -4,8 +4,10 @@
   import { goto } from '$app/navigation';
   import { toast } from '$lib/stores/toast.svelte';
   import { followPacksStore } from '$lib/stores/followPacks.svelte';
-  import { createPackModal } from '$lib/stores/createPackModal.svelte';
   import { NDKKind, NDKFollowPack } from '@nostr-dev-kit/ndk';
+
+  let showEditPackModal = $state(false);
+  let editingPack = $state<NDKFollowPack | null>(null);
   import { User } from '$lib/ndk/ui/user';
   import NoteCard from '$lib/components/NoteCard.svelte';
   import CreateFollowPackDialog from '$lib/components/CreateFollowPackDialog.svelte';
@@ -102,8 +104,8 @@
 
   function handleEdit() {
     if (pack) {
-      createPackModal.show = true;
-      createPackModal.data = pack;
+      editingPack = pack;
+      showEditPackModal = true;
     }
   }
 </script>
@@ -233,8 +235,8 @@
   {/if}
 
   <CreateFollowPackDialog
-    bind:open={createPackModal.show}
-    editingPack={createPackModal.data}
+    bind:open={showEditPackModal}
+    {editingPack}
   />
   </div>
 </div>

@@ -75,10 +75,10 @@ export const ndkReady = (async () => {
 })();
 
 // Create hashtag interests store (only in browser)
-export const hashtagInterests = browser ? createHashtagInterestsStore(ndk) : null as any;
+export const hashtagInterests = browser ? createHashtagInterestsStore(ndk) : null;
 
 // Create relay feeds store (only in browser)
-export const relayFeeds = browser ? createRelayFeedsStore(ndk) : null as any;
+export const relayFeeds = browser ? createRelayFeedsStore(ndk) : null;
 
 // Re-export auth management utilities
 export {

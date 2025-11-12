@@ -27,9 +27,13 @@
     try {
       // Use wallet to generate token
       token = await wallet.send(amountNum, memo || undefined);
-    } catch (e: any) {
-      error = e.message || 'Failed to send';
-      console.error(e);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        error = err.message;
+      } else {
+        error = 'Failed to send';
+      }
+      console.error(err);
     } finally {
       isSending = false;
     }

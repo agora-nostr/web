@@ -18,8 +18,8 @@
   let replyContent = $state('');
   let isSubmitting = $state(false);
   let isFocused = $state(false);
-  let textareaElement: HTMLTextAreaElement;
-  let fileInput: HTMLInputElement;
+  let textareaElement: HTMLTextAreaElement | undefined = $state();
+  let fileInput: HTMLInputElement | undefined = $state();
   let selectedMentions = $state<string[]>([]);
 
   const blossom = new NDKBlossom(ndk);

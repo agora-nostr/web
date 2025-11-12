@@ -76,7 +76,9 @@
   <div transition:fade={{ duration: 300 }}>
     {@render children()}
     <PWAInstallPrompt />
-    <LoginModal />
     <RelayAuthModal />
   </div>
 {/if}
+
+<!-- Login Modal - Outside transition wrapper to prevent z-index stacking issues -->
+<LoginModal />

@@ -192,16 +192,6 @@
       padding: 0.5rem;
     }
 
-    .wallet-card {
-      padding: 1.5rem;
-      border-radius: 8px;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
     .action-btn {
       padding: 1.25rem 0.75rem;
       gap: 0.5rem;

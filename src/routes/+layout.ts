@@ -1,4 +1,2 @@
-// Disable SSR site-wide - run everything client-side only
-export const ssr = false;
+// Enable SSR for proper routing, still hydrates client-side
 export const csr = true;
-export const prerender = false;

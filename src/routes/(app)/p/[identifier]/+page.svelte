@@ -13,8 +13,6 @@
   import CreateFollowPackDialog from '$lib/components/CreateFollowPackDialog.svelte';
   import ProfileSettings from '$lib/components/settings/ProfileSettings.svelte';
   import * as Dialog from '$lib/components/ui/dialog';
-  import { MediaQuery } from 'svelte/reactivity';
-  import * as Drawer from '$lib/components/ui/drawer';
   import { createLazyFeed } from '$lib/utils/lazyFeed.svelte';
   import { layoutMode } from '$lib/stores/layoutMode.svelte';
   import { t } from 'svelte-i18n';
@@ -37,7 +35,6 @@
 
   const pubkey = $derived(user?.pubkey);
   const isOwnProfile = $derived.by(() => ndk.$currentPubkey === pubkey);
-  const isDesktop = new MediaQuery('(min-width: 768px)');
 
   let activeTab = $state<'notes' | 'replies' | 'media' | 'articles' | 'highlights' | 'packs'>('notes');
   let isShareModalOpen = $state(false);
@@ -453,51 +450,18 @@
     initialPubkey={pubkey}
   />
 
-  {#if isDesktop.current}
-    <Dialog.Root bind:open={isEditProfileModalOpen}>
-      <Dialog.Content
-        class="max-w-2xl max-h-[90vh] overflow-y-auto"
-        onClose={() => isEditProfileModalOpen = false}
-      >
-        <Dialog.Header>
-          <Dialog.Title>Edit Profile</Dialog.Title>
-          <Dialog.Description>Update your profile information and settings</Dialog.Description>
-        </Dialog.Header>
-        <div class="py-4">
-          <ProfileSettings />
-        </div>
-      </Dialog.Content>
-    </Dialog.Root>
-  {:else}
-    <Drawer.Root bind:open={isEditProfileModalOpen}>
-      <Drawer.Content>
-        <Drawer.Header class="text-left">
-          <Drawer.Title>Edit Profile</Drawer.Title>
-          <Drawer.Description>Update your profile information and settings</Drawer.Description>
-        </Drawer.Header>
-        <div class="overflow-y-auto px-4 pb-4">
-          <ProfileSettings
-            hideSubmitButton={true}
-            onSubmit={(handler) => profileSubmitHandler = handler}
-            onFormStateChange={(state) => profileFormState = state}
-          />
-        </div>
-        <Drawer.Footer class="pt-2">
-          <button
-            type="button"
-            onclick={() => profileSubmitHandler?.()}
-            disabled={profileFormState.isSubmitting || profileFormState.isUploading}
-            class="w-full px-6 py-3 bg-primary hover:bg-accent-dark text-foreground font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {#if profileFormState.isSubmitting}
-              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Saving...</span>
-            {:else}
-              <span>Save Profile</span>
-            {/if}
-          </button>
-        </Drawer.Footer>
-      </Drawer.Content>
-    </Drawer.Root>
-  {/if}
+  <Dialog.Root bind:open={isEditProfileModalOpen}>
+    <Dialog.Content
+      class="max-w-2xl max-h-[90vh] overflow-y-auto"
+      onClose={() => isEditProfileModalOpen = false}
+    >
+      <Dialog.Header>
+        <Dialog.Title>Edit Profile</Dialog.Title>
+        <Dialog.Description>Update your profile information and settings</Dialog.Description>
+      </Dialog.Header>
+      <div class="py-4">
+        <ProfileSettings />
+      </div>
+    </Dialog.Content>
+  </Dialog.Root>
 </div>

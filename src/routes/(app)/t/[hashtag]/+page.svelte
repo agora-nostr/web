@@ -28,7 +28,7 @@
 
   const notesFeed = createLazyFeed(ndk, () => {
     const currentHashtag = hashtag;
-    const filter: any = {
+    const filter: NDKFilter = {
       kinds: [NDKKind.Text],
       '#t': [currentHashtag.toLowerCase()],
       limit: 200
@@ -45,7 +45,7 @@
 
   const mediaFeed = createLazyFeed(ndk, () => {
     const currentHashtag = hashtag;
-    const filter: any = {
+    const filter: NDKFilter = {
       kinds: [NDKKind.Text, NDKKind.Image, NDKKind.Video, NDKKind.ShortVideo],
       '#t': [currentHashtag.toLowerCase()],
       limit: 300

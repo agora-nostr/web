@@ -300,7 +300,7 @@
 				<div class="space-y-4">
 					<button
 						onclick={handleStartJourney}
-						class="w-full py-6 text-lg font-semibold bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg transition-all duration-200 hover:shadow-xl rounded-xl flex items-center justify-center gap-2"
+						class="w-full py-3 text-lg font-semibold bg-primary hover:from-primary-700 hover:to-primary-800 text-white shadow-lg transition-all duration-200 hover:shadow-xl rounded-xl flex items-center justify-center gap-2"
 					>
 						{$t('onboarding.invite.startJourney')}
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

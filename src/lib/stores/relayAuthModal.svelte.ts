@@ -4,36 +4,25 @@ interface RelayAuthRequest {
   onReject: () => void;
 }
 
-let show = $state(false);
-let request = $state<RelayAuthRequest | null>(null);
-
-export const relayAuthModal = {
-  get show() {
-    return show;
-  },
-  set show(value: boolean) {
-    show = value;
-  },
-  get request() {
-    return request;
-  },
-  set request(value: RelayAuthRequest | null) {
-    request = value;
-  },
+class RelayAuthModal {
+  show = $state(false);
+  request = $state<RelayAuthRequest | null>(null);
 
   confirm() {
-    if (request) {
-      request.onConfirm();
-      show = false;
-      request = null;
-    }
-  },
-
-  reject() {
-    if (request) {
-      request.onReject();
-      show = false;
-      request = null;
+    if (this.request) {
+      this.request.onConfirm();
+      this.show = false;
+      this.request = null;
     }
   }
-};
+
+  reject() {
+    if (this.request) {
+      this.request.onReject();
+      this.show = false;
+      this.request = null;
+    }
+  }
+}
+
+export const relayAuthModal = new RelayAuthModal();

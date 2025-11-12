@@ -6,6 +6,7 @@
   import { toast } from '$lib/stores/toast.svelte';
   import UserSelector from '$lib/components/UserSelector.svelte';
   import MentionPicker from '$lib/components/MentionPicker.svelte';
+  import { useMentionPicker } from '$lib/composables/useMentionPicker.svelte';
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -39,15 +40,11 @@
   let uploadedImages = $state<Array<{ url: string; preview: string }>>([]);
   let isUploading = $state(false);
 
-  // Mention picker state
-  let showMentionPicker = $state(false);
-  let mentionSearchQuery = $state('');
-  let mentionStartIndex = $state(0);
-  let mentionPickerPosition = $state({ top: 0, left: 0 });
-
-  // Track mention markers to nostr entity mapping
-  // Key: marker (e.g., "@jackmallers@primal.net"), Value: nostr entity (e.g., "nostr:nprofile1...")
-  let mentionMarkers = $state<Map<string, string>>(new Map());
+  const mentionPicker = useMentionPicker(
+    () => textareaElement,
+    () => value,
+    (v) => value = v
+  );
 
   async function handleFileSelect(file: File) {
     if (!file.type.startsWith('image/')) {
@@ -55,10 +52,7 @@
       return;
     }
 
-    // Create preview URL
     const previewUrl = URL.createObjectURL(file);
-
-    // Add to images array with preview
     const imageIndex = uploadedImages.length;
     uploadedImages = [...uploadedImages, { url: '', preview: previewUrl }];
 
@@ -69,20 +63,17 @@
       });
 
       if (upload.result?.url) {
-        // Update the image with the actual URL
         uploadedImages[imageIndex] = {
           url: upload.result.url,
           preview: previewUrl
         };
 
-        // Add image URL to content at cursor position
         insertImageUrl(upload.result.url);
         toast.success('Image uploaded');
       }
     } catch (error) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload image');
-      // Remove the failed upload
       uploadedImages = uploadedImages.filter((_, i) => i !== imageIndex);
     } finally {
       isUploading = false;
@@ -99,7 +90,6 @@
 
     value = value.slice(0, start) + imageMarkdown + value.slice(end);
 
-    // Set cursor position after the inserted URL
     setTimeout(() => {
       textarea.selectionStart = textarea.selectionEnd = start + imageMarkdown.length;
       textarea.focus();
@@ -109,15 +99,11 @@
   function removeImage(index: number) {
     const image = uploadedImages[index];
 
-    // Remove the URL from the content
     if (image.url) {
       value = value.replace(`\n${image.url}\n`, '').replace(image.url, '');
     }
 
-    // Revoke the preview URL to free memory
     URL.revokeObjectURL(image.preview);
-
-    // Remove from array
     uploadedImages = uploadedImages.filter((_, i) => i !== index);
   }
 
@@ -127,7 +113,6 @@
     if (file) {
       handleFileSelect(file);
     }
-    // Reset input so the same file can be selected again
     input.value = '';
   }
 
@@ -147,7 +132,6 @@
 
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
-      // Handle multiple files
       for (const file of Array.from(files)) {
         if (file.type.startsWith('image/')) {
           await handleFileSelect(file);
@@ -175,164 +159,21 @@
     fileInput?.click();
   }
 
-  function getCaretCoordinates() {
-    if (!textareaElement) return { top: 0, left: 0 };
-
-    const textarea = textareaElement;
-    const cursorPosition = textarea.selectionStart;
-
-    // Create a mirror div to calculate position
-    const div = document.createElement('div');
-    const styles = window.getComputedStyle(textarea);
-    const properties = [
-      'boxSizing', 'width', 'height', 'overflowX', 'overflowY',
-      'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
-      'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
-      'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize',
-      'lineHeight', 'fontFamily', 'textAlign', 'textTransform', 'textIndent',
-      'textDecoration', 'letterSpacing', 'wordSpacing'
-    ];
-
-    properties.forEach(prop => {
-      div.style[prop as any] = styles[prop as any];
-    });
-
-    div.style.position = 'absolute';
-    div.style.visibility = 'hidden';
-    div.style.whiteSpace = 'pre-wrap';
-    div.style.wordWrap = 'break-word';
-
-    document.body.appendChild(div);
-
-    const textBeforeCursor = textarea.value.substring(0, cursorPosition);
-    div.textContent = textBeforeCursor;
-
-    const span = document.createElement('span');
-    span.textContent = textarea.value.substring(cursorPosition) || '.';
-    div.appendChild(span);
-
-    const rect = textarea.getBoundingClientRect();
-    const coordinates = {
-      top: rect.top + span.offsetTop + parseInt(styles.borderTopWidth) - textarea.scrollTop + 20,
-      left: rect.left + span.offsetLeft + parseInt(styles.borderLeftWidth)
-    };
-
-    document.body.removeChild(div);
-    return coordinates;
-  }
-
-  function handleInput(event: Event) {
-    const textarea = event.target as HTMLTextAreaElement;
-    const cursorPosition = textarea.selectionStart;
-    const textBeforeCursor = textarea.value.substring(0, cursorPosition);
-
-    // Find the last @ before cursor
-    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
-
-    if (lastAtIndex !== -1) {
-      // Check if there's a space between @ and cursor
-      const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
-
-      // Only show picker if:
-      // 1. @ is at start or preceded by whitespace/newline
-      // 2. No spaces after @ (still typing the mention)
-      const charBeforeAt = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' ';
-      const hasSpaceAfterAt = textAfterAt.includes(' ') || textAfterAt.includes('\n');
-
-      if ((charBeforeAt === ' ' || charBeforeAt === '\n' || lastAtIndex === 0) && !hasSpaceAfterAt) {
-        mentionStartIndex = lastAtIndex;
-        mentionSearchQuery = textAfterAt;
-        mentionPickerPosition = getCaretCoordinates();
-        showMentionPicker = true;
-        return;
-      }
-    }
-
-    // Close picker if no valid @ found
-    showMentionPicker = false;
-  }
-
-  async function insertMention(nprofile: string) {
-    const textarea = textareaElement;
-    if (!textarea) return;
-
-    const cursorPosition = textarea.selectionStart;
-
-    // Extract pubkey from nprofile to get user's profile
-    const pubkeyMatch = nprofile.match(/nostr:nprofile1([a-z0-9]+)/);
-    if (!pubkeyMatch) return;
-
-    // Fetch user to get their NIP-05
-    const user = ndk.getUser({ nprofile: nprofile.replace('nostr:', '') });
-    await user.fetchProfile();
-
-    // Create a readable marker using NIP-05 or fallback to display name
-    const marker = user.profile?.nip05
-      ? `@${user.profile.nip05}`
-      : `@${user.profile?.displayName || user.profile?.name || user.npub.slice(0, 12)}`;
-
-    // Store the mapping from marker to nostr entity
-    mentionMarkers.set(marker, nprofile);
-
-    // Replace from @ to cursor with the readable marker
-    const beforeMention = value.substring(0, mentionStartIndex);
-    const afterMention = value.substring(cursorPosition);
-
-    value = beforeMention + marker + ' ' + afterMention;
-
-    // Set cursor position after the mention
-    const newCursorPos = mentionStartIndex + marker.length + 1;
-    setTimeout(() => {
-      textarea.selectionStart = textarea.selectionEnd = newCursorPos;
-      textarea.focus();
-    }, 0);
-
-    showMentionPicker = false;
-    mentionSearchQuery = '';
-  }
-
-  function closeMentionPicker() {
-    showMentionPicker = false;
-    mentionSearchQuery = '';
-  }
-
-  /**
-   * Replaces all tracked mention markers with their corresponding nostr entities
-   * Call this function before publishing to convert readable markers to nostr entities
-   */
   export function getContentWithNostrEntities(): string {
-    let result = value;
-
-    // Replace each marker with its nostr entity
-    for (const [marker, entity] of mentionMarkers) {
-      // Use a while loop to replace all occurrences of this marker
-      while (result.includes(marker)) {
-        result = result.replace(marker, entity);
-      }
-    }
-
-    return result;
+    return mentionPicker.getContentWithNostrEntities(value);
   }
 
-  /**
-   * Clears all mention markers and resets the composer state
-   * Call this after successfully publishing
-   */
   export function reset() {
     value = '';
-    mentionMarkers.clear();
+    mentionPicker.reset();
     uploadedImages = [];
-    showMentionPicker = false;
-    mentionSearchQuery = '';
   }
 
   function handleKeyDown(event: KeyboardEvent) {
-    // If mention picker is open, don't interfere with its keyboard handling
-    if (showMentionPicker) {
+    if (mentionPicker.show) {
       return;
     }
 
-    // Stop Enter key from bubbling up to prevent triggering actions on NoteCards
     if (event.key === 'Enter') {
       event.stopPropagation();
     }
@@ -361,7 +202,7 @@
       {placeholder}
       {autofocus}
       {disabled}
-      oninput={handleInput}
+      oninput={mentionPicker.handleInput}
       onpaste={handlePaste}
       onkeydown={handleKeyDown}
       class="w-full min-h-[120px] max-md:flex-1 max-md:min-h-0 bg-transparent text-foreground placeholder-neutral-500 resize-none focus:outline-none focus:ring-0 text-lg"
@@ -375,7 +216,7 @@
             <img
               src={image.preview}
               alt="Upload preview"
-              class="w-20 h-20 object-cover rounded-lg border border {image.url ? '' : 'opacity-50 animate-pulse'}"
+              class="w-20 h-20 object-cover rounded-lg border {image.url ? '' : 'opacity-50 animate-pulse'}"
             />
             {#if !image.url}
               <div class="absolute inset-0 flex items-center justify-center">
@@ -425,11 +266,11 @@
   </div>
 </div>
 
-{#if showMentionPicker}
+{#if mentionPicker.show}
   <MentionPicker
-    position={mentionPickerPosition}
-    searchQuery={mentionSearchQuery}
-    onSelect={insertMention}
-    onClose={closeMentionPicker}
+    position={mentionPicker.position}
+    searchQuery={mentionPicker.searchQuery}
+    onSelect={mentionPicker.insertMention}
+    onClose={mentionPicker.closeMentionPicker}
   />
 {/if}

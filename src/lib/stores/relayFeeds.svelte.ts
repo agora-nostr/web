@@ -1,7 +1,8 @@
 import { NDKRelayFeedList } from '@nostr-dev-kit/ndk';
+import type NDK from '@nostr-dev-kit/ndk';
 
 class RelayFeedsStore {
-  constructor(private ndk: any) {}
+  constructor(private ndk: NDK) {}
 
   get list(): NDKRelayFeedList | null {
     const session = this.ndk.$sessions;
@@ -106,6 +107,6 @@ class RelayFeedsStore {
   }
 }
 
-export function createRelayFeedsStore(ndk: any) {
+export function createRelayFeedsStore(ndk: NDK) {
   return new RelayFeedsStore(ndk);
 }

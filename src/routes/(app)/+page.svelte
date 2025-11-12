@@ -17,8 +17,6 @@
   import FeedHeader from '$lib/components/headers/FeedHeader.svelte';
   import { getRelaysToUse } from '$lib/utils/relayUtils';
   import { useRelayInfoCached } from '$lib/utils/relayInfo.svelte';
-  import CreateMediaPostModal from '$lib/components/CreateMediaPostModal.svelte';
-  import { createMediaPostModal } from '$lib/stores/createMediaPostModal.svelte';
   import { homePageFilter } from '$lib/stores/homePageFilter.svelte';
   import { page } from '$app/stores';
 
@@ -492,6 +490,3 @@
     {/if}
   </div>
 </div>
-
-<!-- Media Post Modal -->
-<CreateMediaPostModal bind:open={createMediaPostModal.show} onClose={() => createMediaPostModal.close()} />

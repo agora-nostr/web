@@ -28,7 +28,7 @@
     open = $bindable(false)
   }: Props = $props();
   let searchQuery = $state('');
-  let buttonElement: HTMLButtonElement | null = null;
+  let buttonElement: HTMLButtonElement | null = $state(null);
   let dropdownPosition = $state({ top: 0, left: 0, width: 0 });
 
   // Fetch current user's follows

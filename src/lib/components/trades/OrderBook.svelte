@@ -37,7 +37,13 @@
   const selectedRelay = $derived(settings.selectedRelay);
 
   const subscription = ndk.$subscribe(() => {
-    const opts: any = {
+    const opts: {
+      filters: NDKFilter[];
+      closeOnEose: boolean;
+      subId: string;
+      relayUrls?: string[];
+      exclusiveRelay?: boolean;
+    } = {
       filters: [{ kinds: [38383], limit: 100 }],
       closeOnEose: false,
       subId: 'p2p'

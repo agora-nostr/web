@@ -1,6 +1,6 @@
 import { ndk } from '$lib/ndk.svelte';
 import { settings } from '$lib/stores/settings.svelte';
-import type { NDKEvent } from '@nostr-dev-kit/ndk';
+import type { NDKEvent, NDKFilter } from '@nostr-dev-kit/ndk';
 
 interface PaymentMethodInfo {
   id: string;
@@ -37,7 +37,12 @@ export function useAvailablePaymentMethods() {
   const selectedRelay = $derived(settings.selectedRelay);
 
   const subscription = ndk.$subscribe(() => {
-    const opts: any = {
+    const opts: {
+      filters: NDKFilter[];
+      closeOnEose: boolean;
+      relayUrls?: string[];
+      exclusiveRelay?: boolean;
+    } = {
       filters: [{ kinds: [38383], limit: 100 }],
       closeOnEose: false,
     };

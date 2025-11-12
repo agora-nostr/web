@@ -4,7 +4,6 @@
   import type { NDKUser } from '@nostr-dev-kit/ndk';
   import { MediaQuery } from 'svelte/reactivity';
   import * as Dialog from '$lib/components/ui/dialog';
-  import * as Drawer from '$lib/components/ui/drawer';
   import { UserSearchCombobox } from '$lib/ndk/components/user-search';
 
   interface Props {
@@ -21,34 +20,16 @@
   }
 </script>
 
-{#if isDesktop.current}
-  <Dialog.Root open={isOpen} onOpenChange={(newOpen: boolean) => { if (!newOpen) onClose(); }}>
-    <Dialog.Content class="max-w-md">
-      <Dialog.Header>
-        <Dialog.Title>Search Users</Dialog.Title>
-      </Dialog.Header>
+<Dialog.Root open={isOpen} onOpenChange={(newOpen: boolean) => { if (!newOpen) onClose(); }}>
+  <Dialog.Content class="max-w-md">
+    <Dialog.Header>
+      <Dialog.Title>Search Users</Dialog.Title>
+    </Dialog.Header>
 
-      <UserSearchCombobox
-        ndk={ndk}
-        onSelect={handleUserSelect}
-        placeholder="Search by name, NIP-05, or paste npub..."
-      />
-    </Dialog.Content>
-  </Dialog.Root>
-{:else}
-  <Drawer.Root open={isOpen} onOpenChange={(newOpen: boolean) => { if (!newOpen) onClose(); }}>
-    <Drawer.Content>
-      <Drawer.Header class="text-left">
-        <Drawer.Title>Search Users</Drawer.Title>
-      </Drawer.Header>
-
-      <div class="px-4 pb-4">
-        <UserSearchCombobox
-          ndk={ndk}
-          onSelect={handleUserSelect}
-          placeholder="Search by name, NIP-05, or paste npub..."
-        />
-      </div>
-    </Drawer.Content>
-  </Drawer.Root>
-{/if}
+    <UserSearchCombobox
+      ndk={ndk}
+      onSelect={handleUserSelect}
+      placeholder="Search by name, NIP-05, or paste npub..."
+    />
+  </Dialog.Content>
+</Dialog.Root>
