@@ -14,7 +14,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@capacitor/barcode-scanner": "^2.2.0",
     "@cashu/cashu-ts": "^2.7.2",
     "@hugeicons/core-free-icons": "^1.2.1",
     "@hugeicons/svelte": "^1.0.2",

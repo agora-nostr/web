@@ -1,5 +1,6 @@
 <script lang="ts">
   import { browser } from '$app/environment';
+  import { Html5Qrcode } from 'html5-qrcode';
 
   let { onScan = $bindable<(data: string) => void>(() => {}), onCancel = $bindable<() => void>(() => {}) } = $props();
 
@@ -7,45 +8,67 @@
   let error = $state<string | null>(null);
   let pasteValue = $state('');
   let showPasteInput = $state(false);
+  let html5QrCode: Html5Qrcode | null = null;
+  let readerElement: HTMLDivElement | null = null;
 
   async function startScan() {
-    if (!browser) return;
+    if (!browser || !readerElement) return;
 
     try {
-      // Make body background transparent so camera shows through
-      document.body.style.background = 'transparent';
-      document.documentElement.style.background = 'transparent';
-
       isScanning = true;
       error = null;
 
-      // Dynamically import the scanner
-      const { CapacitorBarcodeScanner } = await import('@capacitor/barcode-scanner');
+      // Create scanner instance
+      html5QrCode = new Html5Qrcode('qr-reader');
 
-      // Start scanning with minimal native UI
-      const result = await CapacitorBarcodeScanner.scanBarcode({
-        hint: 17, // QR_CODE format
-        scanInstructions: '', // We'll show our own instructions
-        scanButton: false,
-        scanText: ''
-      });
+      // Configuration for scanning
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0
+      };
 
-      if (result && result.ScanResult) {
-        handleScannedData(result.ScanResult);
-      }
+      // Success callback
+      const qrCodeSuccessCallback = (decodedText: string) => {
+        handleScannedData(decodedText);
+      };
+
+      // Start scanning with back camera (environment facing)
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        qrCodeSuccessCallback,
+        undefined // error callback
+      );
     } catch (e) {
-      error = e instanceof Error ? e.message : String(e);
+      const errorMessage = e instanceof Error ? e.message : String(e);
+
+      // Show user-friendly error and fallback to paste
+      if (errorMessage.toLowerCase().includes('permission') ||
+          errorMessage.toLowerCase().includes('notallowed')) {
+        error = 'Camera permission denied. Please paste your invoice below.';
+      } else if (errorMessage.toLowerCase().includes('notfound') ||
+                 errorMessage.toLowerCase().includes('no camera')) {
+        error = 'No camera found. Please paste your invoice below.';
+      } else {
+        error = 'Unable to access camera. Please paste your invoice below.';
+      }
+
       console.error('Scan error:', e);
-    } finally {
-      stopScan();
+      showPasteInput = true;
+      isScanning = false;
     }
   }
 
-  function stopScan() {
-    // Restore background
-    if (browser && document?.body) {
-      document.body.style.background = '';
-      document.documentElement.style.background = '';
+  async function stopScan() {
+    if (html5QrCode) {
+      try {
+        await html5QrCode.stop();
+        html5QrCode.clear();
+      } catch (e) {
+        console.error('Error stopping scanner:', e);
+      }
+      html5QrCode = null;
     }
     isScanning = false;
   }
@@ -56,6 +79,7 @@
       ? data.trim().substring(10)
       : data.trim();
 
+    stopScan();
     onScan(cleanData);
   }
 
@@ -80,8 +104,8 @@
     }
   }
 
-  function cancel() {
-    stopScan();
+  async function cancel() {
+    await stopScan();
     onCancel();
   }
 
@@ -99,26 +123,17 @@
 </script>
 
 <div class="scanner-container">
+  <!-- QR Reader Container -->
+  <div id="qr-reader" bind:this={readerElement} class="qr-reader"></div>
+
   {#if error}
-    <div class="error-overlay">
-      <div class="error-content">
-        <div class="error-icon">⚠️</div>
-        <p class="error-message">{error}</p>
-        <button class="button-primary" onclick={cancel}>Close</button>
-      </div>
+    <div class="error-message-bar">
+      <p>{error}</p>
     </div>
   {/if}
 
   {#if isScanning}
-    <!-- Custom UI overlay that doesn't block the camera -->
     <div class="scanner-overlay">
-      <div class="scanner-frame">
-        <div class="corner top-left"></div>
-        <div class="corner top-right"></div>
-        <div class="corner bottom-left"></div>
-        <div class="corner bottom-right"></div>
-      </div>
-
       <div class="scanner-instructions">
         <p>Position QR code within the frame</p>
       </div>
@@ -171,7 +186,40 @@
     right: 0;
     bottom: 0;
     z-index: 9999;
-    pointer-events: none; /* Allow camera interaction to pass through */
+    background: black;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .qr-reader {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qr-reader :global(video) {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .error-message-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    z-index: 10000;
+  }
+
+  .error-message-bar p {
+    margin: 0;
+    font-size: 0.9rem;
   }
 
   .scanner-overlay {
@@ -183,59 +231,25 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 2rem;
-    pointer-events: none; /* Allow camera interaction */
-  }
-
-  .scanner-frame {
-    position: relative;
-    width: 250px;
-    height: 250px;
-    margin-bottom: 2rem;
-  }
-
-  .corner {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    border: 3px solid white;
-  }
-
-  .corner.top-left {
-    top: 0;
-    left: 0;
-    border-right: none;
-    border-bottom: none;
-  }
-
-  .corner.top-right {
-    top: 0;
-    right: 0;
-    border-left: none;
-    border-bottom: none;
-  }
-
-  .corner.bottom-left {
-    bottom: 0;
-    left: 0;
-    border-right: none;
-    border-top: none;
-  }
-
-  .corner.bottom-right {
-    bottom: 0;
-    right: 0;
-    border-left: none;
-    border-top: none;
+    pointer-events: none;
   }
 
   .scanner-instructions {
     color: white;
     text-align: center;
+    margin-top: 6rem;
     margin-bottom: 2rem;
     font-size: 1rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+  }
+
+  .scanner-instructions p {
+    margin: 0;
   }
 
   .cancel-button {
@@ -248,7 +262,8 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    pointer-events: auto; /* Enable interaction for button */
+    pointer-events: auto;
+    margin-top: auto;
   }
 
   .cancel-button:hover {
@@ -261,8 +276,8 @@
     left: 0;
     right: 0;
     padding: 1.5rem;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-    pointer-events: none; /* Allow camera interaction */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    z-index: 10001;
   }
 
   .paste-button {
@@ -362,53 +377,15 @@
     background: var(--color-muted, #f5f5f5);
   }
 
-  .error-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    z-index: 9999;
-  }
-
-  .error-content {
-    background: white;
-    border-radius: 16px;
-    padding: 2rem;
-    max-width: 400px;
-    text-align: center;
-  }
-
-  .error-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-
-  .error-message {
-    color: black;
-    margin-bottom: 1.5rem;
-    font-size: 1rem;
-  }
-
   @media (max-width: 640px) {
-    .scanner-frame {
-      width: 200px;
-      height: 200px;
-    }
-
-    .corner {
-      width: 30px;
-      height: 30px;
-      border-width: 2px;
-    }
-
     .scanner-instructions {
       font-size: 0.875rem;
+      margin-top: 4rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .paste-section {
+      padding: 1rem;
     }
   }
 </style>

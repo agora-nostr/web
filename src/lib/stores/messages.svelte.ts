@@ -12,7 +12,6 @@ class MessagesStore {
 
   // Lazy-start messenger when first accessed
   private async ensureStarted() {
-    console.log('ensurestrated running')
     if (!this.isStarted && ndk.$currentUser && ndk.signer) {
       this.isStarted = true;
 

@@ -308,7 +308,6 @@ class OnboardingStore {
     try {
       // Get npub from signer for npub.cash address
       const user = await signer.user();
-      const npub = user.npub;
 
       // Enable npub.cash and get Lightning address
       npubCash.setEnabled(true);
