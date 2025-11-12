@@ -92,9 +92,9 @@
       if (event.publishStatus === 'error') {
         const error = event.publishError;
         console.error('Publish error object:', error);
-        console.error('Relay errors:', (error as any)?.relayErrors);
+        console.error('Relay errors:', error?.relayErrors);
 
-        const relayErrors = (error as any)?.relayErrors || {};
+        const relayErrors = error?.relayErrors || {};
         const relayErrorEntries = Object.entries(relayErrors);
 
         if (relayErrorEntries.length > 0) {

@@ -8,6 +8,7 @@
   import ZapSettings from '$lib/components/settings/ZapSettings.svelte';
   import WalletSettings from '$lib/components/settings/WalletSettings.svelte';
   import HashtagSettings from '$lib/components/settings/HashtagSettings.svelte';
+  import type { Component } from 'svelte';
 
   type SettingsSection = 'relays' | 'theme' | 'blossom' | 'keys' | 'zap' | 'wallet' | 'hashtags' | 'debug' | null;
 
@@ -18,7 +19,7 @@
     iconPath: string;
     iconColor: string;
     iconBg: string;
-    component: any;
+    component: Component;
     available: boolean;
   }
 

@@ -17,13 +17,11 @@
  * Ensures IDs remain unique throughout the application lifecycle.
  */
 declare global {
-	interface Window {
-		__registryIdCounter?: { current: number };
-	}
+	var __registryIdCounter: { current: number } | undefined;
 }
 
 if (typeof globalThis !== "undefined") {
-	(globalThis as any).__registryIdCounter ??= { current: 0 };
+	globalThis.__registryIdCounter ??= { current: 0 };
 }
 
 /**
@@ -45,9 +43,13 @@ export function useId(prefix = "bits"): string {
 		return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
 	}
 
-	const counter = (globalThis as any).__registryIdCounter;
-	counter.current++;
-	return `${prefix}-${counter.current}`;
+	const counter = globalThis.__registryIdCounter;
+	if (counter) {
+		counter.current++;
+		return `${prefix}-${counter.current}`;
+	}
+	// Fallback if counter is somehow undefined
+	return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
 /**
