@@ -1,5 +1,12 @@
 import { browser } from '$app/environment';
 
+// Extend Navigator interface for iOS standalone mode
+declare global {
+  interface Navigator {
+    standalone?: boolean;
+  }
+}
+
 // Type definition for beforeinstallprompt event
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -28,7 +35,7 @@ function isStandalone(): boolean {
 
   // Check for iOS standalone mode
   if ('standalone' in window.navigator) {
-    return (window.navigator as any).standalone === true;
+    return window.navigator.standalone === true;
   }
 
   // Check for Android/Chrome standalone mode
