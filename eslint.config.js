@@ -1,39 +1,89 @@
-// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from "eslint-plugin-storybook";
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import svelte from 'eslint-plugin-svelte';
+import svelteParser from 'svelte-eslint-parser';
+import globals from 'globals';
 
-import js from '@eslint/js'
+export default tseslint.config(
+  // Global ignores
+  {
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      '.svelte-kit/**',
+      'build/**',
+      'static/**',
+      'landing/**',
+      'site/**',
+      '.playwright-mcp/**',
+      'voces-reference/**',
+      '*.config.js',
+      '*.config.ts',
+    ]
+  },
 
-export default [{
-  ignores: [
-    'dist',
-    'node_modules',
-    '.playwright-mcp',
-    '**/*.svelte',
-    '**/*.tsx',
-    '**/*.ts',
-    'voces-reference/**',
-    'src/components/**',
-    'src/pages/**',
-    'src/lib/**',
-    'scripts/**',
-    'public/**',
-    'server.js',
-    '.svelte-kit/**',
-    'build/**',
-    'static/worker.js'
-  ]
-}, {
-  ...js.configs.recommended,
-  files: ['**/*.js'],
-  languageOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
+  // Base JS config
+  js.configs.recommended,
+
+  // TypeScript configs
+  ...tseslint.configs.recommended,
+
+  // Svelte configs
+  ...svelte.configs['flat/recommended'],
+
+  // TypeScript files
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-empty-object-type': 'off',
+    },
   },
-  rules: {
-    'no-unused-vars': ['error', {
-      argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_',
-      caughtErrorsIgnorePattern: '^_'
-    }],
+
+  // Svelte files
+  {
+    files: ['**/*.svelte'],
+    languageOptions: {
+      parser: svelteParser,
+      parserOptions: {
+        parser: tseslint.parser,
+      },
+      globals: {
+        ...globals.browser,
+      },
+    },
+    rules: {
+      // Svelte-specific rules
+      'svelte/no-at-html-tags': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_|^\\$\\$',
+        caughtErrorsIgnorePattern: '^_',
+      }],
+    },
   },
-}, ...storybook.configs["flat/recommended"]];
+
+  // Test files - more lenient
+  {
+    files: ['**/*.test.ts', '**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+);

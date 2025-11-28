@@ -21,19 +21,16 @@ export const SHARD_CONSTANTS = {
   MAX_TOTAL_SHARDS: 10,
 } as const;
 
-// Browser-compatible hex conversion utilities
-function hexToUint8Array(hex: string): Uint8Array {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-  }
-  return bytes;
+// Hex conversion utilities - uses Buffer for Node.js (required by shamirs-secret-sharing-ts)
+function hexToBuffer(hex: string): Buffer {
+  return Buffer.from(hex, 'hex');
 }
 
-function uint8ArrayToHex(bytes: Uint8Array): string {
-  return Array.from(bytes)
-    .map(byte => byte.toString(16).padStart(2, '0'))
-    .join('');
+function bufferToHex(buffer: Buffer | Uint8Array): string {
+  if (Buffer.isBuffer(buffer)) {
+    return buffer.toString('hex');
+  }
+  return Buffer.from(buffer).toString('hex');
 }
 
 function validateShardConfig(config: ShardConfig): void {
@@ -67,9 +64,9 @@ function splitSecret(
   totalShards: number
 ): string[] {
   try {
-    const secretBytes = hexToUint8Array(secret);
-    const shardBuffers = split(secretBytes, { shares: totalShards, threshold });
-    return shardBuffers.map(buffer => uint8ArrayToHex(buffer));
+    const secretBuffer = hexToBuffer(secret);
+    const shardBuffers = split(secretBuffer, { shares: totalShards, threshold });
+    return shardBuffers.map(buffer => bufferToHex(buffer));
   } catch (error) {
     throw BackupError.from(error, BackupErrorCode.SHAMIR_SPLIT_FAILED, 'Failed to split secret into shards');
   }
@@ -123,9 +120,9 @@ async function decryptShard(
 
 function joinShards(shards: string[]): string {
   try {
-    const shardBuffers = shards.map(shard => hexToUint8Array(shard));
-    const secretBytes = combine(shardBuffers);
-    return uint8ArrayToHex(secretBytes);
+    const shardBuffers = shards.map(shard => hexToBuffer(shard));
+    const secretBuffer = combine(shardBuffers);
+    return bufferToHex(secretBuffer);
   } catch (error) {
     throw BackupError.from(error, BackupErrorCode.SHAMIR_JOIN_FAILED, 'Failed to reconstruct secret from shards');
   }

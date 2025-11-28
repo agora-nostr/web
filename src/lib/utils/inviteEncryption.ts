@@ -6,35 +6,38 @@
 const IV_LENGTH = 12;
 
 /**
+ * Generate a cryptographically secure random string from the given charset
+ */
+function secureRandomString(length: number, chars: string): string {
+	const randomValues = crypto.getRandomValues(new Uint8Array(length));
+	return Array.from(randomValues, (v) => chars[v % chars.length]).join('');
+}
+
+/**
  * Generate a random encryption key (24 alphanumeric characters)
+ * Uses crypto.getRandomValues() for cryptographic security
  */
 export function generateEncryptionKey(): string {
 	const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-	let result = '';
-	for (let i = 0; i < 24; i++) {
-		result += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
-	return result;
+	return secureRandomString(24, chars);
 }
+
+/**
+ * Generate a random d-tag (12 alphanumeric characters)
+ * Uses crypto.getRandomValues() for cryptographic security
+ */
 export function generateDTag(): string {
 	const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-	let result = '';
-	for (let i = 0; i < 12; i++) {
-		result += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
-	return result;
+	return secureRandomString(12, chars);
 }
 
 /**
  * Generate a random invite code (24 alphanumeric characters)
+ * Uses crypto.getRandomValues() for cryptographic security
  */
 export function generateInviteCode(): string {
 	const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-	let result = '';
-	for (let i = 0; i < 24; i++) {
-		result += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
-	return result;
+	return secureRandomString(24, chars);
 }
 
 /**

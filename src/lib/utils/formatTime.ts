@@ -1,12 +1,18 @@
 /**
  * Format a timestamp to a short relative time string
  * @param timestamp - Unix timestamp in seconds
- * @returns Short relative time string (e.g., "just now", "5m", "3h", "2d")
+ * @returns Short relative time string (e.g., "just now", "5m", "3h", "2d", "in the future")
  */
 export function formatTimeAgo(timestamp: number): string {
   const now = Date.now();
   const date = new Date(timestamp * 1000);
   const diff = now - date.getTime();
+
+  // Handle future timestamps
+  if (diff < 0) {
+    return 'in the future';
+  }
+
   const seconds = Math.floor(diff / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);

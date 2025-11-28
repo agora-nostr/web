@@ -13,8 +13,8 @@ export function encodeGeohash(lat: number, lon: number, precision = 5): string {
   let evenBit = true;
   let geohash = '';
 
-  let latRange = [-90.0, 90.0];
-  let lonRange = [-180.0, 180.0];
+  const latRange = [-90.0, 90.0];
+  const lonRange = [-180.0, 180.0];
 
   while (geohash.length < precision) {
     if (evenBit) {
