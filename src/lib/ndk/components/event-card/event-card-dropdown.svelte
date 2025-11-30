@@ -67,11 +67,6 @@
     }
   }
 
-  function handleReport() {
-    // TODO: Implement report modal
-    showMenu = false;
-  }
-
   // Close menu on outside click
   $effect(() => {
     if (!showMenu) return;
@@ -124,22 +119,6 @@
         </svg>
         <span class="text-sm">{isMuted ? 'Unmute' : 'Mute'}</span>
       </button>
-
-      <!-- Report button -->
-      <button
-        onclick={handleReport}
-        class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-accent transition-colors text-yellow-600"
-        type="button"
-      >
-        <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-          <line x1="12" y1="9" x2="12" y2="13"></line>
-          <line x1="12" y1="17" x2="12.01" y2="17"></line>
-        </svg>
-        <span class="text-sm">Report</span>
-      </button>
-
-      <div class="my-1 border-t border-border"></div>
 
       <!-- Copy author nprofile -->
       <button

@@ -34,8 +34,8 @@
       class="w-full px-2 py-1.5 lg:px-3 lg:py-2 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
     >
       {#each currencies as curr}
-        <option value={curr.code}>
-          {curr.code === 'all' ? curr.name : `${curr.flag} ${curr.code} - ${curr.name}`}
+        <option value={curr.id}>
+          {curr.id === 'all' ? curr.name : `${curr.icon} ${curr.id} - ${curr.name}`}
         </option>
       {/each}
     </select>

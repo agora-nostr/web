@@ -16,8 +16,6 @@
 
 		multiple?: boolean;
 
-		showAddRelay?: boolean;
-
 		trigger?: Snippet;
 
 		variant?: 'default' | 'secondary' | 'outline' | 'ghost';
@@ -33,7 +31,6 @@
 		ndk,
 		selected = $bindable([]),
 		multiple = true,
-		showAddRelay = true,
 		trigger,
 		variant = 'outline',
 		size = 'md',
@@ -151,7 +148,7 @@
 						</div>
 
 						<div class="mb-4 space-y-1">
-							{#each context.connectedRelays as relay (relay)}
+							{#each context.connectedRelays as relay, index (index)}
 								<div
 									class={cn(
 										'relative cursor-pointer transition-colors p-2 rounded-md',
@@ -188,13 +185,6 @@
 								</div>
 							{/each}
 						</div>
-
-						{#if showAddRelay}
-							<div class="border-t pt-4">
-								<!-- TODO: Add relay form component -->
-								<!-- <Relay.Selector.AddForm showAsButton={true} class="w-full" /> -->
-							</div>
-						{/if}
 					</div>
 				</Popover.Content>
 			</Popover.Root>
