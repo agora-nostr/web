@@ -27,7 +27,7 @@ export function createLazyFeed(
   } = options;
 
   // Store subscription reference with reactive config
-  let subscription = ndk.$subscribe(configGetter);
+  const subscription = ndk.$subscribe(configGetter);
 
   // Track how many events to display
   let displayLimit = $state(initialLimit);

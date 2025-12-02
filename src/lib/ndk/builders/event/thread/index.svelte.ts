@@ -88,13 +88,13 @@ export function createThreadView(
 
 	// Subscription management
 	let subscription: NDKSubscription | undefined;
-	let missingEventSubscriptions = new SvelteMap<string, NDKSubscription>();
+	const missingEventSubscriptions = new SvelteMap<string, NDKSubscription>();
 
 	// Event cache for the current thread
-	let eventMap = new SvelteMap<string, NDKEvent>();
+	const eventMap = new SvelteMap<string, NDKEvent>();
 
 	// Track which events we've already requested descendants for
-	let requestedDescendantIds = new SvelteSet<string>();
+	const requestedDescendantIds = new SvelteSet<string>();
 
 	// Initialize main event
 	$effect(() => {

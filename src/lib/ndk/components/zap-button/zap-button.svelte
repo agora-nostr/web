@@ -59,7 +59,7 @@
     data-variant={variant}
     onclick={handleClick}
     class={buttonStyles({ variant, active: zapAction.hasZapped, class: className })}
-    aria-label={`Zap`}
+    aria-label="Zap"
   >
     <ZapIcon size={16} filled={zapAction.hasZapped} class="flex-shrink-0" />
     {#if showCount && zapAction.totalAmount > 0}

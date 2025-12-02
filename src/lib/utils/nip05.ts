@@ -61,9 +61,8 @@ export async function checkNip05Availability(
 		return { available: false, error: 'Unable to check availability. Please try again.' };
 	} catch (error) {
 		console.error('Error checking NIP-05 availability:', error);
-		// On error, we'll treat it as available but log the error
-		// This prevents blocking users if the relay is temporarily unavailable
-		return { available: true };
+		// On error, fail closed - don't allow claiming a username we couldn't verify
+		return { available: false, error: 'Could not verify availability. Please try again.' };
 	}
 }
 

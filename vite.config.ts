@@ -5,6 +5,16 @@ export default defineConfig({
   plugins: [
     sveltekit()
   ],
+  test: {
+    include: ['src/**/*.{test,spec}.{js,ts}'],
+    environment: 'happy-dom',
+    globals: true,
+    setupFiles: ['./vitest.setup.ts'],
+    // Run backup tests in Node environment for Buffer support (needed by shamirs-secret-sharing-ts)
+    environmentMatchGlobs: [
+      ['src/lib/backup/**/*.test.ts', 'node'],
+    ],
+  },
   define: {
     'global': 'globalThis'
   },
