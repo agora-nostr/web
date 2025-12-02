@@ -87,7 +87,7 @@
           class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover"
         />
       {:else}
-        <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br bg-primary rounded-full" />
+        <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br bg-primary rounded-full"></div>
       {/if}
       <div>
         <div class="flex items-center gap-2">

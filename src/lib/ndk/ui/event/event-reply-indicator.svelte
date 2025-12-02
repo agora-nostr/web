@@ -7,8 +7,8 @@
   import type { NDKSvelte } from '@nostr-dev-kit/svelte';
   import type { Snippet } from 'svelte';
   import { getContext } from 'svelte';
-  import { getNDKFromContext } from '../../utils/ndk-context.svelte.js';
-  import { ENTITY_CLICK_CONTEXT_KEY, type EntityClickContext } from '../entity-click-context.js';
+  import { getNDK } from '../../utils/ndk';
+  import { CONTENT_RENDERER_CONTEXT_KEY, type ContentRendererContext } from '../content-renderer/content-renderer.context.js';
   import { User } from '../user/index.js';
 
   interface Props {
@@ -31,11 +31,11 @@
     children
   }: Props = $props();
 
-  const ndk = getNDKFromContext(providedNdk);
-  const entityClickContext = getContext<EntityClickContext | undefined>(ENTITY_CLICK_CONTEXT_KEY);
+  const ndk = getNDK(providedNdk);
+  const rendererContext = getContext<ContentRendererContext | undefined>(CONTENT_RENDERER_CONTEXT_KEY);
 
-  // Use onclick prop if provided, otherwise fall back to context callback
-  const handleClick = $derived(onclick ?? entityClickContext?.onEventClick);
+  // Use onclick prop if provided, otherwise fall back to renderer callback
+  const handleClick = $derived(onclick ?? rendererContext?.renderer.onEventClick);
 
   let replyToEvent = $state<NDKEvent | null>(null);
   let loading = $state(true);

@@ -5,7 +5,7 @@
 	"subcategory": "displays",
 	"variant": "modern",
 	"oneLiner": "Modern inline mention with avatar and hover card popover",
-	"command": "npx jsrepo add mention-modern",
+	"registryName": "components/mention-modern",
 	"dependencies": ["@nostr-dev-kit/svelte", "@nostr-dev-kit/ndk", "bits-ui"],
 	"useCases": [
 		"user-mentions",
@@ -14,6 +14,11 @@
 		"social-references",
 		"popover-profiles"
 	],
+	"registration": {
+		"autoRegister": true,
+		"priority": 10,
+		"type": "mention"
+	},
 	"apiDoc": {
 		"name": "MentionModern",
 		"description": "Modern inline mention component with avatar and user card popover on hover. Displays user avatar and name inline with primary color styling. Shows detailed user card on hover with 200ms delay. Features smooth transitions, hover states, and keyboard navigation support. Uses User builder pattern and Popover from bits-ui for interaction.",

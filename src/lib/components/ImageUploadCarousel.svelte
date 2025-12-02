@@ -64,7 +64,7 @@
         images = [...images, {
           url: upload.result.url,
           mimeType: file.type,
-          hash: upload.result.sha256 || '',
+          hash: Array.isArray(upload.result.sha256) ? upload.result.sha256[0] : (upload.result.sha256 || ''),
           blurhash: upload.result.blurhash,
           dimensions
         }];

@@ -34,19 +34,13 @@
 
     (async () => {
       try {
-        console.log("[Onboarding] Checking for existing profile...");
         const profile = await activeUser.fetchProfile();
         if (profile && (profile.name || profile.displayName || profile.about)) {
-          console.log(
-            "[Onboarding] ✓ Found existing profile, will skip profile step",
-          );
           hasExistingProfile = true;
         } else {
-          console.log("[Onboarding] No existing profile found");
           hasExistingProfile = false;
         }
       } catch (err) {
-        console.log("[Onboarding] Error checking for profile:", err);
         hasExistingProfile = false;
       } finally {
         checkedForProfile = true;
@@ -59,7 +53,6 @@
     // Don't generate a key if user is already logged in
     if (signer || ndk.$activeUser) return;
     signer = NDKPrivateKeySigner.generate();
-    console.log("[Onboarding] ✓ Generated new keypair, pubkey:", signer.pubkey);
   });
 
   // NOTE: completeInviteSetup is now called explicitly in handleStep4Next for invite flow
@@ -68,9 +61,6 @@
   function goToStep(step: number) {
     // Skip profile step (4) if user already has a profile
     if (step === 4 && hasExistingProfile) {
-      console.log(
-        "[Onboarding] Skipping profile step - user has existing profile",
-      );
       step = 5;
     }
     onboardingStore.setStep(step);
@@ -111,15 +101,11 @@
     }
 
     try {
-      console.log("[Onboarding] Starting onboarding completion...");
 
       // 1. Login first (only for new users)
       if (!isExistingUser && signer) {
-        console.log("[Onboarding] Logging in new user...");
         await ndk.$sessions?.login(signer);
-        console.log("[Onboarding] ✓ Logged in with pubkey:", signer.pubkey);
       } else {
-        console.log("[Onboarding] Existing user already logged in");
       }
 
       // 2. Get the signer to use (either new user's signer or existing user's signer from session)
@@ -131,30 +117,21 @@
 
       // 3. Check if this is an invite flow or regular onboarding
       if (inviteData && !hasCompletedInviteSetup) {
-        console.log("[Onboarding] Invite flow: completing invite setup");
         await onboardingStore.completeInviteSetup(signerToUse as NDKPrivateKeySigner);
       } else if (!isExistingUser) {
         // Only publish profile and setup for new users
-        console.log("[Onboarding] Regular flow: publishing profile and setup");
         await onboardingStore.publishProfileAndSetup(signerToUse as NDKPrivateKeySigner);
       } else {
-        console.log("[Onboarding] Existing user: skipping profile publishing");
       }
 
       // 4. Publish follow packs if selected
       if (selectedPacks.length > 0) {
-        console.log(
-          "[Onboarding] Publishing kind:3 from",
-          selectedPacks.length,
-          "packs",
-        );
         await followPackUsers(ndk, selectedPacks);
       }
 
       // 5. Publish introduction if provided
       const introText = onboardingStore.introductionText;
       if (introText) {
-        console.log("[Onboarding] Publishing introduction post");
         try {
           const introData = JSON.parse(introText);
           const event = new NDKEvent(ndk);
@@ -167,13 +144,11 @@
           }
 
           await event.publish();
-          console.log("[Onboarding] ✓ Published introduction");
         } catch (err) {
           console.error("[Onboarding] ✗ Error publishing introduction:", err);
         }
       }
 
-      console.log("[Onboarding] ✓ Onboarding complete");
       onboardingStore.clear();
       goto("/");
     } catch (err) {

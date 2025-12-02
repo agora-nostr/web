@@ -164,7 +164,7 @@
       <div
         class="h-32 bg-cover bg-center"
         style="background-image: url(https://m.primal.net/OQwX.jpg)"
-      />
+      ></div>
       <div class="relative -mt-12 px-6 pb-6">
         <img
           src="https://m.primal.net/OQwW.jpg"

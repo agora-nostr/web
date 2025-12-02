@@ -50,25 +50,20 @@
     return events.map(event => NDKFollowPack.from(event));
   });
 
-  const loading = $derived(followPacksSubscription?.eoseReceived === false);
+  const loading = $derived((followPacksSubscription as any)?.eoseReceived === false);
 
   const communityInfo = $derived(COMMUNITY_METADATA[communityKey] || COMMUNITY_METADATA.venezuela);
 
   function handlePackClick(pack: NDKFollowPack) {
     const packId = pack.encode();
-    console.log('[Step2] Pack clicked:', pack.title, 'packId:', packId);
     if (selectedPacks.includes(packId)) {
-      console.log('[Step2] Deselecting pack');
       onSelectPacks(selectedPacks.filter(id => id !== packId));
     } else {
-      console.log('[Step2] Selecting pack');
       onSelectPacks([...selectedPacks, packId]);
     }
-    console.log('[Step2] Selected packs count:', selectedPacks.length);
   }
 
   function handleNext() {
-    console.log('[Step2] Calling onNext');
     onNext();
   }
 </script>
@@ -81,7 +76,7 @@
       alt="Community leaders"
       class="absolute inset-0 w-full h-full object-cover"
     />
-    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/70" />
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/70"></div>
     <div class="absolute bottom-0 left-0 right-0 p-12">
       <div class="mb-8">
         <p class="text-3xl text-foreground/90 italic leading-relaxed">

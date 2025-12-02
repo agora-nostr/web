@@ -15,7 +15,7 @@
   interface Props {
     ndk: NDKSvelte;
 
-    article: NDKArticle;
+    event: NDKArticle;
 
     width?: string;
 
@@ -30,7 +30,7 @@
 
   let {
     ndk,
-    article,
+    event,
     width = 'w-[320px]',
     height = 'h-[420px]',
     imageHeight = 'h-56',
@@ -53,7 +53,7 @@
   const interactiveClasses = onclick ? 'hover:bg-muted hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/10 cursor-pointer' : '';
 </script>
 
-<Root {ndk} {article}>
+<Root {ndk} article={event}>
   <svelte:element
     data-article-card-portrait=""
     this={onclick ? 'button' : 'div'}

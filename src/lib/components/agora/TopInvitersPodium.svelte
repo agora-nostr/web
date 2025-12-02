@@ -34,7 +34,6 @@
 	let profilesVersion = $state(0);
 
 	$effect(() => {
-		console.log('[TopInvitersPodium] $effect running, stats count:', stats.length);
 		const newProfiles = new Map<string, NDKUserProfile | null>();
 		let loaded = 0;
 		const total = stats.length;
@@ -47,7 +46,6 @@
 		stats.forEach(stat => {
 			ndk.fetchUser(stat.pubkey).then(u => {
 				u?.fetchProfile().then(p => {
-					console.log('[TopInvitersPodium] Setting profile for', stat.pubkey);
 					newProfiles.set(stat.pubkey, p || null);
 					loaded++;
 					if (loaded === total) {

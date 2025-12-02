@@ -2,6 +2,7 @@
   import { ndk } from '$lib/ndk.svelte';
   import { goto } from '$app/navigation';
   import { headerStore } from '$lib/stores/header.svelte';
+  import { layoutStore } from '$lib/stores/layout.svelte';
   import { type NDKFollowPack } from '@nostr-dev-kit/ndk';
 
   let showCreatePackModal = $state(false);
@@ -70,7 +71,7 @@
       if (activeFilter === 'mine' && userPubkey) {
         filtered = filtered.filter(pack => pack.pubkey === userPubkey);
       } else if (activeFilter === 'follows' && userFollows) {
-        const followPubkeys = Array.from(userFollows).map(user => typeof user === 'string' ? user : user.pubkey);
+        const followPubkeys = Array.from(userFollows).map((user: any) => typeof user === 'string' ? user : user.pubkey);
         filtered = filtered.filter(pack => followPubkeys.includes(pack.pubkey));
       } else if (activeFilter === 'include-me' && userPubkey) {
         filtered = filtered.filter(pack => {
@@ -121,12 +122,14 @@
     goto(url);
   }
 
-  // Set up header
+  // Set up header and layout
   $effect(() => {
     headerStore.header = packsHeader;
+    layoutStore.setRightSidebarVisibility(false);
 
     return () => {
       headerStore.clear();
+      layoutStore.setRightSidebarVisibility(true);
     };
   });
 </script>

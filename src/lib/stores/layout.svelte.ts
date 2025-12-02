@@ -72,14 +72,6 @@ class LayoutStore {
   }
 
   /**
-   * Auto-collapse for article mode
-   */
-  setArticleMode() {
-    this.collapseSidebar();
-    this.setRightSidebarVisibility(false);
-  }
-
-  /**
    * Reset to default layout
    */
   reset() {

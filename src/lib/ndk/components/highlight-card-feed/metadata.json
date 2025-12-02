@@ -5,9 +5,14 @@
 	"subcategory": "cards",
 	"variant": "feed",
 	"oneLiner": "A feed-optimized card for highlight content",
-	"command": "npx jsrepo add highlight-card-feed",
+	"registryName": "components/highlight-card-feed",
 	"dependencies": ["@nostr-dev-kit/svelte", "@nostr-dev-kit/ndk"],
 	"useCases": ["highlight", "cards", "feed", "nostr", "social"],
+	"registration": {
+		"autoRegister": true,
+		"priority": 10,
+		"wrapper": "NDKHighlight"
+	},
 	"apiDoc": {
 		"name": "HighlightCardFeed",
 		"description": "A card for displaying text highlights (NIP-84) in feed layouts. Features book page-style design with optional author header, source information, and custom action buttons. Includes hover effects and supports custom snippet for actions area.",

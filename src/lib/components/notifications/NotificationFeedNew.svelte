@@ -48,58 +48,18 @@
 {:else if groupedNotifications}
   <div class="space-y-2">
     {#each groupedNotifications.all as group (group.targetEvent.id)}
-      <Notification.Root notification={group}>
+      <Notification.Root {ndk} notification={group}>
         <div class="flex items-start gap-3 p-4 hover:bg-accent/10 rounded-lg transition-colors">
           <!-- Actor avatars -->
-          <Notification.Actors class="flex -space-x-2">
-            {#each group.actors.slice(0, 3) as actor}
-              <div class="w-10 h-10 rounded-full bg-muted border-2 border-background">
-                <!-- User avatar would go here -->
-              </div>
-            {/each}
-            {#if group.actors.length > 3}
-              <div class="w-10 h-10 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs">
-                +{group.actors.length - 3}
-              </div>
-            {/if}
-          </Notification.Actors>
+          <Notification.Actors />
 
           <!-- Notification content -->
           <div class="flex-1 min-w-0">
-            <Notification.Action>
-              <p class="text-sm">
-                <span class="font-medium">
-                  {#if group.actors.length === 1}
-                    Someone
-                  {:else if group.actors.length === 2}
-                    2 people
-                  {:else}
-                    {group.actors.length} people
-                  {/if}
-                </span>
+            <Notification.Action />
 
-                {#if group.types.has(7)}
-                  reacted to
-                {:else if group.types.has(9735)}
-                  zapped
-                {:else if group.types.has(6)}
-                  reposted
-                {:else if group.types.has(1) || group.types.has(1111)}
-                  replied to
-                {:else}
-                  interacted with
-                {/if}
-                your note
-              </p>
-            </Notification.Action>
+            <Notification.Content class="mt-1 text-sm text-muted-foreground line-clamp-2" />
 
-            <Notification.Content class="mt-1 text-sm text-muted-foreground line-clamp-2">
-              {group.targetEvent.content}
-            </Notification.Content>
-
-            <Notification.Timestamp class="mt-1">
-              <TimeAgo timestamp={group.mostRecentAt} />
-            </Notification.Timestamp>
+            <Notification.Timestamp class="mt-1" />
           </div>
 
           <!-- Interaction counts -->

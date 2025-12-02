@@ -163,7 +163,7 @@
             </Button>
           </div>
 
-          {#if typeof navigator !== 'undefined' && navigator.share}
+          {#if typeof navigator !== 'undefined' && (navigator as any).share}
             <Button
               onclick={handleNativeShare}
               class="w-full mt-3"

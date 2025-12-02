@@ -1,4 +1,4 @@
-import NDKCacheSqliteWasm from "@nostr-dev-kit/cache-sqlite-wasm";
+import NDKCacheBrowser from "@nostr-dev-kit/cache-browser";
 import { createNDK } from '@nostr-dev-kit/svelte';
 import { LocalStorage } from '@nostr-dev-kit/sessions';
 import { NDKEvent, NDKKind, NDKBlossomList, NDKInterestList, NDKRelayFeedList } from '@nostr-dev-kit/ndk';
@@ -15,14 +15,13 @@ const DEFAULT_RELAYS = [
   'wss://relay.nostr.band',
 ];
 
-// Initialize SQLite WASM cache (worker-only, browser only)
-const cacheAdapter = browser ? new NDKCacheSqliteWasm({
+// Initialize browser-optimized cache with automatic WASM/IndexedDB fallback
+const cacheAdapter = browser ? new NDKCacheBrowser({
   dbName: "agora",
   workerUrl: `/worker-${CACHE_WORKER_VERSION}.js`,
   wasmUrl: "/sql-wasm.wasm",
+  debug: import.meta.env.DEV
 }) : undefined;
-
-export const cacheInitialized = cacheAdapter?.initializeAsync();
 
 // Initialize signature verification worker (only in browser)
 let sigVerifyWorker: Worker | undefined;
@@ -50,6 +49,9 @@ export const ndk = createNDK({
   } : undefined
 })
 
+// Initialize cache with NDK instance
+export const cacheInitialized = cacheAdapter?.initializeAsync(ndk);
+
 // Set the relay authentication policy (browser only)
 if (browser) {
   ndk.relayAuthDefaultPolicy = createAuthPolicyWithConfirmation({ ndk });
@@ -61,9 +63,7 @@ export const ndkReady = (async () => {
 
   try {
     // Wait for cache to be initialized
-    console.log("🔄 Initializing cache...");
     await cacheInitialized;
-    console.log("✅ Cache initialized.");
 
     // Initialize worker
     const SigVerifyWorker = (await import('./sig-verify.worker.ts?worker')).default;

@@ -1,5 +1,6 @@
 import { NDKMessenger, CacheModuleStorage, type NDKConversation, type NDKMessage } from '@nostr-dev-kit/messages';
 import { ndk } from '../ndk.svelte';
+import { messagesLogger as logger } from '$lib/utils/logger';
 
 /**
  * Svelte 5 store for managing DM state using @nostr-dev-kit/messages
@@ -10,31 +11,34 @@ class MessagesStore {
   private _totalUnreadCount = $state(0);
   private isStarted = false;
 
-  // Lazy-start messenger when first accessed
-  private async ensureStarted() {
-    if (!this.isStarted && ndk.$currentUser && ndk.signer) {
-      this.isStarted = true;
+  constructor() {
+    // Components should call start() when ready
+    // Auto-start logic removed to avoid effect_orphan error
+  }
 
-      // Create messenger instance with persistent storage
-      const storage = new CacheModuleStorage(ndk.cacheAdapter!, ndk.$currentUser.pubkey);
-      this.messenger = new NDKMessenger(ndk, { storage });
+  async start() {
+    if (this.isStarted || !ndk.$currentUser || !ndk.signer) return;
 
-      // Listen for new messages
-      this.messenger.on('message', (message: NDKMessage) => {
-        // Refresh conversations when a message arrives
-        this.refreshConversations();
-      });
+    this.isStarted = true;
 
-      this.messenger.on('error', (error: unknown) => {
-        console.error('Messenger error:', error);
-      });
+    // Create messenger instance with persistent storage
+    const storage = new CacheModuleStorage(ndk.cacheAdapter!, ndk.$currentUser.pubkey);
+    this.messenger = new NDKMessenger(ndk, { storage });
 
-      // Start the messenger
-      await this.messenger.start();
+    // Listen for new messages
+    this.messenger.on('message', (message: NDKMessage) => {
+      this.refreshConversations();
+    });
 
-      // Load initial conversations
-      await this.refreshConversations();
-    }
+    this.messenger.on('error', (error: unknown) => {
+      logger.error('Messenger error:', error);
+    });
+
+    // Start the messenger
+    await this.messenger.start();
+
+    // Load initial conversations
+    await this.refreshConversations();
   }
 
   private async refreshConversations() {
@@ -49,7 +53,7 @@ class MessagesStore {
         0
       );
     } catch (error) {
-      console.error('Failed to refresh conversations:', error);
+      logger.error('Failed to refresh conversations:', error);
     }
   }
 
@@ -64,8 +68,6 @@ class MessagesStore {
   }
 
   async getConversation(participantNpub: string): Promise<NDKConversation | null> {
-    await this.ensureStarted();
-
     if (!this.messenger) return null;
 
     const user = ndk.getUser({ npub: participantNpub });
@@ -73,8 +75,6 @@ class MessagesStore {
   }
 
   async sendMessage(recipientNpub: string, content: string): Promise<NDKMessage | null> {
-    await this.ensureStarted();
-
     if (!this.messenger) return null;
 
     const recipient = ndk.getUser({ npub: recipientNpub });
@@ -99,11 +99,6 @@ class MessagesStore {
   }
 
   get conversations() {
-    // Only trigger lazy initialization if we have a user
-    if (ndk.$currentUser) {
-      this.ensureStarted();
-    }
-
     // Sort by last message timestamp (most recent first)
     return [...this._conversations].sort((a, b) => {
       const aTime = a.getLastMessage()?.timestamp || 0;
@@ -113,10 +108,6 @@ class MessagesStore {
   }
 
   get totalUnreadCount() {
-    // Only trigger lazy initialization if we have a user
-    if (ndk.$currentUser) {
-      this.ensureStarted();
-    }
     return this._totalUnreadCount;
   }
 

@@ -10,7 +10,7 @@ import {
 	type NDKUser,
 } from "@nostr-dev-kit/ndk";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
-import { getContext } from "svelte";
+import { getNDK } from "../../utils/ndk/index.svelte.js";
 
 export interface ZapStats {
 	count: number;
@@ -45,16 +45,12 @@ export type ZapIntentCallback = (event: NDKEvent, zapFn: ZapFunction) => void;
  */
 export function createZapAction(
 	config: () => ZapActionConfig,
-	ndk?: NDKSvelte,
+	ndkParam?: NDKSvelte,
 ) {
-	const resolvedNDK = ndk || getContext<NDKSvelte>("ndk");
+	const ndk = getNDK(ndkParam);
 
 	// Subscribe to zaps
 	let zapsSub = $state<ReturnType<NDKSvelte["$subscribe"]> | null>(null);
-
-	// Optimistic UI state
-	let optimisticZapAmount = $state(0);
-	let optimisticUserZapped = $state(false);
 
 	$effect(() => {
 		const { target } = config();
@@ -63,7 +59,7 @@ export function createZapAction(
 			return;
 		}
 
-		zapsSub = resolvedNDK.$subscribe(() => ({
+		zapsSub = ndk.$subscribe(() => ({
 			filters: [
 				{
 					kinds: [NDKKind.Zap],
@@ -76,12 +72,7 @@ export function createZapAction(
 
 	const stats = $derived.by(() => {
 		const sub = zapsSub;
-		if (!sub)
-			return {
-				count: optimisticUserZapped ? 1 : 0,
-				totalAmount: optimisticZapAmount,
-				hasZapped: optimisticUserZapped,
-			};
+		if (!sub) return { count: 0, totalAmount: 0, hasZapped: false };
 
 		const zaps = Array.from(sub.events);
 		const zapInvoices = zaps.map(zapInvoiceFromEvent).filter(Boolean);
@@ -89,17 +80,14 @@ export function createZapAction(
 			(sum, invoice) => sum + (invoice?.amount || 0),
 			0,
 		);
-		const hasZapped = resolvedNDK.$currentPubkey
-			? zapInvoices.some(
-					(invoice) => invoice?.zapper === resolvedNDK.$currentPubkey,
-				)
+		const hasZapped = ndk.$currentPubkey
+			? zapInvoices.some((invoice) => invoice?.zapper === ndk.$currentPubkey)
 			: false;
 
 		return {
-			count: zaps.length + (optimisticUserZapped ? 1 : 0),
-			totalAmount:
-				Math.floor(totalAmount / 1000) + optimisticZapAmount, // Convert millisats to sats + optimistic
-			hasZapped: hasZapped || optimisticUserZapped,
+			count: zaps.length,
+			totalAmount: Math.floor(totalAmount / 1000), // Convert millisats to sats
+			hasZapped,
 		};
 	});
 
@@ -109,33 +97,16 @@ export function createZapAction(
 			throw new Error("No target to zap");
 		}
 
-		if (!resolvedNDK.$currentPubkey) {
+		if (!ndk.$currentPubkey) {
 			throw new Error("User must be logged in to zap");
 		}
 
-		// Optimistically update UI immediately
-		optimisticZapAmount = amount;
-		optimisticUserZapped = true;
+		// Use NDKZapper to send the zap
+		const zapper = new NDKZapper(target, amount * 1000, "msat", {
+			comment,
+		});
 
-		try {
-			// Use NDKZapper to send the zap
-			const zapper = new NDKZapper(target, amount * 1000, "msat", {
-				comment,
-			});
-
-			await zapper.zap();
-
-			// Clear optimistic state after a delay to let the real zap event arrive
-			setTimeout(() => {
-				optimisticZapAmount = 0;
-				optimisticUserZapped = false;
-			}, 3000);
-		} catch (error) {
-			// Rollback optimistic updates on failure
-			optimisticZapAmount = 0;
-			optimisticUserZapped = false;
-			throw error;
-		}
+		await zapper.zap();
 	}
 
 	const events = $derived(zapsSub ? Array.from(zapsSub.events) : []);

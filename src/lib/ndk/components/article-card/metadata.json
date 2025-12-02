@@ -5,9 +5,14 @@
 	"subcategory": "cards",
 	"variant": "basic",
 	"oneLiner": "A medium-sized article card with image, title, summary and metadata",
-	"command": "npx jsrepo add article-card",
+	"registryName": "components/article-card",
 	"dependencies": ["@nostr-dev-kit/svelte", "@nostr-dev-kit/ndk"],
 	"useCases": ["article-lists", "content-feeds", "blog-layouts", "news-sites"],
+	"registration": {
+		"autoRegister": true,
+		"priority": 7,
+		"wrapper": "NDKArticle"
+	},
 	"apiDoc": {
 		"name": "ArticleCard",
 		"description": "Article card component",
@@ -19,7 +24,7 @@
 				"description": "NDK instance"
 			},
 			{
-				"name": "article",
+				"name": "event",
 				"type": "NDKArticle",
 				"description": "Article to display"
 			},

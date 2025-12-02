@@ -5,7 +5,7 @@
 import type { NDKUser, NDKSubscription } from "@nostr-dev-kit/ndk";
 import { NDKRelaySet } from "@nostr-dev-kit/ndk";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
-import { resolveNDK } from "../resolve-ndk/index.svelte.js";
+import { getNDK } from "../../utils/ndk/index.svelte.js";
 
 export interface UserInputResult {
 	user: NDKUser;
@@ -51,7 +51,7 @@ const NPUB_PATTERN = /^(npub1|nprofile1)[a-z0-9]{20,}/i;
  */
 export function createUserInput(
 	config: () => UserInputConfig,
-	ndk?: NDKSvelte,
+	ndkParam?: NDKSvelte,
 ): {
 	readonly results: UserInputResult[];
 	readonly selectedUser: NDKUser | null;
@@ -59,7 +59,7 @@ export function createUserInput(
 	selectUser: (user: NDKUser) => void;
 	clear: () => void;
 } {
-	const resolvedNDK = resolveNDK(ndk);
+	const ndk = getNDK(ndkParam);
 
 	let results = $state<UserInputResult[]>([]);
 	let selectedUser = $state<NDKUser | null>(null);
@@ -77,7 +77,7 @@ export function createUserInput(
 			return [];
 		}
 
-		const cacheAdapter = resolvedNDK.cacheAdapter;
+		const cacheAdapter = ndk.cacheAdapter;
 
 		if (!cacheAdapter?.getProfiles) {
 			const allProfiles = cacheAdapter?.getAllProfilesSync?.() || new Map();
@@ -94,7 +94,7 @@ export function createUserInput(
 					profile.nip05?.toLowerCase().includes(lowerQuery) ||
 					profile.about?.toLowerCase().includes(lowerQuery)
 				) {
-					const user = resolvedNDK.getUser({ pubkey });
+					const user = ndk.getUser({ pubkey });
 					matchedResults.push({ user });
 				}
 			}
@@ -111,7 +111,7 @@ export function createUserInput(
 		}
 
 		const results = Array.from(profileMap.keys()).map((pubkey) => ({
-			user: resolvedNDK.getUser({ pubkey }),
+			user: ndk.getUser({ pubkey }),
 		}));
 
 		return results;
@@ -122,7 +122,7 @@ export function createUserInput(
 	 */
 	async function lookupUser(input: string): Promise<UserInputResult | null> {
 		try {
-			const user = await resolvedNDK.fetchUser(input);
+			const user = await ndk.fetchUser(input);
 			if (!user) {
 				return null;
 			}
@@ -145,8 +145,8 @@ export function createUserInput(
 		const cachedResults = await searchCachedProfiles(query);
 
 		cachedResults.sort((a, b) => {
-			const aFollowing = resolvedNDK.$follows.has(a.user.pubkey);
-			const bFollowing = resolvedNDK.$follows.has(b.user.pubkey);
+			const aFollowing = ndk.$follows.has(a.user.pubkey);
+			const bFollowing = ndk.$follows.has(b.user.pubkey);
 			if (aFollowing && !bFollowing) return -1;
 			if (!aFollowing && bFollowing) return 1;
 			return 0;
@@ -168,7 +168,7 @@ export function createUserInput(
 			);
 
 			if (existingIndex === -1) {
-				const isFollowing = resolvedNDK.$follows.has(lookupResult.user.pubkey);
+				const isFollowing = ndk.$follows.has(lookupResult.user.pubkey);
 				if (isFollowing) {
 					results = [lookupResult, ...results];
 				} else {
@@ -198,11 +198,11 @@ export function createUserInput(
 		loading = true;
 
 		const relayInstances = relays.map((url) =>
-			resolvedNDK.pool.getRelay(url, true, true),
+			ndk.pool.getRelay(url, true, true),
 		);
-		const relaySet = new NDKRelaySet(new Set(relayInstances), resolvedNDK);
+		const relaySet = new NDKRelaySet(new Set(relayInstances), ndk);
 
-		const sub = resolvedNDK.subscribe(
+		const sub = ndk.subscribe(
 			{ kinds: [0], search: query },
 			{ closeOnEose: true, groupable: false, subId: "user-search" },
 			relaySet,
@@ -212,13 +212,13 @@ export function createUserInput(
 		activeSubscription = sub;
 
 		sub.on("event", (event) => {
-			const user = resolvedNDK.getUser({ pubkey: event.pubkey });
+			const user = ndk.getUser({ pubkey: event.pubkey });
 
 			const existingIndex = results.findIndex(
 				(r) => r.user.pubkey === user.pubkey,
 			);
 			if (existingIndex === -1) {
-				const isFollowing = resolvedNDK.$follows.has(user.pubkey);
+				const isFollowing = ndk.$follows.has(user.pubkey);
 				if (isFollowing) {
 					results = [{ user }, ...results];
 				} else {

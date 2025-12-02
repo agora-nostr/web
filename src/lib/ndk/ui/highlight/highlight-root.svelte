@@ -13,7 +13,7 @@
     HIGHLIGHT_CONTEXT_KEY,
     type HighlightContext,
   } from './highlight.context.js';
-  import { getNDKFromContext } from '../../utils/ndk-context.svelte.js';
+  import { getNDK } from '../../utils/ndk';
 
   interface Props {
     ndk?: NDKSvelte;
@@ -32,7 +32,7 @@
     children,
   }: Props = $props();
 
-  const ndk = getNDKFromContext(providedNdk);
+  const ndk = getNDK(providedNdk);
 
   // Create highlight builder
   const state = createHighlight(() => ({ event }), ndk);

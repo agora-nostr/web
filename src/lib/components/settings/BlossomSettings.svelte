@@ -2,6 +2,7 @@
   import { toast } from '$lib/stores/toast.svelte';
   import { ndk } from '$lib/ndk.svelte';
   import { NDKBlossomList, NDKKind } from '@nostr-dev-kit/ndk';
+  import { createFetchEvent } from '@nostr-dev-kit/svelte';
 
   const DEFAULT_SERVERS = [
     'https://blossom.primal.net',

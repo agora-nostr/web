@@ -5,18 +5,18 @@
 <script lang="ts">
   import type { NDKArticle } from '@nostr-dev-kit/ndk';
   import type { NDKSvelte } from '@nostr-dev-kit/svelte';
-  import { Article } from '../../../components/ui/article';
+  import { Article } from '../../ui/article';
 
   interface Props {
     ndk: NDKSvelte;
-    article: NDKArticle;
+    event: NDKArticle;
   }
 
-  let { ndk, article }: Props = $props();
+  let { ndk, event }: Props = $props();
 </script>
 
 <div data-article-card-compact="" class="rounded-lg overflow-hidden border border-border bg-card">
-  <Article.Root {ndk} {article}>
+  <Article.Root {ndk} article={event}>
     <div class="flex flex-row gap-3 p-2">
       <Article.Image class="h-24" />
 

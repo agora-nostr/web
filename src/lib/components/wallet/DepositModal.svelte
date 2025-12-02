@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ndk } from '$lib/ndk.svelte';
+  import { walletStore } from '$lib/features/wallet';
   import type { NDKCashuDeposit } from '@nostr-dev-kit/wallet';
   import QRCode from './QRCode.svelte';
   import * as Dialog from '$lib/components/ui/dialog';
@@ -16,8 +16,13 @@
   let error = $state<string | null>(null);
 
   async function handleDeposit() {
-    if (!ndk.$wallet) {
+    if (!walletStore.wallet) {
       error = 'Wallet not available';
+      return;
+    }
+
+    if (!('deposit' in walletStore.wallet)) {
+      error = 'Deposit not supported with NWC wallet';
       return;
     }
 
@@ -25,7 +30,7 @@
     error = null;
 
     try {
-      deposit = ndk.$wallet.deposit(amount);
+      deposit = walletStore.wallet.deposit(amount);
 
       if (!deposit) {
         throw new Error('Failed to create deposit - no Cashu wallet available');
@@ -38,7 +43,7 @@
       });
 
       deposit.on('error', (err) => {
-        error = typeof err === 'string' ? err : err?.message || 'Deposit failed';
+        error = typeof err === 'string' ? err : (err && typeof err === 'object' && 'message' in err ? (err as any).message : 'Deposit failed');
         isLoading = false;
       });
 

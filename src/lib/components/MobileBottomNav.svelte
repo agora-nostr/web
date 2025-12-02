@@ -14,7 +14,6 @@
   import Badge from './Badge.svelte';
 
   const currentPath = $derived($page.url.pathname);
-  const wallet = ndk.$wallet;
   const notificationsManager = createNotificationsManager(ndk);
 
   const isActive = (path: string) => {

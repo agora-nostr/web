@@ -1,6 +1,8 @@
 import { ndk } from '$lib/ndk.svelte';
+import { walletStore } from '$lib/features/wallet';
 import { npubCash } from '$lib/stores/npubcash.svelte';
 import type { NDKSubscription } from '@nostr-dev-kit/ndk';
+import { npubCashLogger as logger } from '$lib/utils/logger';
 
 const ZAP_KIND = 9735;
 const CHECK_INTERVAL = 30000; // Check every 30 seconds
@@ -19,11 +21,10 @@ class NpubCashMonitor {
 		}
 
 		if (!ndk.$currentUser) {
-			console.warn('[NpubCashMonitor] No active user, cannot start monitoring');
+			logger.warn('No active user, cannot start monitoring');
 			return;
 		}
 
-		console.log('[NpubCashMonitor] Starting zap monitoring for', ndk.$currentUser.pubkey);
 
 		// Subscribe to zap events for the current user
 		this.zapSubscription = ndk.subscribe(
@@ -36,7 +37,6 @@ class NpubCashMonitor {
 
 		// When a zap is received, check for tokens
 		this.zapSubscription.on('event', () => {
-			console.log('[NpubCashMonitor] Zap received, checking npub.cash balance');
 			this.checkAndClaim();
 		});
 
@@ -63,7 +63,6 @@ class NpubCashMonitor {
 			this.checkInterval = null;
 		}
 
-		console.log('[NpubCashMonitor] Stopped monitoring');
 	}
 
 	/**
@@ -78,9 +77,10 @@ class NpubCashMonitor {
 			return;
 		}
 
-		// Don't claim tokens if there's no wallet to redeem them to
-		if (!ndk.$wallet) {
-			console.warn('[NpubCashMonitor] No wallet available, skipping token claim');
+		// Don't claim tokens if there's no NIP-60 wallet to redeem them to
+		// (NWC wallets don't support receiveToken)
+		if (!walletStore.isNip60 || !walletStore.wallet) {
+			logger.warn('No NIP-60 wallet available, skipping token claim');
 			return;
 		}
 
@@ -90,11 +90,10 @@ class NpubCashMonitor {
 			const token = await npubCash.claimTokens();
 
 			if (token) {
-				console.log('[NpubCashMonitor] Token claimed, redeeming to wallet');
 				await this.redeemToWallet(token);
 			}
 		} catch (e) {
-			console.error('[NpubCashMonitor] Error checking/claiming tokens:', e);
+			logger.error('Error checking/claiming tokens:', e);
 		} finally {
 			this.isProcessing = false;
 		}
@@ -104,16 +103,15 @@ class NpubCashMonitor {
 	 * Redeem a Cashu token to the user's NIP-60 wallet
 	 */
 	private async redeemToWallet(token: string) {
-		if (!ndk.$wallet) {
-			console.warn('[NpubCashMonitor] No wallet available, cannot redeem token');
+		if (!walletStore.isNip60 || !walletStore.wallet || !('receiveToken' in walletStore.wallet)) {
+			logger.warn('No NIP-60 wallet available, cannot redeem token');
 			return;
 		}
 
 		try {
-			await ndk.$wallet.receiveToken(token);
-			console.log('[NpubCashMonitor] ✓ Token redeemed to wallet');
+			await walletStore.wallet.receiveToken(token);
 		} catch (e) {
-			console.error('[NpubCashMonitor] Failed to redeem token to wallet:', e);
+			logger.error('Failed to redeem token to wallet:', e);
 		}
 	}
 }

@@ -36,7 +36,7 @@
 
         return {
           memberPubkey: event.pubkey,
-          inviterPubkey,
+          inviterPubkey: inviterPubkey ?? null,
           joinedAt: event.created_at || 0
         };
       })

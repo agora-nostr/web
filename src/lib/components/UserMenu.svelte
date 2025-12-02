@@ -122,7 +122,7 @@
           onclick={navigateToProfile}
           class="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted transition-colors text-left"
         >
-          <User.Root {ndk} pubkey={ndk.$currentUser.pubkey}>
+          <User.Root {ndk} pubkey={ndk.$currentUser?.pubkey ?? ''}>
             <User.Avatar class="w-12 h-12" />
           </User.Root>
           <div class="flex-1 min-w-0">

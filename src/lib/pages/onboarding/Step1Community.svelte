@@ -80,9 +80,9 @@
         onerror={() => mainImageError = true}
       />
     {:else}
-      <div class="absolute inset-0 bg-gradient-to-br from-primary-600 to-primary-700" />
+      <div class="absolute inset-0 bg-gradient-to-br from-primary-600 to-primary-700"></div>
     {/if}
-    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
     <div class="absolute bottom-12 left-12 right-12 text-foreground">
       <h1 class="text-5xl font-bold mb-4">
         {$t('onboarding.step1Community.title')}
@@ -135,8 +135,8 @@
                   if (fallback) fallback.style.display = 'block';
                 }}
               />
-              <div class={`absolute inset-0 bg-gradient-to-br ${community.fallbackColor}`} style="display: none;" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div class={`absolute inset-0 bg-gradient-to-br ${community.fallbackColor}`} style="display: none;"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               <div class="absolute bottom-3 left-3 right-3">
                 <div class="flex items-center gap-2 text-foreground">
                   <span class="text-2xl">{community.flag}</span>

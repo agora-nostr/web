@@ -5,9 +5,14 @@
 	"subcategory": "cards",
 	"variant": "hero",
 	"oneLiner": "A large hero article card for featured content",
-	"command": "npx jsrepo add article-card-hero",
+	"registryName": "components/article-card-hero",
 	"dependencies": ["@nostr-dev-kit/svelte", "@nostr-dev-kit/ndk"],
 	"useCases": ["hero-sections", "featured-content", "landing-pages"],
+	"registration": {
+		"autoRegister": true,
+		"priority": 10,
+		"wrapper": "NDKArticle"
+	},
 	"apiDoc": {
 		"name": "ArticleCardHero",
 		"description": "A large hero article card with full-width background image, gradient overlay, and prominent typography. Features article title, summary, author details with avatar, publication time, and reading time. Ideal for featured content and landing pages.",
@@ -20,7 +25,7 @@
 				"description": "NDK instance for Nostr operations"
 			},
 			{
-				"name": "article",
+				"name": "event",
 				"type": "NDKArticle",
 				"required": true,
 				"description": "Article to display"

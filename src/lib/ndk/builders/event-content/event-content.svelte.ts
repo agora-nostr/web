@@ -28,7 +28,7 @@ export interface EventContentConfig {
  * Create reactive state for rendering event content with rich parsing
  *
  * Automatically detects and parses:
- * - User mentions (npub, nprofile)
+ * - User mentions (npub/nprofile → "mention" type)
  * - Event references (note, nevent, naddr)
  * - Media (images, videos, YouTube embeds)
  * - Custom emojis
@@ -52,7 +52,7 @@ export function createEventContent(
 		get segments() {
 			const actualContent = String(
 				config().event?.content ?? config().content ?? "",
-			);
+			).trim();
 			const event = config().event;
 			const actualEmojiTags =
 				event?.tags && Array.isArray(event.tags)

@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { ndk } from '$lib/ndk.svelte';
+  import { walletStore } from '$lib/features/wallet';
   import { headerStore } from '$lib/stores/header.svelte';
   import BalanceCard from './BalanceCard.svelte';
   import SendView from './SendView.svelte';
   import ReceiveView from './ReceiveView.svelte';
   import QRScanner from './QRScanner.svelte';
   import InvoiceDetails from './InvoiceDetails.svelte';
+  import TransactionList from './TransactionList.svelte';
 
   type TabView = 'wallet' | 'send' | 'receive' | 'scan' | 'invoice';
   let currentTab = $state<TabView>('wallet');
@@ -22,10 +23,10 @@
   }
 
   async function handlePayInvoice(invoice: string) {
-    if (!ndk.$wallet) throw new Error('Wallet not available');
+    if (!walletStore.wallet) throw new Error('Wallet not available');
 
     try {
-      await ndk.$wallet.lnPay({
+      await walletStore.wallet.lnPay({
         pr: invoice,
       });
 
@@ -102,6 +103,10 @@
           <span class="action-label">Receive</span>
         </button>
       </div>
+
+      <div class="transactions-section">
+        <TransactionList />
+      </div>
     {:else if currentTab === 'send'}
       <SendView />
     {:else if currentTab === 'scan'}
@@ -128,6 +133,10 @@
 
   .balance-section {
     margin-bottom: 2rem;
+  }
+
+  .transactions-section {
+    margin-top: 2rem;
   }
 
   .action-buttons {

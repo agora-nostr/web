@@ -115,7 +115,6 @@ class PWAStore {
       this.showPrompt = false;
       this.deferredPrompt = null;
 
-      console.log('PWA was installed successfully');
     });
 
     // For iOS, we can't detect beforeinstallprompt, so show iOS-specific prompt
@@ -140,10 +139,8 @@ class PWAStore {
     const choiceResult = await this.deferredPrompt.userChoice;
 
     if (choiceResult.outcome === 'accepted') {
-      console.log('User accepted the install prompt');
       this.isInstalled = true;
     } else {
-      console.log('User dismissed the install prompt');
       this.userDismissed = true;
       this.savePreferences();
     }

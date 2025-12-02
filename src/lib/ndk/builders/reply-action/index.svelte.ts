@@ -4,7 +4,7 @@
 
 import { NDKEvent, NDKKind, eventIsReply } from "@nostr-dev-kit/ndk";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
-import { resolveNDK } from "../resolve-ndk/index.svelte.js";
+import { getNDK } from "../../utils/ndk/index.svelte.js";
 
 export interface ReplyStats {
 	count: number;
@@ -38,9 +38,9 @@ export type ReplyIntentCallback = (event: NDKEvent) => void;
  */
 export function createReplyAction(
 	config: () => ReplyActionConfig,
-	ndk?: NDKSvelte,
+	ndkParam?: NDKSvelte,
 ) {
-	const resolvedNDK = resolveNDK(ndk);
+	const ndk = getNDK(ndkParam);
 	// Subscribe to replies for this event
 	let repliesSub = $state<ReturnType<NDKSvelte["$subscribe"]> | null>(null);
 
@@ -51,7 +51,7 @@ export function createReplyAction(
 			return;
 		}
 
-		repliesSub = resolvedNDK.$subscribe(() => ({
+		repliesSub = ndk.$subscribe(() => ({
 			filters: [
 				{
 					kinds: [NDKKind.Text, NDKKind.GenericReply],
@@ -78,8 +78,8 @@ export function createReplyAction(
 
 		return {
 			count: actualReplies.length,
-			hasReplied: resolvedNDK.$currentPubkey
-				? actualReplies.some((r) => r.pubkey === resolvedNDK.$currentPubkey)
+			hasReplied: ndk.$currentPubkey
+				? actualReplies.some((r) => r.pubkey === ndk.$currentPubkey)
 				: false,
 			pubkeys,
 		};
@@ -92,7 +92,7 @@ export function createReplyAction(
 			throw new Error("No event to reply to");
 		}
 
-		if (!resolvedNDK.$currentPubkey) {
+		if (!ndk.$currentPubkey) {
 			throw new Error("User must be logged in to reply");
 		}
 

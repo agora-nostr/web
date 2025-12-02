@@ -5,7 +5,7 @@
 <script lang="ts">
   import { getContext } from 'svelte';
   import { ARTICLE_CONTEXT_KEY, type ArticleContext } from './article.context.js';
-  import { cn } from "$lib/utils/cn.js";
+  import { cn } from "$lib/ndk/utils/cn.js";
 
   interface Props {
     class?: string;

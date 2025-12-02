@@ -1,14 +1,49 @@
 <script lang="ts">
-  import type { NDKEvent, NDKImetaTag } from '@nostr-dev-kit/ndk';
-  import { mapImetaTag } from '@nostr-dev-kit/ndk';
+  import type { NDKEvent, NDKImetaTag, NDKFilter } from '@nostr-dev-kit/ndk';
+  import { NDKKind, mapImetaTag } from '@nostr-dev-kit/ndk';
+  import type { NDKSvelte } from '@nostr-dev-kit/svelte';
   import MediaViewerModal from './MediaViewerModal.svelte';
   import EmptyState from './EmptyState.svelte';
+  import { createLazyFeed } from '$lib/utils/lazyFeed.svelte';
+  import type { SubscriptionProps } from '$lib/types/subscription';
 
   interface Props {
-    events: NDKEvent[];
+    ndk: NDKSvelte;
+    subscriptionProps: SubscriptionProps;
   }
 
-  const { events }: Props = $props();
+  const { ndk, subscriptionProps }: Props = $props();
+
+  const mediaFeed = createLazyFeed(ndk, () => {
+    const filter: NDKFilter = {
+      kinds: [NDKKind.Text, NDKKind.Image],
+      limit: 300
+    };
+
+    if (subscriptionProps.hashtags) {
+      filter['#t'] = subscriptionProps.hashtags;
+    }
+
+    if (subscriptionProps.authors) {
+      filter.authors = subscriptionProps.authors;
+    }
+
+    return {
+      filters: [filter],
+      relayUrls: subscriptionProps.relayUrls,
+      cacheUnconstrainFilter: [],
+      subId: "media-grid",
+      exclusiveRelay: !!subscriptionProps.relayUrls,
+    };
+  }, {
+    initialLimit: 30,
+    pageSize: 30
+  });
+
+  const events = $derived(mediaFeed.events.filter(event =>
+    event.kind === NDKKind.Image ||
+    (event.kind === NDKKind.Text && hasMediaUrl(event.content, 'image'))
+  ));
 
   let selectedMedia = $state<{ event: NDKEvent; imeta: NDKImetaTag; mediaType: 'image' | 'video' | 'audio' | 'file' } | null>(null);
 
@@ -18,6 +53,13 @@
 
   function closeMediaViewer() {
     selectedMedia = null;
+  }
+
+  function hasMediaUrl(content: string, type: 'image' | 'video'): boolean {
+    const regex = type === 'image'
+      ? /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp|svg|avif))/gi
+      : /(https?:\/\/[^\s]+\.(mp4|webm|mov|avi|mkv))/gi;
+    return regex.test(content);
   }
 
   function extractMediaUrls(content: string): string[] {

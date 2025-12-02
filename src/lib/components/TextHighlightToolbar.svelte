@@ -78,7 +78,7 @@
       <span class="text-sm font-medium">Highlight</span>
     </button>
 
-    <div class="w-px h-6 bg-muted" />
+    <div class="w-px h-6 bg-muted"></div>
 
     <button
       type="button"
@@ -99,5 +99,5 @@
   class="fixed z-50"
   style="left: {position.x}px; top: {position.y}px; transform: translate(-50%, -100%);"
 >
-  <div class="w-3 h-3 bg-card border-r border-b border-border rotate-45 translate-y-1.5" />
+  <div class="w-3 h-3 bg-card border-r border-b border-border rotate-45 translate-y-1.5"></div>
 </div>

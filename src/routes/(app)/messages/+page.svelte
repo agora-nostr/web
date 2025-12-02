@@ -3,12 +3,20 @@
   import ConversationList from '$lib/components/messages/ConversationList.svelte';
   import NewMessageModal from '$lib/components/messages/NewMessageModal.svelte';
   import { messagesStore } from '$lib/stores/messages.svelte';
+  import { layoutStore } from '$lib/stores/layout.svelte';
 
   let showNewMessageModal = $state(false);
 
   function handleNewMessage() {
     showNewMessageModal = true;
   }
+
+  $effect(() => {
+    layoutStore.setRightSidebarVisibility(false);
+    return () => {
+      layoutStore.setRightSidebarVisibility(true);
+    };
+  });
 </script>
 
 <div class="h-full flex flex-col">

@@ -162,6 +162,7 @@
               type="button"
               onclick={handleCommentPublish}
               disabled={isSubmitting}
+              aria-label="Publish comment"
               class="w-7 h-7 bg-accent text-white rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200 active:scale-90"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

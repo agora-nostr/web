@@ -2,7 +2,7 @@
   import type { Trustee } from '$lib/backup/types';
   import { ndk } from '$lib/ndk.svelte';
   import User from '$lib/components/User.svelte';
-  import { useProfileSearch } from '$lib/composables/useProfileSearch.svelte.ts';
+  import { useProfileSearch } from '$lib/composables/useProfileSearch.svelte';
 
   interface Props {
     trustees: Trustee[];

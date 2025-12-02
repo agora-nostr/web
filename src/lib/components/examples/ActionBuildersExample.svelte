@@ -18,7 +18,7 @@
     if (!event) return null;
 
     return createReactionAction(
-      () => ({ target: event }),
+      () => ({ event, target: event }),
       ndk
     );
   });
@@ -52,7 +52,6 @@
     try {
       // Toggle reaction (uses ❤️ by default)
       await reactionAction.react("+");
-      console.log('Reaction toggled!');
     } catch (error) {
       console.error('Failed to react:', error);
     }
@@ -64,7 +63,6 @@
 
     try {
       await reactionAction.react(emoji);
-      console.log(`Added ${emoji} reaction!`);
     } catch (error) {
       console.error('Failed to add reaction:', error);
     }
@@ -76,7 +74,6 @@
 
     try {
       await followAction.follow();
-      console.log('Follow toggled!');
     } catch (error) {
       console.error('Failed to follow/unfollow:', error);
     }
@@ -88,7 +85,6 @@
 
     try {
       await zapAction.zap(amount, 'Great post!');
-      console.log(`Zapped ${amount} sats!`);
     } catch (error) {
       console.error('Failed to zap:', error);
     }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ndk } from '$lib/ndk.svelte';
+  import { walletStore } from '$lib/features/wallet';
   import * as Dialog from '$lib/components/ui/dialog';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
@@ -20,7 +20,7 @@
       return;
     }
 
-    if (!ndk.$wallet) {
+    if (!walletStore.wallet) {
       error = 'Wallet not available';
       return;
     }
@@ -30,12 +30,17 @@
     success = false;
 
     try {
-      await ndk.$wallet.pay({
-        amount,
-        recipient: recipient.trim() || undefined,
-        comment: comment.trim() || undefined,
-        unit: 'sat',
-      });
+      const wallet = walletStore.wallet;
+      if (wallet && 'pay' in wallet && typeof wallet.pay === 'function') {
+        await wallet.pay({
+          amount,
+          recipient: recipient.trim() || undefined,
+          comment: comment.trim() || undefined,
+          unit: 'sat',
+        });
+      } else {
+        throw new Error('Wallet does not support payments');
+      }
       success = true;
       setTimeout(() => {
         close();

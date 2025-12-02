@@ -10,7 +10,7 @@
 
   const { relay, variant = 'default' }: Props = $props();
 
-  const relayInfo = $derived(relay.connectivity.nip11);
+  const relayInfo = $derived((relay as any).nip11 || (relay as any).info);
   const relayName = $derived(relayInfo?.name || new URL(relay.url).hostname);
   const relayDescription = $derived(relayInfo?.description);
 </script>

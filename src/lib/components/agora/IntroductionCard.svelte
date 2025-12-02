@@ -15,12 +15,10 @@
 	let inviterProfile = $state<NDKUserProfile | null>(null);
 
 	$effect(() => {
-		console.log('[IntroductionCard] $effect running for author:', event.pubkey);
 		event.author.fetchProfile().then(p => { profile = p; });
 	});
 
 	$effect(() => {
-		console.log('[IntroductionCard] $effect running for invitedBy:', invitedBy);
 		if (!invitedBy) {
 			inviterProfile = null;
 			return;

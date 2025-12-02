@@ -4,7 +4,7 @@
 
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
-import { resolveNDK } from "../resolve-ndk/index.svelte.js";
+import { getNDK } from "../../utils/ndk/index.svelte.js";
 
 /**
  * Configuration for notification feed
@@ -98,11 +98,11 @@ export function createNotificationFeed(
 	config: () => NotificationFeedConfig,
 	ndkParam?: NDKSvelte,
 ): NotificationFeedState {
-	const ndk = resolveNDK(ndkParam);
+	const ndk = getNDK(ndkParam);
 
 	// $metaSubscribe handles its own reactivity - the function we pass
 	// will be re-evaluated when config() changes
-	const metaSub = ndk?.$metaSubscribe?.(() => {
+	const metaSub = ndk.$metaSubscribe(() => {
 		const {
 			pubkey,
 			kinds = [7, 9735, 6, 16, 1, 1111], // reactions, zaps, reposts, boost, replies, generic replies

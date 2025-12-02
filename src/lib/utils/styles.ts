@@ -211,7 +211,6 @@ export function hoverScale(options: { scale?: number } = {}): string {
  * @example
  * ```ts
  * if (isDarkMode()) {
- *   console.log('Dark mode is active');
  * }
  * ```
  */

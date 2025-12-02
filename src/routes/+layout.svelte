@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ndkReady } from "$lib/ndk.svelte";
   import { settings } from "$lib/stores/settings.svelte";
+  import { walletStore, WalletSetupModal } from "$lib/features/wallet";
   import { browser } from "$app/environment";
   import { locale } from "svelte-i18n";
   import { initializeI18n } from "$i18n/config";
@@ -19,13 +20,23 @@
   import "$lib/ndk/components/hashtag/";
   import "$lib/ndk/components/mention-modern/";
   import "$lib/ndk/components/link-inline-basic/";
+  import "$lib/ndk/components/article-card-compact/";
   import "$lib/ndk/components/event-card-classic/";
   import "$lib/ndk/components/event-card-compact/";
-  import "$lib/ndk/components/article-card-compact/";
-  import "$lib/ndk/components/event-card-generic/";
-  import Media from "$lib/ndk/components/media-render-bento-grid";
+  import "$lib/ndk/components/media-carousel";
+  // import "$lib/ndk/components/event-card-generic/";
+  // import Media from "$lib/ndk/components/media-render-bento-grid";
+  import { NDKKind, type NDKEvent } from "@nostr-dev-kit/ndk";
+  import { goto } from "$app/navigation";
 
-  defaultContentRenderer.mediaComponent = Media;
+  // defaultContentRenderer.mediaComponent = Media;
+  defaultContentRenderer.onEventClick = (event: NDKEvent) => {
+    if (event.kind === NDKKind.Article) {
+      goto(`/article/${event.encode()}`);
+    } else {
+      goto(`/e/${event.encode()}`);
+    }
+  };
 
   interface Props {
     children: Snippet;
@@ -34,6 +45,14 @@
   const { children }: Props = $props();
 
   let ready = $state(false);
+  let showWalletSetup = $state(false);
+
+  // Watch for wallet setup needs when user logs in
+  $effect(() => {
+    if (ready && walletStore.needsSetup) {
+      showWalletSetup = true;
+    }
+  });
 
   // Initialize i18n (only in browser)
   if (browser) {
@@ -64,6 +83,7 @@
 
     // Wait for NDK cache to be initialized before mounting the app
     ndkReady.then(() => {
+      walletStore.restore();
       ready = true;
     });
   } else {
@@ -86,3 +106,6 @@
 
 <!-- Login Modal - Outside transition wrapper to prevent z-index stacking issues -->
 <LoginModal />
+
+<!-- Wallet Setup Modal - For users without a wallet configured -->
+<WalletSetupModal bind:open={showWalletSetup} />

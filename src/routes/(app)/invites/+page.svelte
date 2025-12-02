@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ndk } from '$lib/ndk.svelte';
 	import { headerStore } from '$lib/stores/header.svelte';
-	import NDK, { NDKEvent, type NDKFilter } from '@nostr-dev-kit/ndk';
+	import NDK, { NDKEvent, NDKKind, type NDKFilter } from '@nostr-dev-kit/ndk';
 	import { formatTimeAgo } from '$lib/utils/formatTime';
 	import { AGORA_RELAYS } from '$lib/utils/relayUtils';
 	import PageHeader from '$lib/components/headers/PageHeader.svelte';

@@ -58,7 +58,7 @@
         <div class="flex -space-x-1.5 mb-2 items-center">
           {#each pubkeys.slice(0, 5) as pubkey (pubkey)}
             <User.Root {ndk} {pubkey}>
-              <User.Avatar class="rounded-full border-2 border-background" size={32} />
+              <User.Avatar class="rounded-full border-2 border-background" />
             </User.Root>
           {/each}
           {#if pubkeys.length > 5}

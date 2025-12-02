@@ -3,7 +3,7 @@
 */
 
 import type { Component } from "svelte";
-import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import type { NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
 
 /**
@@ -32,6 +32,7 @@ export type HandlerInfo = {
 export type MentionComponent = Component<{
 	ndk: NDKSvelte;
 	bech32: string;
+	onclick?: (user: NDKUser) => void;
 	class?: string;
 }>;
 
@@ -47,22 +48,33 @@ export type HashtagComponent = Component<{
 
 /**
  * Link component interface
- * Accepts either a single URL or an array of URLs (for grouped links)
+ * Accepts a single URL only
  */
 export type LinkComponent = Component<{
-	url: string | string[];
+	url: string;
+	onclick?: (url: string) => void;
 	class?: string;
 }>;
 
 /**
  * Media component interface
- * Accepts either a single URL or an array of URLs (for grouped media)
+ * Accepts an array of URLs with the ability to handle clicks with index information
  */
 export type MediaComponent = Component<{
-	url: string | string[];
+	url: string[];
 	type?: string;
+	onclick?: (urls: string[], clickedIndex: number) => void;
 	class?: string;
 }>;
+
+/**
+ * Entity click callback types
+ */
+export type UserClickCallback = (user: NDKUser) => void;
+export type EventClickCallback = (event: NDKEvent) => void;
+export type HashtagClickCallback = (tag: string) => void;
+export type LinkClickCallback = (url: string) => void;
+export type MediaClickCallback = (urls: string[], clickedIndex: number) => void;
 
 /**
  * ContentRenderer - Unified system for customizing content rendering
@@ -106,7 +118,7 @@ export class ContentRenderer {
 	blockNsfw: boolean = true;
 
 	/**
-	 * Component for rendering npub/nprofile mentions
+	 * Component for rendering user mentions (npub/nprofile)
 	 * If null, renders raw bech32 string
 	 */
 	mentionComponent: MentionComponent | null = null;
@@ -132,13 +144,23 @@ export class ContentRenderer {
 	/**
 	 * Fallback component for rendering embedded events with no registered kind handler
 	 * If null, renders raw bech32 string
-	 * Users can register generic-embedded or any other component as the fallback
+	 * Users can register fallback-embedded or any other component as the fallback
 	 */
 	fallbackComponent: Component<{
 		ndk: NDKSvelte;
 		event: NDKEvent;
 		class?: string;
 	}> | null = null;
+
+	/**
+	 * Click callbacks for interactive content
+	 * These are passed to components as onclick props
+	 */
+	onUserClick?: UserClickCallback;
+	onEventClick?: EventClickCallback;
+	onHashtagClick?: HashtagClickCallback;
+	onLinkClick?: LinkClickCallback;
+	onMediaClick?: MediaClickCallback;
 
 	/**
 	 * Registry of embedded event kind handlers
@@ -353,11 +375,59 @@ export class ContentRenderer {
 		this.linkComponent = null;
 		this.mediaComponent = null;
 		this.fallbackComponent = null;
+		this.onUserClick = undefined;
+		this.onEventClick = undefined;
+		this.onHashtagClick = undefined;
+		this.onLinkClick = undefined;
+		this.onMediaClick = undefined;
 		this.mentionPriority = 0;
 		this.hashtagPriority = 0;
 		this.linkPriority = 0;
 		this.mediaPriority = 0;
 		this.fallbackPriority = 0;
+	}
+
+	/**
+	 * Create a clone of this renderer with all handlers and components
+	 * Optionally override click callbacks
+	 */
+	clone(callbacks?: {
+		onUserClick?: UserClickCallback;
+		onEventClick?: EventClickCallback;
+		onHashtagClick?: HashtagClickCallback;
+		onLinkClick?: LinkClickCallback;
+		onMediaClick?: MediaClickCallback;
+	}): ContentRenderer {
+		const cloned = new ContentRenderer();
+
+		// Copy all public properties
+		cloned.blockNsfw = this.blockNsfw;
+		cloned.mentionComponent = this.mentionComponent;
+		cloned.hashtagComponent = this.hashtagComponent;
+		cloned.linkComponent = this.linkComponent;
+		cloned.mediaComponent = this.mediaComponent;
+		cloned.fallbackComponent = this.fallbackComponent;
+
+		// Copy callbacks (use provided overrides or original values)
+		cloned.onUserClick = callbacks?.onUserClick ?? this.onUserClick;
+		cloned.onEventClick = callbacks?.onEventClick ?? this.onEventClick;
+		cloned.onHashtagClick = callbacks?.onHashtagClick ?? this.onHashtagClick;
+		cloned.onLinkClick = callbacks?.onLinkClick ?? this.onLinkClick;
+		cloned.onMediaClick = callbacks?.onMediaClick ?? this.onMediaClick;
+
+		// Copy all handlers from the private map
+		for (const [kind, info] of this.handlers) {
+			cloned.handlers.set(kind, info);
+		}
+
+		// Copy priorities
+		cloned.mentionPriority = this.mentionPriority;
+		cloned.hashtagPriority = this.hashtagPriority;
+		cloned.linkPriority = this.linkPriority;
+		cloned.mediaPriority = this.mediaPriority;
+		cloned.fallbackPriority = this.fallbackPriority;
+
+		return cloned;
 	}
 }
 

@@ -13,7 +13,6 @@ export async function clearCacheDatabase(dbName: string = 'voces-cache'): Promis
     const request = indexedDB.deleteDatabase(dbName);
 
     request.onsuccess = () => {
-      console.log(`Successfully deleted cache database: ${dbName}`);
       resolve();
     };
 
@@ -48,10 +47,8 @@ export function shouldClearCache(): boolean {
  */
 export async function initializeCache(dbName: string = 'voces-cache'): Promise<void> {
   if (shouldClearCache()) {
-    console.log('Cache version mismatch detected, clearing cache...');
     try {
       await clearCacheDatabase(dbName);
-      console.log('Cache cleared successfully');
     } catch (error) {
       console.error('Failed to clear cache:', error);
     }

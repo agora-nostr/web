@@ -50,6 +50,8 @@
               onclick={() => showProtectedInfo = !showProtectedInfo}
               onmouseover={() => showProtectedInfo = true}
               onmouseleave={() => showProtectedInfo = false}
+              onfocus={() => showProtectedInfo = true}
+              onblur={() => showProtectedInfo = false}
               class="text-muted-foreground hover:text-muted-foreground transition-colors"
               aria-label="Info about protected mode"
               type="button"
@@ -72,6 +74,7 @@
           type="button"
           role="switch"
           aria-checked={isProtected}
+          aria-label="Toggle protected mode"
           id="protected-switch"
           onclick={() => handleProtectedChange(!isProtected)}
           class="relative inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 {isProtected ? 'bg-primary' : 'bg-input'}"

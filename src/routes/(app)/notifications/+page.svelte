@@ -4,12 +4,10 @@
   import NotificationItem from '$lib/components/notifications/NotificationItem.svelte';
   import { onMount } from 'svelte';
 
-  console.log('[NotificationsPage] Initializing notifications page');
 
   const notificationsManager = createNotificationsManager(ndk);
 
   onMount(() => {
-    console.log('[NotificationsPage] Mounted');
   });
 
   const filters: Array<{ value: NotificationFilter; label: string }> = [
@@ -24,14 +22,10 @@
   ];
 
   function handleFilterChange(filter: NotificationFilter) {
-    console.log('[NotificationsPage] Filter changed to:', filter);
     notificationsManager.setFilter(filter);
   }
 
   $effect(() => {
-    console.log('[NotificationsPage] Notifications count:', notificationsManager.notifications.length);
-    console.log('[NotificationsPage] Current filter:', notificationsManager.filter);
-    console.log('[NotificationsPage] Counts:', notificationsManager.counts);
   });
 </script>
 
@@ -72,8 +66,7 @@
       </div>
     {:else}
       {#each notificationsManager.notifications as notification, index (notification.id)}
-        {console.log('[NotificationsPage] Rendering notification', index, ':', notification.type, notification.id)}
-        <NotificationItem {notification} targetEventsCache={notificationsManager.targetEventsCache} />
+        <NotificationItem {notification} />
       {/each}
     {/if}
   </div>

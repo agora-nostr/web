@@ -57,8 +57,7 @@
     zapFn(1, "test zap from agora")
   }
 
-  function userClicked(pubkey: string) {
-    const user = ndk.getUser(pubkey);
+  function userClicked(user: import('@nostr-dev-kit/ndk').NDKUser) {
     goto(`/p/${user.npub}`);
   }
 </script>

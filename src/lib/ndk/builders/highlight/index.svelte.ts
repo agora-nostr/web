@@ -10,7 +10,7 @@
 import type { NDKEvent, NDKArticle } from "@nostr-dev-kit/ndk";
 import { NDKArticle as NDKArticleClass } from "@nostr-dev-kit/ndk";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
-import { resolveNDK } from "../resolve-ndk/index.svelte.js";
+import { getNDK } from "../../utils/ndk/index.svelte.js";
 
 export interface UrlMetadata {
 	title?: string;
@@ -118,9 +118,9 @@ function calculatePosition(
  */
 export function createHighlight(
 	config: () => HighlightConfig,
-	ndk?: NDKSvelte,
+	ndkParam?: NDKSvelte,
 ): HighlightState {
-	const resolvedNDK = resolveNDK(ndk);
+	const ndk = getNDK(ndkParam);
 
 	const state = $state({
 		content: "",
@@ -207,7 +207,7 @@ export function createHighlight(
 				const [kind, pubkey, dTag] = parts;
 
 				state.loading = true;
-				resolvedNDK
+				ndk
 					.guardrailOff()
 					.fetchEvent({
 						kinds: [parseInt(kind)],

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ndk } from '$lib/ndk.svelte';
+  import { walletStore } from '$lib/features/wallet';
   import * as Dialog from '$lib/components/ui/dialog';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
@@ -20,8 +20,13 @@
       return;
     }
 
-    if (!ndk.$wallet) {
+    if (!walletStore.wallet) {
       error = 'Wallet not available';
+      return;
+    }
+
+    if (!('receiveToken' in walletStore.wallet)) {
+      error = 'Token redemption not supported with NWC wallet';
       return;
     }
 
@@ -30,7 +35,7 @@
     success = false;
 
     try {
-      await ndk.$wallet.receiveToken(token.trim(), description.trim() || undefined);
+      await walletStore.wallet.receiveToken(token.trim(), description.trim() || undefined);
       success = true;
       setTimeout(() => {
         close();

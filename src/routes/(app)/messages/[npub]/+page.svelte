@@ -129,7 +129,7 @@
 
         <!-- Profile button -->
         <button
-          onclick={() => goto(`/p/${participant.npub}`)}
+          onclick={() => participant && goto(`/p/${participant.npub}`)}
           class="p-2 rounded-lg hover:bg-neutral-800/50 transition-colors text-neutral-400 hover:text-primary"
           title="View profile"
         >

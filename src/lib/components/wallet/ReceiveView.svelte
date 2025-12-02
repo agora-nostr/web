@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { ndk } from '$lib/ndk.svelte';
+  import { walletStore } from '$lib/features/wallet';
   import type { NDKCashuDeposit } from '@nostr-dev-kit/wallet';
   import QRCode from './QRCode.svelte';
-
-  const wallet = ndk.$wallet;
 
   let activeTab = $state<'paste' | 'mint'>('mint');
   let tokenInput = $state('');
@@ -15,7 +13,8 @@
   let depositInvoice = $state<string | null>(null);
   let isCheckingPayment = $state(false);
 
-  let availableMints = $derived(wallet?.mints || []);
+  // Mints are only available for NIP-60 Cashu wallets
+  let availableMints = $derived(walletStore.isNip60 && walletStore.wallet && 'mints' in walletStore.wallet ? walletStore.wallet.mints : []);
   let selectedMint = $state<string>('');
 
   $effect(() => {
@@ -26,8 +25,13 @@
 
   async function handleReceive() {
     if (!tokenInput.trim()) return;
-    if (!wallet) {
+    if (!walletStore.wallet) {
       error = 'Wallet not available';
+      return;
+    }
+
+    if (!('receiveToken' in walletStore.wallet)) {
+      error = 'Token redemption not supported with NWC wallet';
       return;
     }
 
@@ -35,7 +39,7 @@
     error = '';
 
     try {
-      await wallet.receiveToken(tokenInput.trim());
+      await walletStore.wallet.receiveToken(tokenInput.trim());
 
       success = { amount: 0 };
       tokenInput = '';
@@ -60,8 +64,13 @@
       return;
     }
 
-    if (!wallet) {
+    if (!walletStore.wallet) {
       error = 'Wallet not available';
+      return;
+    }
+
+    if (!('deposit' in walletStore.wallet)) {
+      error = 'Deposit not supported with NWC wallet';
       return;
     }
 
@@ -69,7 +78,7 @@
     error = '';
 
     try {
-      const deposit = wallet.deposit(amount, selectedMint);
+      const deposit = walletStore.wallet.deposit(amount, selectedMint);
 
       if (!deposit) {
         throw new Error('Failed to create deposit request');
@@ -87,7 +96,7 @@
       });
 
       deposit.on('error', (err) => {
-        error = err.message || 'Deposit failed';
+        error = (typeof err === 'object' && err !== null && 'message' in err ? (err as any).message : null) || 'Deposit failed';
         isCheckingPayment = false;
         isProcessing = false;
       });

@@ -191,6 +191,9 @@
   />
 
   <div
+    role="textbox"
+    tabindex="-1"
+    aria-label="Content composer with drag and drop support"
     class="flex-1 flex flex-col {isDragging ? 'ring-2 ring-primary ring-offset-2 rounded-lg' : ''}"
     ondragover={handleDragOver}
     ondragleave={handleDragLeave}

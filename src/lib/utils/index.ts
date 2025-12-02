@@ -1,1 +1,1 @@
-export { cn } from "./cn.js";
+export { cn } from "$lib/ndk/utils/cn.js";

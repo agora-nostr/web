@@ -5,7 +5,7 @@
 <script lang="ts">
   import { getContext } from 'svelte';
   import { EVENT_CARD_CONTEXT_KEY, type EventCardContext } from './event-card.context.js';
-  import { ENTITY_CLICK_CONTEXT_KEY, type EntityClickContext } from '../../ui/entity-click-context.js';
+  import { CONTENT_RENDERER_CONTEXT_KEY, type ContentRendererContext } from '../../ui/content-renderer/content-renderer.context.js';
   import { cn } from '../../utils/cn';
   import { User } from '../../ui/user';
   import { Event } from '../../ui/event';
@@ -39,13 +39,13 @@
     throw new Error('EventCard.Header must be used within EventCard.Root');
   }
 
-  const entityClickContext = getContext<EntityClickContext | undefined>(ENTITY_CLICK_CONTEXT_KEY);
+  const rendererContext = getContext<ContentRendererContext | undefined>(CONTENT_RENDERER_CONTEXT_KEY);
 
   // Handle user click
   function handleUserClick(e: Event) {
-    if (entityClickContext?.onUserClick) {
+    if (rendererContext?.renderer.onUserClick && context.event.author) {
       e.stopPropagation();
-      entityClickContext.onUserClick(context.event.pubkey);
+      rendererContext.renderer.onUserClick(context.event.author);
     }
   }
 </script>
@@ -64,7 +64,7 @@
     <div
       class={cn(
         'flex items-center gap-3 flex-1 min-w-0',
-        entityClickContext?.onUserClick && 'cursor-pointer'
+        rendererContext?.renderer.onUserClick && 'cursor-pointer'
       )}
       onclick={handleUserClick}
       onkeydown={(e) => {
@@ -72,8 +72,8 @@
           handleUserClick(e);
         }
       }}
-      role={entityClickContext?.onUserClick ? "button" : "presentation"}
-      tabindex={entityClickContext?.onUserClick ? 0 : undefined}
+      role={rendererContext?.renderer.onUserClick ? "button" : "presentation"}
+      tabindex={rendererContext?.renderer.onUserClick ? 0 : undefined}
     >
       {#if showAvatar}
         <User.Avatar

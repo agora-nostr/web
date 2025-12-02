@@ -126,7 +126,7 @@
           </div>
           <div class="bg-neutral-100 dark:bg-card border border rounded-xl p-4 text-center">
             <div class="text-2xl font-bold text-primary mb-1">
-              {stats.eventRelays.toLocaleString()}
+              {((stats as any).eventRelays || 0).toLocaleString()}
             </div>
             <div class="text-xs text-muted-foreground font-medium">
               Event-Relay Links

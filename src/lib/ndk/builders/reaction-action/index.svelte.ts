@@ -4,7 +4,7 @@
 
 import { type NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
-import { resolveNDK } from "../resolve-ndk/index.svelte.js";
+import { getNDK } from "../../utils/ndk/index.svelte.js";
 import { SvelteMap } from "svelte/reactivity";
 
 export interface EmojiReaction {
@@ -66,9 +66,9 @@ export interface CustomEmojiData {
  */
 export function createReactionAction(
 	config: () => ReactionActionConfig,
-	ndk?: NDKSvelte,
+	ndkParam?: NDKSvelte,
 ) {
-	const resolvedNDK = resolveNDK(ndk);
+	const ndk = getNDK(ndkParam);
 	// Subscribe to reactions for this event
 	let reactionsSub = $state<ReturnType<NDKSvelte["$subscribe"]> | null>(null);
 
@@ -85,7 +85,7 @@ export function createReactionAction(
 			return;
 		}
 
-		reactionsSub = resolvedNDK.$subscribe(() => ({
+		reactionsSub = ndk.$subscribe(() => ({
 			filters: [
 				{
 					kinds: [NDKKind.Reaction],
@@ -133,7 +133,7 @@ export function createReactionAction(
 				data.pubkeys.push(reaction.pubkey);
 			}
 
-			if (reaction.pubkey === resolvedNDK.$currentPubkey) {
+			if (reaction.pubkey === ndk.$currentPubkey) {
 				data.hasReacted = true;
 				data.userReaction = reaction;
 			}
@@ -160,8 +160,8 @@ export function createReactionAction(
 			if (!data.hasReacted) {
 				data.count++;
 				data.hasReacted = true;
-				if (!data.pubkeys.includes(resolvedNDK.$currentPubkey!)) {
-					data.pubkeys.push(resolvedNDK.$currentPubkey!);
+				if (!data.pubkeys.includes(ndk.$currentPubkey!)) {
+					data.pubkeys.push(ndk.$currentPubkey!);
 				}
 				data.userReaction = pendingEvent;
 			}
@@ -182,7 +182,7 @@ export function createReactionAction(
 			throw new Error("No event to react to");
 		}
 
-		if (!resolvedNDK.$currentPubkey) {
+		if (!ndk.$currentPubkey) {
 			throw new Error("User must be logged in to react");
 		}
 

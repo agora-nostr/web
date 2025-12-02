@@ -1,11 +1,17 @@
 <script lang="ts">
   import { decode } from 'light-bolt11-decoder';
 
+  interface Props {
+    invoice?: string;
+    onPay?: (invoice: string) => void;
+    onCancel?: () => void;
+  }
+
   let {
-    invoice = $bindable<string>(''),
-    onPay = $bindable<(invoice: string) => void>(() => {}),
-    onCancel = $bindable<() => void>(() => {})
-  } = $props();
+    invoice = $bindable(''),
+    onPay = () => {},
+    onCancel = () => {}
+  }: Props = $props();
 
   let decoded = $state<any>(null);
   let error = $state<string | null>(null);

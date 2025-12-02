@@ -94,7 +94,7 @@
       <div class="text-center py-8 text-muted-foreground">
         <p class="text-sm">Hashtag interests not available</p>
       </div>
-    {:else if hashtagInterests.isLoading}
+    {:else if (hashtagInterests as any).isLoading}
       <div class="flex items-center justify-center py-8 text-muted-foreground">
         <svg class="w-5 h-5 animate-spin mr-2" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

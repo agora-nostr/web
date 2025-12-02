@@ -57,8 +57,7 @@
       cacheUsage: NDKSubscriptionCacheUsage.ONLY_RELAY,
       exclusiveRelay: true,
       limit: 10,
-    }),
-    ndk,
+    })
   );
 
   async function saveIntroduction() {

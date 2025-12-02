@@ -1,19 +1,14 @@
 <script lang="ts">
-  import { ndk } from '$lib/ndk.svelte';
+  import { walletStore, formatSats } from '$lib/features/wallet';
   import { NDKWalletStatus } from '@nostr-dev-kit/wallet';
 
-  const wallet = ndk.$wallet;
-  const balance = $derived(wallet?.balance || 0);
-  const status = $derived(wallet?.status === NDKWalletStatus.READY ? 'idle' : wallet?.status === NDKWalletStatus.FAILED ? 'error' : 'loading');
-
-  function formatBalance(sats: number): string {
-    return new Intl.NumberFormat('en-US').format(sats);
-  }
+  const balance = $derived(walletStore.getBalanceAmount() ?? 0);
+  const status = $derived(walletStore.wallet?.status === NDKWalletStatus.READY ? 'idle' : walletStore.wallet?.status === NDKWalletStatus.FAILED ? 'error' : 'loading');
 </script>
 
 <div class="balance-card">
   <div class="balance-amount">
-    <span class="amount gradient-text">{formatBalance(balance)}</span>
+    <span class="amount gradient-text">{formatSats(balance)}</span>
     <span class="unit">sats</span>
   </div>
 

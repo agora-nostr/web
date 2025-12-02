@@ -5,17 +5,18 @@
 <script lang="ts">
   import type { NDKEvent } from '@nostr-dev-kit/ndk';
   import type { NDKSvelte } from '@nostr-dev-kit/svelte';
-  import { setContext } from 'svelte';
+  import { getContext, setContext } from 'svelte';
   import { EVENT_CARD_CONTEXT_KEY, type EventCardContext } from './event-card.context.js';
-  import { ENTITY_CLICK_CONTEXT_KEY, type EntityClickContext } from '../../ui/entity-click-context.js';
-  import type {
-    UserClickCallback,
-    EventClickCallback,
-    HashtagClickCallback,
-    LinkClickCallback,
-    MediaClickCallback
-  } from '../../ui/entity-click-types.js';
-  import { getNDKFromContext } from '../../utils/ndk-context.svelte.js';
+  import { CONTENT_RENDERER_CONTEXT_KEY, type ContentRendererContext } from '../../ui/content-renderer/content-renderer.context.js';
+  import {
+    defaultContentRenderer,
+    type UserClickCallback,
+    type EventClickCallback,
+    type HashtagClickCallback,
+    type LinkClickCallback,
+    type MediaClickCallback
+  } from '../../ui/content-renderer/index.svelte.js';
+  import { getNDK } from '../../utils/ndk';
   import { cn } from '../../utils/cn';
   import type { Snippet } from 'svelte';
 
@@ -57,7 +58,7 @@
     ...restProps
   }: Props = $props();
 
-  const ndk = getNDKFromContext(providedNdk);
+  const ndk = getNDK(providedNdk);
 
   // EventCardContext: structural data about the card
   const context: EventCardContext = {
@@ -68,17 +69,32 @@
 
   setContext(EVENT_CARD_CONTEXT_KEY, context);
 
-  // EntityClickContext: behavioral callbacks for entity interactions
-  // This is separate to prevent circular dependency between ui/ and components/event-card/
-  const entityClickContext: EntityClickContext = {
-    get onUserClick() { return onUserClick; },
-    get onEventClick() { return onEventClick; },
-    get onHashtagClick() { return onHashtagClick; },
-    get onLinkClick() { return onLinkClick; },
-    get onMediaClick() { return onMediaClick; }
-  };
+  // Get parent ContentRendererContext if it exists
+  const parentRendererContext = getContext<ContentRendererContext | undefined>(CONTENT_RENDERER_CONTEXT_KEY);
 
-  setContext(ENTITY_CLICK_CONTEXT_KEY, entityClickContext);
+  // Create a renderer that clones parent renderer with overridden callbacks
+  const renderer = $derived.by(() => {
+    const base = parentRendererContext?.renderer ?? defaultContentRenderer;
+
+    // If no callbacks to override, return base as-is
+    if (!onUserClick && !onEventClick && !onHashtagClick && !onLinkClick && !onMediaClick) {
+      return base;
+    }
+
+    // Clone the renderer with overridden callbacks
+    return base.clone({
+      onUserClick,
+      onEventClick,
+      onHashtagClick,
+      onLinkClick,
+      onMediaClick
+    });
+  });
+
+  // ContentRendererContext: provide the merged renderer
+  setContext(CONTENT_RENDERER_CONTEXT_KEY, {
+    get renderer() { return renderer; }
+  });
 
   // Determine if we should show as clickable
   const isClickable = $derived(!!onclick);

@@ -30,7 +30,9 @@
     observer.observe(element);
 
     return () => {
-      observer.unobserve(element);
+      if (element) {
+        observer.unobserve(element);
+      }
     };
   });
 </script>

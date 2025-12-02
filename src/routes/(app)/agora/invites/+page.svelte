@@ -2,6 +2,7 @@
 	import { ndk } from '$lib/ndk.svelte';
 	import { settings } from '$lib/stores/settings.svelte';
 	import { headerStore } from '$lib/stores/header.svelte';
+	import { layoutStore } from '$lib/stores/layout.svelte';
 	import { isAgoraRelay } from '$lib/utils/relayUtils';
 	import { NDKSubscriptionCacheUsage } from '@nostr-dev-kit/ndk';
 	import TopInvitersPodium from '$lib/components/agora/TopInvitersPodium.svelte';
@@ -14,7 +15,6 @@
 
 	// Subscribe to kind 514 (redemption events) - these have all the info we need
 	const redemptionsSubscription = $derived.by(() => {
-		console.log('[INVITES] redemptionsSubscription $derived.by running', { selectedRelay, isAgora });
 		if (!selectedRelay || !isAgora) return null;
 		return ndk.$subscribe(() => ({
 			filters: [{ kinds: [514] }],
@@ -27,7 +27,6 @@
 
 	// Subscribe to introduction posts
 	const introductionsSubscription = $derived.by(() => {
-		console.log('[INVITES] introductionsSubscription $derived.by running', { selectedRelay, isAgora });
 		if (!selectedRelay || !isAgora) return null;
 		return ndk.$subscribe(() => ({
 			filters: [{ kinds: [1], '#t': ['introduction'], limit: 20 }],
@@ -40,7 +39,6 @@
 
 	// Calculate inviter stats from redemptions
 	const inviterStats = $derived.by(() => {
-		console.log('[INVITES] inviterStats $derived.by running', redemptionsSubscription?.events.length);
 		if (!redemptionsSubscription) return [];
 
 		const redemptions = redemptionsSubscription.events;
@@ -72,7 +70,6 @@
 
 	// Map introductions with inviter info
 	const introductions = $derived.by(() => {
-		console.log('[INVITES] introductions $derived.by running', introductionsSubscription?.events.length, redemptionsSubscription?.events.length);
 		if (!introductionsSubscription || !redemptionsSubscription) return [];
 
 		const intros = introductionsSubscription.events;
@@ -90,7 +87,7 @@
 		return intros
 			.map(event => ({
 				event,
-				invitedBy: memberToInviter.get(event.pubkey) || null
+				invitedBy: memberToInviter.get(event.pubkey)
 			}))
 			.sort((a, b) => (b.event.created_at || 0) - (a.event.created_at || 0))
 			.slice(0, 10);
@@ -98,7 +95,6 @@
 
 	// Extract new members from redemption events
 	const newMembers = $derived.by(() => {
-		console.log('[INVITES] newMembers $derived.by running', redemptionsSubscription?.events.length);
 		if (!redemptionsSubscription) return [];
 
 		const redemptions = redemptionsSubscription.events;
@@ -116,16 +112,18 @@
 			.slice(0, 20);
 	});
 
-	// Set up header
+	// Set up header and layout
 	$effect(() => {
 		if (isAgora) {
 			headerStore.header = agoraInvitesHeader;
 		} else {
 			headerStore.clear();
 		}
+		layoutStore.setRightSidebarVisibility(false);
 
 		return () => {
 			headerStore.clear();
+			layoutStore.setRightSidebarVisibility(true);
 		};
 	});
 </script>

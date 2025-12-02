@@ -1,22 +1,17 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { goto } from '$app/navigation';
-  import { ndk } from '$lib/ndk.svelte';
-  import { layoutMode } from '$lib/stores/layoutMode.svelte';
-  import ArticleHeader from '$lib/components/ArticleHeader.svelte';
-  import CommentSection from '$lib/components/CommentSection.svelte';
-  import TextHighlightToolbar from '$lib/components/TextHighlightToolbar.svelte';
-  import HighlightCard from '$lib/ndk/components/highlight-card-feed/highlight-card-feed.svelte';
-  import User from '$lib/components/User.svelte';
-  import { NDKArticle } from '@nostr-dev-kit/ndk';
-  import { NDKKind, NDKList, NDKEvent } from '@nostr-dev-kit/ndk';
-  import { nip19 } from 'nostr-tools';
-  import { extractArticleImage } from '$lib/utils/extractArticleImage';
-    import { ArticleContent } from '$lib/ndk/components/article-content';
-    import ArticleCardHero from '$lib/ndk/components/article-card-hero/article-card-hero.svelte';
+  import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
+  import { ndk } from "$lib/ndk.svelte";
+  import { layoutMode } from "$lib/stores/layoutMode.svelte";
+  import CommentSection from "$lib/components/CommentSection.svelte";
+  import HighlightCard from "$lib/ndk/components/highlight-card-feed/highlight-card-feed.svelte";
+  import { NDKArticle } from "@nostr-dev-kit/ndk";
+  import type { NDKEvent } from "@nostr-dev-kit/ndk";
+  import { ArticleContent } from "$lib/ndk/components/article-content";
+  import ArticleCardHero from "$lib/ndk/components/article-card-hero/article-card-hero.svelte";
+  import { createFetchEvent } from "@nostr-dev-kit/svelte";
 
   let error = $state<string | null>(null);
-  let isBookmarked = $state(false);
   let showShareMenu = $state(false);
   let copied = $state(false);
   let userError = $state<string | null>(null);
@@ -24,86 +19,15 @@
 
   const naddr = $derived($page.params.naddr);
 
-  let article = $state<NDKArticle | null>(null);
+  let articleFetch = createFetchEvent(ndk, () => ({ bech32: naddr, type: 'bech32' }));
+  let article = $derived.by(() => {
+    if (!articleFetch.event) return null;
 
-  $effect(() => {
-    if (!naddr) {
-      article = null;
-      return;
-    }
-    ndk.fetchEvent(naddr).then(event => {
-      article = event ? NDKArticle.from(event) : null;
-    });
+    return NDKArticle.from(articleFetch.event);
   });
-
-  const heroImage = $derived(article ? extractArticleImage(article) : null);
-
-  const publishedAt = $derived(article?.published_at);
-
-  async function checkBookmark() {
-    if (!ndk.$currentPubkey || !article) return;
-
-    try {
-      const bookmarksNaddr = nip19.naddrEncode({
-        kind: NDKKind.ArticleCurationSet,
-        pubkey: ndk.$currentPubkey,
-        identifier: 'bookmarks'
-      });
-
-      const bookmarkList = await ndk.fetchEvent(bookmarksNaddr);
-      if (bookmarkList) {
-        const bookmarkedItems = bookmarkList.tags
-          .filter(tag => tag[0] === 'a')
-          .map(tag => tag[1]);
-
-        const articlePointer = article.tagId();
-        isBookmarked = bookmarkedItems.includes(articlePointer);
-      }
-    } catch (err) {
-      console.error('Failed to check bookmark status:', err);
-    }
-  }
 
   function closeDrawer() {
     selectedHighlight = null;
-  }
-
-  async function handleBookmark() {
-    if (!ndk.$currentUser || !article) return;
-
-    try {
-      const bookmarksNaddr = nip19.naddrEncode({
-        kind: NDKKind.ArticleCurationSet,
-        pubkey: ndk.$currentPubkey,
-        identifier: 'bookmarks'
-      });
-
-      let bookmarkList = await ndk.fetchEvent(bookmarksNaddr) as NDKList | null;
-
-      if (!bookmarkList) {
-        bookmarkList = new NDKList(ndk);
-        bookmarkList.kind = NDKKind.CurationSet;
-        bookmarkList.tags = [
-          ['d', 'bookmarks'],
-          ['title', 'Bookmarks']
-        ];
-      }
-
-      const articlePointer = article.tagId();
-
-      if (isBookmarked) {
-        bookmarkList.tags = bookmarkList.tags.filter(
-          tag => !(tag[0] === 'a' && tag[1] === articlePointer)
-        );
-      } else {
-        bookmarkList.addItem(article);
-      }
-
-      await bookmarkList.publish();
-      isBookmarked = !isBookmarked;
-    } catch (err) {
-      console.error('Bookmark error:', err);
-    }
   }
 
   function handleCopyIdentifier() {
@@ -112,15 +36,17 @@
     const identifier = article.encode();
     navigator.clipboard.writeText(identifier);
     copied = true;
-    setTimeout(() => copied = false, 2000);
+    setTimeout(() => (copied = false), 2000);
   }
 
   function handleShare(platform: string) {
     if (!article) return;
 
-    const title = encodeURIComponent(article.title || 'Check out this article');
+    const title = encodeURIComponent(article.title || "Check out this article");
     const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(`${article.title} by ${article.author.profile?.name || 'Anonymous'}`);
+    const text = encodeURIComponent(
+      `${article.title} by ${article.author.profile?.name || "Anonymous"}`,
+    );
 
     const shareUrls: Record<string, string> = {
       twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
@@ -129,7 +55,7 @@
     };
 
     if (shareUrls[platform]) {
-      window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+      window.open(shareUrls[platform], "_blank", "width=600,height=400");
     }
 
     showShareMenu = false;
@@ -142,10 +68,6 @@
   $effect(() => {
     layoutMode.setArticleMode();
 
-    if (article) {
-      checkBookmark();
-    }
-
     return () => {
       layoutMode.reset();
     };
@@ -153,18 +75,22 @@
 </script>
 
 {#if !article}
-  <div class="flex flex-col items-center justify-center min-h-screen bg-card">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground"></div>
+  <div class="flex flex-col items-center justify-center min-h-screen">
+    <div
+      class="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground"
+    ></div>
     <p class="mt-4 text-muted-foreground">Loading article...</p>
   </div>
 {:else if error || !article}
-  <div class="flex flex-col items-center justify-center min-h-screen px-4 bg-card">
+  <div class="flex flex-col items-center justify-center min-h-screen px-4">
     <h1 class="text-2xl font-bold text-foreground mb-2">Article Not Found</h1>
-    <p class="text-muted-foreground mb-4">{error || 'The article could not be loaded.'}</p>
+    <p class="text-muted-foreground mb-4">
+      {error || "The article could not be loaded."}
+    </p>
     <button
       type="button"
-      onclick={() => goto('/')}
-      class="px-4 py-2 bg-card dark:bg-white text-foreground dark:text-black rounded-full hover:bg-muted dark:hover:bg-neutral-100 transition-colors text-sm font-medium"
+      onclick={() => goto("/")}
+      class="px-4 py-2 dark:bg-white text-foreground dark:text-black rounded-full hover:bg-muted dark:hover:bg-neutral-100 transition-colors text-sm font-medium"
     >
       Go Home
     </button>
@@ -172,111 +98,145 @@
 {:else}
   <div class="article-container relative">
     <!-- Header -->
-     <div class="absolute left-0 right-0 top-0">
-       <header class="article-header">
-         <button class="back-btn" onclick={goBack}>
-           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-           </svg>
-         </button>
-         <h1>{article.title || 'Article'}</h1>
-         <div class="article-actions">
-           <button
-             type="button"
-             onclick={handleBookmark}
-             disabled={!ndk.$currentUser}
-             class="action-btn {isBookmarked ? 'bookmarked' : ''}"
-             title={ndk.$currentUser ? (isBookmarked ? 'Remove bookmark' : 'Add bookmark') : 'Login to bookmark'}
-           >
-             <svg class={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-             </svg>
-           </button>
-   
-           <div class="relative">
-             <button
-               type="button"
-               onclick={() => showShareMenu = !showShareMenu}
-               class="action-btn"
-             >
-               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-               </svg>
-             </button>
-   
-             {#if showShareMenu}
-               <div class="share-menu">
-                 <button
-                   type="button"
-                   onclick={() => handleShare('twitter')}
-                   class="share-menu-item"
-                 >
-                   Share on X
-                 </button>
-                 <button
-                   type="button"
-                   onclick={() => handleShare('facebook')}
-                   class="share-menu-item"
-                 >
-                   Share on Facebook
-                 </button>
-                 <button
-                   type="button"
-                   onclick={() => handleShare('linkedin')}
-                   class="share-menu-item"
-                 >
-                   Share on LinkedIn
-                 </button>
-               </div>
-             {/if}
-           </div>
-   
-           <button
-             type="button"
-             onclick={handleCopyIdentifier}
-             class="action-btn"
-           >
-             {#if copied}
-               <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-               </svg>
-             {:else}
-               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-               </svg>
-             {/if}
-           </button>
-         </div>
-       </header>
-     </div>
+    <div class="absolute left-0 right-0 top-0">
+      <header class="article-header">
+        <button class="back-btn" aria-label="Go back" onclick={goBack}>
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <h1>{article.title || "Article"}</h1>
+        <div class="article-actions">
+          <div class="relative">
+            <button
+              type="button"
+              aria-label="Share article"
+              onclick={() => (showShareMenu = !showShareMenu)}
+              class="action-btn"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                />
+              </svg>
+            </button>
+
+            {#if showShareMenu}
+              <div class="share-menu">
+                <button
+                  type="button"
+                  onclick={() => handleShare("twitter")}
+                  class="share-menu-item"
+                >
+                  Share on X
+                </button>
+                <button
+                  type="button"
+                  onclick={() => handleShare("facebook")}
+                  class="share-menu-item"
+                >
+                  Share on Facebook
+                </button>
+                <button
+                  type="button"
+                  onclick={() => handleShare("linkedin")}
+                  class="share-menu-item"
+                >
+                  Share on LinkedIn
+                </button>
+              </div>
+            {/if}
+          </div>
+
+          <button
+            type="button"
+            onclick={handleCopyIdentifier}
+            class="action-btn"
+          >
+            {#if copied}
+              <svg
+                class="w-5 h-5 text-green-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            {:else}
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+            {/if}
+          </button>
+        </div>
+      </header>
+    </div>
 
     <!-- Content -->
 
-    <ArticleCardHero {ndk} {article} />
+    <ArticleCardHero {ndk} event={article} />
 
     <main class="article-main">
       <article class="article-content">
         {#if userError}
           <div class="error-banner">
             <p>{userError}</p>
-            <button
-              type="button"
-              onclick={() => userError = null}
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <button type="button" aria-label="Dismiss error" onclick={() => (userError = null)}>
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
         {/if}
 
-        <ArticleContent
-          {article}
-        />
+        <ArticleContent {article} />
       </article>
 
       <div class="comments-section">
-        <CommentSection {article} onError={(err) => userError = err} />
+        <CommentSection {article} onError={(err) => (userError = err)} />
       </div>
     </main>
   </div>
@@ -287,6 +247,7 @@
     <div
       class="drawer-backdrop"
       onclick={closeDrawer}
+      onkeydown={(e) => e.key === 'Enter' || e.key === ' ' ? closeDrawer() : null}
       role="button"
       tabindex="0"
       aria-label="Close drawer"
@@ -302,8 +263,18 @@
           class="drawer-close-btn"
           aria-label="Close"
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -397,10 +368,6 @@
     cursor: not-allowed;
   }
 
-  .action-btn.bookmarked {
-    color: #eab308;
-  }
-
   .share-menu {
     position: absolute;
     right: 0;
@@ -427,65 +394,6 @@
 
   .share-menu-item:hover {
     background: var(--color-muted);
-  }
-
-  .hero-image {
-    position: relative;
-    width: 100%;
-    height: 50vh;
-    min-height: 400px;
-    max-height: 600px;
-    overflow: hidden;
-  }
-
-  .hero-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5), transparent);
-  }
-
-  .hero-content {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: flex-end;
-  }
-
-  .hero-text {
-    width: 100%;
-    max-width: 56rem;
-    margin: 0 auto;
-    padding: 0 1.5rem 2rem;
-  }
-
-  .hero-title {
-    font-size: clamp(1.5rem, 4vw, 3rem);
-    font-weight: 700;
-    color: white;
-    margin: 0 0 1rem 0;
-    line-height: 1.2;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  }
-
-  .hero-author {
-    color: white;
-  }
-
-  .hero-author :global(button) {
-    color: white !important;
-  }
-
-  .hero-author :global(p),
-  .hero-author :global(time) {
-    color: white !important;
   }
 
   .article-main {
@@ -628,11 +536,6 @@
 
     .action-btn {
       padding: 0.375rem;
-    }
-
-    .hero-image {
-      height: 40vh;
-      min-height: 300px;
     }
 
     .article-content {

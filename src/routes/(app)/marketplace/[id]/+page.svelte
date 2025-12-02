@@ -3,22 +3,22 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { NDKClassified, type NDKEvent } from '@nostr-dev-kit/ndk';
-    import { NDKWebLNWallet } from '@nostr-dev-kit/wallet';
+  import { NDKWebLNWallet } from '@nostr-dev-kit/wallet';
+  import { createFetchEvent } from '@nostr-dev-kit/svelte';
 
   interface Props {
     listing: NDKEvent | null;
     loading: boolean;
   }
 
-  const naddr = $page.params.id;
+  const naddr = $derived($page.params.id);
 
-  let listing = $state<NDKClassified | null>(null);
-  
-  $effect(() => {
-    if (!naddr) return;
+  const listingFetcher = createFetchEvent(ndk, () => ({
+    type: 'bech32',
+    bech32: naddr || ''
+  }));
 
-    ndk.fetchEvent(naddr).then((e) => {listing = e})
-  })
+  let listing = $derived(listingFetcher.event as NDKClassified | null);
 
   const timeAgo = $derived.by(() => {
     if (!listing?.created_at) return 'recently';
@@ -51,7 +51,7 @@
 <div class="listing-detail-container">
   <!-- Header -->
   <div class="listing-header">
-    <button class="back-btn" onclick={() => goto('/marketplace')}>
+    <button class="back-btn" aria-label="Back to marketplace" onclick={() => goto('/marketplace')}>
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>

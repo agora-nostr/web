@@ -5,6 +5,7 @@
   import { toast } from '$lib/stores/toast.svelte';
   import { followPacksStore } from '$lib/stores/followPacks.svelte';
   import { NDKKind, NDKFollowPack } from '@nostr-dev-kit/ndk';
+  import { createFetchEvent } from '@nostr-dev-kit/svelte';
 
   let showEditPackModal = $state(false);
   let editingPack = $state<NDKFollowPack | null>(null);
@@ -21,26 +22,14 @@
   let activeTab = $state<ActiveTab>('feed');
   let isFollowingAll = $state(false);
 
-  let pack = $state<NDKFollowPack | null>(null);
-  let isLoading = $state(true);
-
   // Fetch the specific pack event by its bech32 ID
-  $effect(() => {
-    if (packId) {
-      isLoading = true;
+  const packFetcher = createFetchEvent(ndk, () => ({
+    type: 'bech32',
+    bech32: packId || ''
+  }));
 
-      // Try to decode and fetch the event
-      ndk.fetchEvent(packId).then(event => {
-        if (event) {
-          pack = NDKFollowPack.from(event);
-        }
-        isLoading = false;
-      }).catch(err => {
-        console.error('Failed to fetch pack:', err);
-        isLoading = false;
-      });
-    }
-  });
+  let pack = $derived(packFetcher.event ? NDKFollowPack.from(packFetcher.event) : null);
+  let isLoading = $derived(packFetcher.loading);
 
   let pubkeys = $derived(pack?.tags.filter(t => t[0] === 'p').map(t => t[1]) || []);
 
@@ -61,7 +50,6 @@
   // Subscribe to notes from pack members
   const feedSubscription = $derived.by(() => {
     if (activeTab === 'feed' && pubkeys.length > 0) {
-      console.log(`[FollowPackDetail] Creating subscription for ${pubkeys.length} members`);
       return ndk.$subscribe(
         () => ({
           filters: [{ kinds: [NDKKind.Text], authors: pubkeys, limit: 50 }],

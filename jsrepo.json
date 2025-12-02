@@ -1,6 +1,6 @@
 {
 	"$schema": "https://unpkg.com/jsrepo@2.5.1/schemas/project-config.json",
-	"repos": ["@ieedan/shadcn-svelte-extras", "@ndk/svelte@latest"],
+	"repos": ["@ndk/svelte@latest"],
 	"includeTests": false,
 	"includeDocs": false,
 	"watermark": true,
@@ -8,10 +8,6 @@
 	"configFiles": {},
 	"paths": {
 		"*": "./src/lib/ndk",
-		"components": "./src/lib/ndk/components",
-		"ui": "./src/lib/components/ui",
-		"actions": "$lib/actions",
-		"hooks": "$lib/hooks",
-		"utils": "$lib/utils"
+		"components": "./src/lib/ndk/components"
 	}
 }

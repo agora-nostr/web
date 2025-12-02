@@ -137,7 +137,6 @@ Looking forward to connecting with you on the open social web!`;
 			// Mark as protected before publishing
 			inviteEvent.isProtected = true;
 
-			console.log('Publishing invite event to selected Agoras...', inviteEvent.id, selectedRelayUrls);
 
 			// Publish to specific Agora relays only
 			const relays = new Set<NDKRelay>();
@@ -154,7 +153,6 @@ Looking forward to connecting with you on the open social web!`;
 			try {
 				await inviteEvent.publish(relaySet);
 			} catch (e) {
-				console.log('going with the auth hack');
 				// fucking hack
 				await inviteEvent.publish(relaySet);
 			}
@@ -166,7 +164,6 @@ Looking forward to connecting with you on the open social web!`;
 			const code = isPersonalized ? `${dTag}${encryptionKey}` : dTag;
 			const link = `${window.location.origin}/i/${code}`;
 			inviteLink = link;
-			console.log('Invite created:', link);
 		} catch (error) {
 			console.error('Failed to generate invite:', error);
 			alert('Failed to generate invite. Check console for details.');
@@ -187,7 +184,6 @@ Looking forward to connecting with you on the open social web!`;
 
 	async function shareInvite() {
 		if (!navigator.share) {
-			console.log('Web Share API not supported, falling back to copy');
 			await copyToClipboard();
 			return;
 		}

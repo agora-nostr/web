@@ -2,6 +2,7 @@
   import { t } from 'svelte-i18n';
   import { page } from '$app/stores';
   import { ndk, relayFeeds } from '$lib/ndk.svelte';
+  import { walletStore } from '$lib/features/wallet';
   import { settings } from '$lib/stores/settings.svelte';
   import { messagesStore } from '$lib/stores/messages.svelte';
   import { formatBalance } from '$lib/utils/formatBalance';
@@ -27,7 +28,6 @@
     onPrimaryAction
   }: Props = $props();
 
-  const wallet = ndk.$wallet;
   const notificationsManager = createNotificationsManager(ndk);
   const currentPath = $derived($page.url.pathname);
 
@@ -83,7 +83,7 @@
       icon: 'wallet',
       label: 'Wallet',
       active: (path) => path.startsWith('/wallet'),
-      rightContent: () => wallet?.balance && wallet.balance > 0 ? formatBalance(wallet.balance) : null
+      rightContent: () => { const bal = walletStore.getBalanceAmount(); return bal && bal > 0 ? formatBalance(bal) : null; }
     },
     {
       type: 'link',
@@ -106,8 +106,8 @@
       icon: 'relay',
       label: 'Relay Feeds',
       active: (path) => path.startsWith('/relay-feeds'),
-      visible: () => relayFeeds?.relays.length > 0,
-      rightContent: () => relayFeeds?.relays.length ? String(relayFeeds.relays.length) : null
+      visible: () => (relayFeeds?.relays?.length ?? 0) > 0,
+      rightContent: () => relayFeeds?.relays?.length ? String(relayFeeds.relays.length) : null
     },
     {
       type: 'link',
@@ -250,14 +250,16 @@
           </div>
           {#if item.badge && item.badge() !== null}
             {@const badgeValue = item.badge()}
-            {#if collapsed}
-              <Badge size="xs" class="absolute top-1.5 right-1.5">
-                {badgeValue > 9 ? '9+' : badgeValue}
-              </Badge>
-            {:else}
-              <Badge size="sm">
-                {badgeValue > 99 ? '99+' : badgeValue}
-              </Badge>
+            {#if badgeValue !== null}
+              {#if collapsed}
+                <Badge size="xs" class="absolute top-1.5 right-1.5">
+                  {badgeValue > 9 ? '9+' : badgeValue}
+                </Badge>
+              {:else}
+                <Badge size="sm">
+                  {badgeValue > 99 ? '99+' : badgeValue}
+                </Badge>
+              {/if}
             {/if}
           {:else if !collapsed && item.rightContent && item.rightContent()}
             {#if item.href === '/relay-feeds'}

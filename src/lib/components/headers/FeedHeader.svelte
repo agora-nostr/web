@@ -25,7 +25,7 @@
     if (!headerElement) return;
 
     const updateHeaderHeight = () => {
-      const height = isVideoMode ? 0 : headerElement.offsetHeight;
+      const height = isVideoMode ? 0 : (headerElement?.offsetHeight ?? 0);
       document.documentElement.style.setProperty('--header-height', `${height}px`);
     };
 

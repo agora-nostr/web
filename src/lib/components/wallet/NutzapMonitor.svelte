@@ -1,10 +1,20 @@
 <script lang="ts">
-  import { ndk } from '$lib/ndk.svelte';
+  import { walletStore } from '$lib/features/wallet';
 
-  const nutzaps = $derived(ndk.$wallet?.nutzaps ?? { pending: [], redeemed: [], failed: [] });
-  const pendingCount = $derived(nutzaps.pending.length);
-  const redeemedCount = $derived(nutzaps.redeemed.length);
-  const failedCount = $derived(nutzaps.failed.length);
+  // Nutzaps only available on NIP-60 Cashu wallets
+  const wallet = $derived(walletStore.isNip60 && walletStore.wallet && 'nutzaps' in walletStore.wallet ? walletStore.wallet : null);
+  const nutzaps = $derived.by(() => {
+    const defaultNutzaps = { pending: [], redeemed: [], failed: [] };
+    if (!wallet || !('nutzaps' in wallet)) return defaultNutzaps;
+    const walletNutzaps = wallet.nutzaps;
+    if (typeof walletNutzaps === 'object' && walletNutzaps !== null && 'pending' in walletNutzaps) {
+      return walletNutzaps as { pending: any[]; redeemed: any[]; failed: any[] };
+    }
+    return defaultNutzaps;
+  });
+  const pendingCount = $derived(nutzaps.pending?.length ?? 0);
+  const redeemedCount = $derived(nutzaps.redeemed?.length ?? 0);
+  const failedCount = $derived(nutzaps.failed?.length ?? 0);
 
   let showDetails = $state(false);
 

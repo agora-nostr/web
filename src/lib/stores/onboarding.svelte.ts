@@ -56,7 +56,6 @@ const DEFAULT_STATE: OnboardingState = {
 
 function loadState(): OnboardingState {
   if (typeof window === 'undefined') {
-    console.log('[Store] Server-side, returning DEFAULT_STATE');
     return DEFAULT_STATE;
   }
 
@@ -64,16 +63,13 @@ function loadState(): OnboardingState {
     const stored = sessionStorage.getItem('voces-onboarding');
     if (stored) {
       const parsed = JSON.parse(stored);
-      console.log('[Store] Loaded state from sessionStorage:', parsed);
       // Only restore if there's an active invite, otherwise start fresh at step 1
       if (parsed.invite) {
         return { ...DEFAULT_STATE, ...parsed };
       } else {
-        console.log('[Store] No active invite, ignoring stored state and starting fresh');
         return DEFAULT_STATE;
       }
     } else {
-      console.log('[Store] No stored state found, using DEFAULT_STATE');
     }
   } catch (e) {
     console.error('[Store] Failed to load onboarding state:', e);
@@ -136,12 +132,10 @@ class OnboardingStore {
   }
 
   setInvite(invite: InviteData) {
-    console.log('[Store] setInvite called with:', invite);
     this.state.invite = invite;
 
     // Pre-fill profile name if available
     if (invite.recipientName && !this.state.profileData.name) {
-      console.log('[Store] Pre-filling profile name:', invite.recipientName);
       this.state.profileData.name = invite.recipientName;
     }
 
@@ -149,18 +143,15 @@ class OnboardingStore {
     if (invite.inviteRelay) {
       const agoraLanguage = getAgoraLanguage(invite.inviteRelay);
       if (agoraLanguage) {
-        console.log(`[Store] Setting language to ${agoraLanguage} based on agora relay ${invite.inviteRelay}`);
         settings.setLanguage(agoraLanguage);
         locale.set(agoraLanguage);
       }
     }
 
     // Skip to step 3 (features) when using invite
-    console.log('[Store] Setting step to 3 (features)');
     this.state.currentStep = 3;
 
     saveState(this.state);
-    console.log('[Store] ✓ Invite data saved to sessionStorage');
   }
 
   setStep(step: number) {
@@ -184,7 +175,6 @@ class OnboardingStore {
 
       const newLocale = communityToLocale[community];
       if (newLocale) {
-        console.log(`[Store] Setting language to ${newLocale} based on community ${community}`);
         settings.setLanguage(newLocale);
         locale.set(newLocale);
       }
@@ -209,24 +199,12 @@ class OnboardingStore {
   }
 
   async publishInviteConfirmation(signer: NDKPrivateKeySigner) {
-    console.log('[Store] publishInviteConfirmation called:', {
-      hasPublished: this.state.hasPublishedInviteConfirmation,
-      inviteData: this.state.invite
-    });
 
     if (this.state.hasPublishedInviteConfirmation) {
-      console.log('[Store] ⊘ Invite confirmation already published');
       return;
     }
 
     const invite = this.state.invite;
-    console.log('[Store] Checking invite data:', {
-      hasInvite: !!invite,
-      inviteEventId: invite?.inviteEventId,
-      inviter: invite?.inviter,
-      inviteRelay: invite?.inviteRelay,
-      inviteCode: invite?.inviteCode
-    });
 
     if (!invite?.inviteEventId || !invite?.inviter || !invite?.inviteRelay || !invite?.inviteCode) {
       console.warn('[Store] ✗ Missing required invite data for confirmation');
@@ -234,7 +212,6 @@ class OnboardingStore {
     }
 
     try {
-      console.log('[Store] Creating kind:514 event...');
       const confirmationEvent = new NDKEvent(ndk);
       confirmationEvent.kind = 514;
       confirmationEvent.content = '';
@@ -245,28 +222,20 @@ class OnboardingStore {
       ];
       confirmationEvent.isProtected = true;
 
-      console.log('[Store] Signing event...');
       await confirmationEvent.sign();
-      console.log('[Store] ✓ Event signed');
 
       // Publish ONLY to the invite relay
-      console.log('[Store] Getting relay:', invite.inviteRelay);
       const relay = ndk.pool.getRelay(invite.inviteRelay, true);
       if (relay) {
-        console.log('[Store] ✓ Relay obtained:', relay.url);
         const relaySet = new NDKRelaySet(new Set([relay]), ndk);
-        console.log('[Store] Publishing kind:514 invite confirmation to', invite.inviteRelay);
         await confirmationEvent.publish(relaySet);
-        console.log('[Store] ✓ Successfully published kind:514 invite confirmation');
 
         // Set the invite relay as the selected relay in settings
-        console.log('[Store] Setting selected relay in settings...');
         settings.setSelectedRelay(invite.inviteRelay);
 
         // Also ensure the relay is in the user's relay list
         const existingRelay = settings.relays.find(r => r.url === invite.inviteRelay);
         if (!existingRelay) {
-          console.log('[Store] Adding relay to settings...');
           settings.addRelay({
             url: invite.inviteRelay,
             read: true,
@@ -274,13 +243,11 @@ class OnboardingStore {
             enabled: true
           });
         } else {
-          console.log('[Store] Relay already in settings');
         }
 
         // Mark as published
         this.state.hasPublishedInviteConfirmation = true;
         saveState(this.state);
-        console.log('[Store] ✓ Marked as published in state');
       } else {
         console.error('[Store] ✗ Failed to get relay:', invite.inviteRelay);
       }
@@ -292,7 +259,6 @@ class OnboardingStore {
 
 
   async publishProfileAndSetup(signer: NDKPrivateKeySigner) {
-    console.log('[Store] publishProfileAndSetup called for non-invited user');
     const profile = this.state.profileData;
 
     if (!profile.name) {
@@ -319,7 +285,6 @@ class OnboardingStore {
       relays.add('wss://relay.primal.net');
 
       // Use createAccount with existing signer to get signed events WITHOUT publishing
-      console.log('[Store] Creating account with createAccount() using existing signer...');
       const { events } = await ndk.$sessions.createAccount(
         {
           profile: {
@@ -339,16 +304,12 @@ class OnboardingStore {
         { publish: false, signer }
       );
 
-      console.log('[Store] ✓ Created signed events:', events.length);
 
       // Publish all events to default relays
-      console.log('[Store] Publishing events to default relays...');
       for (const event of events) {
         await event.publish();
-        console.log(`[Store] ✓ Published kind:${event.kind} to default relays`);
       }
 
-      console.log('[Store] ✓ Profile and setup complete');
     } catch (err) {
       console.error('[Store] ✗ Error publishing profile and setup:', err);
       throw err;
@@ -356,23 +317,16 @@ class OnboardingStore {
   }
 
   async completeInviteSetup(signer: NDKPrivateKeySigner) {
-    console.log('[Store] completeInviteSetup called:', {
-      hasCompletedSetup: this.state.hasCompletedInviteSetup,
-      hasInvite: this.hasInvite
-    });
 
     if (this.state.hasCompletedInviteSetup) {
-      console.log('[Store] ⊘ Invite setup already completed, skipping');
       return;
     }
 
     if (!this.hasInvite) {
-      console.log('[Store] ⊘ No invite data, skipping invite setup');
       return;
     }
 
     try {
-      console.log('[Store] Publishing kind:514 invite confirmation...');
 
       // Only publish the kind:514 invite confirmation event
       // Do NOT touch kind:0 (profile) or kind:3 (contacts)
@@ -380,7 +334,6 @@ class OnboardingStore {
 
       this.state.hasCompletedInviteSetup = true;
       saveState(this.state);
-      console.log('[Store] ✓ Invite acceptance complete (kind:514 published)');
     } catch (err) {
       await this.publishInviteConfirmation(signer);
       console.error('[Store] ✗ Error during invite acceptance:', err);

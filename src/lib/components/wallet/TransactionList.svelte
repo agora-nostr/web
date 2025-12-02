@@ -1,8 +1,8 @@
 <script lang="ts">
   import { ndk } from '$lib/ndk.svelte';
 
-  const wallet = ndk.$wallet;
-  const transactions = $derived(wallet?.transactions || []);
+  // Unified transaction API works for both NIP-60 and NWC wallets
+  const transactions = $derived(ndk.$wallet?.transactions ?? []);
 
   function formatDate(timestamp: number): string {
     const date = new Date(timestamp * 1000);
@@ -43,22 +43,22 @@
     <div class="transactions">
       {#each transactions as tx}
         <div class="transaction-item">
-          <div class="tx-icon" class:receive={tx.type === 'receive'} class:send={tx.type === 'send'}>
-            {tx.type === 'receive' ? '↓' : '↑'}
+          <div class="tx-icon" class:receive={tx.direction === 'in'} class:send={tx.direction === 'out'}>
+            {tx.direction === 'in' ? '↓' : '↑'}
           </div>
 
           <div class="tx-info">
             <div class="tx-title">
-              {tx.type === 'receive' ? 'Received' : 'Sent'}
-              {#if tx.memo}
-                <span class="tx-memo">· {tx.memo}</span>
+              {tx.direction === 'in' ? 'Received' : 'Sent'}
+              {#if tx.description}
+                <span class="tx-memo">· {tx.description}</span>
               {/if}
             </div>
             <div class="tx-date">{formatDate(tx.timestamp)}</div>
           </div>
 
-          <div class="tx-amount" class:receive={tx.type === 'receive'} class:send={tx.type === 'send'}>
-            {tx.type === 'receive' ? '+' : '-'}{formatAmount(tx.amount)}
+          <div class="tx-amount" class:receive={tx.direction === 'in'} class:send={tx.direction === 'out'}>
+            {tx.direction === 'in' ? '+' : '-'}{formatAmount(tx.amount)}
           </div>
         </div>
       {/each}

@@ -3,7 +3,8 @@
   import { NDKEvent, NDKRelaySet } from '@nostr-dev-kit/ndk';
   import { NDKBlossom } from '@nostr-dev-kit/blossom';
   import { createBlossomUpload } from '@nostr-dev-kit/svelte';
-    import { AGORA_RELAYS } from '$lib/utils/relayUtils';
+  import { createFetchEvent } from '@nostr-dev-kit/svelte';
+  import { AGORA_RELAYS } from '$lib/utils/relayUtils';
 
   interface Props {
     hideSubmitButton?: boolean;
@@ -28,20 +29,17 @@
   });
 
   // Fetch the profile event reactively to get hashtags
-  let profileEvent = $state<NDKEvent | null>(null);
-
-  $effect(() => {
+  const profileFetcher = createFetchEvent(ndk, () => {
     if (!user?.pubkey) {
-      profileEvent = null;
-      return;
+      return { type: 'filter', filter: { kinds: [0], authors: [''] } };
     }
-    ndk.fetchEvent({
-      kinds: [0],
-      authors: [user.pubkey]
-    }).then(event => {
-      profileEvent = event || null;
-    });
+    return {
+      type: 'filter',
+      filter: { kinds: [0], authors: [user.pubkey] }
+    };
   });
+
+  let profileEvent = $derived(profileFetcher.event);
 
   let isSubmitting = $state(false);
   let isSaved = $state(false);
@@ -140,7 +138,6 @@
       const uploadOptions = {
         fallbackServer: 'https://blossom.primal.net'
       };
-      console.log('Calling pictureUpload.upload with options:', uploadOptions);
       await pictureUpload.upload(file, uploadOptions);
       if (pictureUpload.result?.url) {
         formData.picture = pictureUpload.result.url;

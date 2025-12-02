@@ -5,7 +5,7 @@
 import type { NDKUser } from "@nostr-dev-kit/ndk";
 import { NDKInterestList } from "@nostr-dev-kit/ndk";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
-import { resolveNDK } from "../resolve-ndk/index.svelte";
+import { getNDK } from "../../utils/ndk/index.svelte.js";
 
 export interface FollowActionConfig {
 	target: NDKUser | string | undefined;
@@ -38,14 +38,14 @@ export interface FollowActionConfig {
  */
 export function createFollowAction(
 	config: () => FollowActionConfig,
-	ndk?: NDKSvelte,
+	ndkParam?: NDKSvelte,
 ) {
-	const resolvedNDK = resolveNDK(ndk);
+	const ndk = getNDK(ndkParam);
 
 	// Ensure NDKInterestList is monitored if we have sessions
 	// This is needed for hashtag follows
-	if (resolvedNDK.$sessions) {
-		resolvedNDK.$sessions.addMonitor([NDKInterestList]);
+	if (ndk.$sessions) {
+		ndk.$sessions.addMonitor([NDKInterestList]);
 	}
 
 	const isFollowing = $derived.by(() => {
@@ -56,10 +56,10 @@ export function createFollowAction(
 		if (typeof target === "string") {
 			// If it's a 64-character hex string, treat it as a pubkey
 			if (/^[0-9a-f]{64}$/i.test(target)) {
-				target = resolvedNDK.getUser({ pubkey: target });
+				target = ndk.getUser({ pubkey: target });
 			} else {
 				// Otherwise it's a hashtag
-				const interestList = resolvedNDK.$sessionEvent(NDKInterestList, {
+				const interestList = ndk.$sessionEvent(NDKInterestList, {
 					create: true,
 				}) as NDKInterestList | undefined;
 				if (!interestList) return false;
@@ -70,7 +70,7 @@ export function createFollowAction(
 		// NDKUser = user
 		try {
 			const pubkey = target.pubkey;
-			return resolvedNDK.$follows.has(pubkey);
+			return ndk.$follows.has(pubkey);
 		} catch {
 			// User doesn't have pubkey set yet (e.g., from createFetchUser before loaded)
 			return false;
@@ -85,10 +85,10 @@ export function createFollowAction(
 		if (typeof target === "string") {
 			// If it's a 64-character hex string, treat it as a pubkey
 			if (/^[0-9a-f]{64}$/i.test(target)) {
-				target = resolvedNDK.getUser({ pubkey: target });
+				target = ndk.getUser({ pubkey: target });
 			} else {
 				// Otherwise it's a hashtag
-				const interestList = resolvedNDK.$sessionEvent(NDKInterestList, {
+				const interestList = ndk.$sessionEvent(NDKInterestList, {
 					create: true,
 				}) as NDKInterestList | undefined;
 				if (!interestList) return;
@@ -115,9 +115,9 @@ export function createFollowAction(
 		}
 
 		if (isFollowing) {
-			await resolvedNDK.$follows.remove(pubkey);
+			await ndk.$follows.remove(pubkey);
 		} else {
-			await resolvedNDK.$follows.add(pubkey);
+			await ndk.$follows.add(pubkey);
 		}
 	}
 

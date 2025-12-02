@@ -5,9 +5,14 @@
 	"subcategory": "cards",
 	"variant": "portrait",
 	"oneLiner": "A vertical article card with prominent image",
-	"command": "npx jsrepo add article-card-portrait",
+	"registryName": "components/article-card-portrait",
 	"dependencies": ["@nostr-dev-kit/svelte", "@nostr-dev-kit/ndk"],
 	"useCases": ["featured-articles", "magazine-layouts", "content-grids"],
+	"registration": {
+		"autoRegister": true,
+		"priority": 6,
+		"wrapper": "NDKArticle"
+	},
 	"apiDoc": {
 		"name": "ArticleCardPortrait",
 		"description": "A vertical portrait-oriented article card with prominent cover image, title, summary, and reading time. Features hover effects with scale and shadow transitions. Ideal for magazine-style layouts and content grids.",
@@ -20,7 +25,7 @@
 				"description": "NDK instance for Nostr operations"
 			},
 			{
-				"name": "article",
+				"name": "event",
 				"type": "NDKArticle",
 				"required": true,
 				"description": "Article to display"

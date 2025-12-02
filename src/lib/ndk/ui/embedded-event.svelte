@@ -3,17 +3,23 @@
 -->
 
 <script lang="ts">
-	import { setContext, getContext } from 'svelte';
-	import type { NDKSvelte } from '@nostr-dev-kit/svelte';
-	import type { NDKEvent } from '@nostr-dev-kit/ndk';
-	import { defaultContentRenderer, type ContentRenderer } from './content-renderer';
-	import { CONTENT_RENDERER_CONTEXT_KEY, type ContentRendererContext } from './content-renderer/content-renderer.context.js';
-	import { ENTITY_CLICK_CONTEXT_KEY, type EntityClickContext } from './entity-click-context.js';
+	import { setContext, getContext } from "svelte";
+	import { createFetchEvent, type NDKSvelte } from "@nostr-dev-kit/svelte";
+	import type { NDKEvent } from "@nostr-dev-kit/ndk";
+	import {
+		defaultContentRenderer,
+		type ContentRenderer,
+	} from "./content-renderer";
+	import {
+		CONTENT_RENDERER_CONTEXT_KEY,
+		type ContentRendererContext,
+	} from "./content-renderer/content-renderer.context.js";
 
-	interface EmbeddedEventProps {
+	export interface EmbeddedEventProps {
 		ndk: NDKSvelte;
 		bech32: string;
 		renderer?: ContentRenderer;
+		onclick?: (event: NDKEvent) => void;
 		class?: string;
 	}
 
@@ -21,42 +27,33 @@
 		ndk,
 		bech32,
 		renderer: rendererProp,
-		class: className = ''
+		onclick,
+		class: className = "",
 	}: EmbeddedEventProps = $props();
 
+	// Get parent context
+	const parentContext = getContext<ContentRendererContext | undefined>(
+		CONTENT_RENDERER_CONTEXT_KEY,
+	);
+
 	// Use renderer from prop, or from context, or fallback to default
-	const rendererContext = getContext<ContentRendererContext | undefined>(CONTENT_RENDERER_CONTEXT_KEY);
-	const renderer = $derived(rendererProp ?? rendererContext?.renderer ?? defaultContentRenderer);
-
-	// Get entity click context for click handling
-	const entityClickContext = getContext<EntityClickContext | undefined>(ENTITY_CLICK_CONTEXT_KEY);
-
-	// Set renderer in context so nested components can access it
-	setContext(CONTENT_RENDERER_CONTEXT_KEY, { get renderer() { return renderer } });
-
-	// Fetch event from bech32
-	let event = $state<NDKEvent | undefined>(undefined);
-	let loading = $state(true);
-	let error = $state<Error | undefined>(undefined);
-
-	$effect(() => {
-		loading = true;
-		error = undefined;
-		event = undefined;
-
-		ndk.fetchEvent(bech32).then(fetchedEvent => {
-			event = fetchedEvent ?? undefined;
-			loading = false;
-		}).catch(err => {
-			error = err;
-			loading = false;
-		});
+	const renderer = $derived.by(() => {
+		return rendererProp ?? parentContext?.renderer ?? defaultContentRenderer;
 	});
 
-	const embedded = $derived({ event, loading, error });
+	// Set ContentRendererContext for nested components
+	setContext(CONTENT_RENDERER_CONTEXT_KEY, {
+		get renderer() {
+			return renderer;
+		},
+	});
+
+	const eventFetcher = createFetchEvent(ndk, () => ({ bech32 }));
 
 	// Lookup handler from registry for this specific kind
-	let handlerInfo = $derived(renderer.getKindHandler(embedded.event?.kind));
+	let handlerInfo = $derived(
+		renderer.getKindHandler(eventFetcher.event?.kind),
+	);
 
 	// Use kind-specific handler
 	let KindHandler = $derived(handlerInfo?.component);
@@ -66,33 +63,45 @@
 
 	// Wrap event using NDK wrapper class if available (only for kind-specific handlers)
 	let wrappedEvent = $derived(
-		embedded.event && handlerInfo?.wrapper?.from
-			? handlerInfo.wrapper.from(embedded.event)
-			: embedded.event
+		eventFetcher.event && handlerInfo?.wrapper?.from
+			? handlerInfo.wrapper.from(eventFetcher.event)
+			: eventFetcher.event,
 	);
 
 	// Handle click on embedded event
 	function handleClick(e: MouseEvent | KeyboardEvent) {
-		if (entityClickContext?.onEventClick && wrappedEvent) {
+		if (onclick && wrappedEvent) {
 			e.stopPropagation();
-			entityClickContext.onEventClick(wrappedEvent);
+			onclick(wrappedEvent);
 		}
 	}
 </script>
 
-{#if embedded.loading}
-	<div class="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted text-sm {className}">
-		<div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+{#if eventFetcher.loading}
+	<div
+		class="flex items-center gap-2 p-3 rounded-lg border border-border bg-muted text-sm {className}"
+	>
+		<div
+			class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"
+		></div>
 		<span>Loading event...</span>
 	</div>
-{:else if embedded.error}
-	<div class="p-3 rounded-lg border border-border bg-muted text-sm text-destructive {className}">
+{:else if eventFetcher.error}
+	<div
+		class="p-3 rounded-lg border border-border bg-muted text-sm text-destructive {className}"
+	>
 		<span>Failed to load event</span>
 	</div>
 {:else if KindHandler && wrappedEvent}
 	<!-- Kind-specific handler -->
-	{#if entityClickContext?.onEventClick}
-		<div onclick={handleClick} onkeydown={(e) => e.key === 'Enter' && handleClick(e)} role="button" tabindex="0" class="cursor-pointer">
+	{#if onclick}
+		<div
+			onclick={handleClick}
+			onkeydown={(e) => e.key === "Enter" && handleClick(e)}
+			role="button"
+			tabindex="0"
+			class="cursor-pointer"
+		>
 			<KindHandler {ndk} event={wrappedEvent} />
 		</div>
 	{:else}
@@ -100,18 +109,19 @@
 	{/if}
 {:else if FallbackHandler && wrappedEvent}
 	<!-- Fallback handler - no variant -->
-	{#if entityClickContext?.onEventClick}
-		<div onclick={handleClick} onkeydown={(e) => e.key === 'Enter' && handleClick(e)} role="button" tabindex="0" class="cursor-pointer">
+	{#if onclick}
+		<div
+			onclick={handleClick}
+			onkeydown={(e) => e.key === "Enter" && handleClick(e)}
+			role="button"
+			tabindex="0"
+			class="cursor-pointer"
+		>
 			<FallbackHandler {ndk} event={wrappedEvent} class={className} />
 		</div>
 	{:else}
 		<FallbackHandler {ndk} event={wrappedEvent} class={className} />
 	{/if}
 {:else if wrappedEvent}
-	<!-- NO HANDLER: Show raw bech32. Users can register generic-embedded if they want it. -->
-	{#if entityClickContext?.onEventClick}
-		<button onclick={handleClick} class="cursor-pointer font-mono text-sm bg-transparent border-none p-0 m-0 inline text-inherit">{bech32}</button>
-	{:else}
-		<code>{bech32}</code>
-	{/if}
+	{bech32}
 {/if}

@@ -14,7 +14,9 @@
   let user = $state<NDKUser | undefined>(undefined);
 
   $effect(() => {
-    ndk.fetchUser(nip05Identifier).then(u => { user = u; });
+    if (nip05Identifier) {
+      ndk.fetchUser(nip05Identifier).then(u => { user = u; });
+    }
   });
 
   const pubkey = $derived(user?.pubkey);

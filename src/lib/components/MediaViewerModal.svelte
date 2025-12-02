@@ -212,7 +212,7 @@
                 {errorMessage}
               </div>
             {/if}
-            <CommentForm article={event} onCommentPublished={addComment} onError={handleError} />
+            <CommentForm article={event as any} onError={handleError} />
           </div>
         </div>
       </div>
@@ -365,7 +365,7 @@
               {errorMessage}
             </div>
           {/if}
-          <CommentForm article={event} onCommentPublished={addComment} onError={handleError} />
+          <CommentForm article={event as any} onError={handleError} />
         </div>
       </div>
     </div>

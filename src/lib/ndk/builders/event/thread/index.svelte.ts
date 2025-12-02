@@ -6,7 +6,7 @@ import { NDKEvent, type NDKSubscription } from "@nostr-dev-kit/ndk";
 import { NDKKind } from "@nostr-dev-kit/ndk";
 import { SvelteMap, SvelteSet } from "svelte/reactivity";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
-import { resolveNDK } from "../../resolve-ndk/index.svelte.js";
+import { getNDK } from "../../../utils/ndk/index.svelte.js";
 import type { ThreadView, ThreadNode } from "./types.js";
 import {
 	findRootId,
@@ -72,9 +72,9 @@ export interface ThreadViewConfig {
  */
 export function createThreadView(
 	config: () => ThreadViewConfig,
-	ndk?: NDKSvelte,
+	ndkParam?: NDKSvelte,
 ): ThreadView {
-	const resolvedNDK = resolveNDK(ndk);
+	const ndk = getNDK(ndkParam);
 	const {
 		focusedEvent,
 		maxDepth = 20,
@@ -104,7 +104,7 @@ export function createThreadView(
 	async function initializeMainEvent() {
 		if (typeof focusedEvent === "string") {
 			// Fetch the event if we only have an ID
-			const event = await resolvedNDK.fetchEvent(focusedEvent);
+			const event = await ndk.fetchEvent(focusedEvent);
 			if (event) {
 				_main = event;
 				startThreadSubscription();
@@ -125,7 +125,7 @@ export function createThreadView(
 		const filters = buildThreadFilters(rootId, _main.id, kinds);
 
 		// Create subscription
-		subscription = resolvedNDK.subscribe(filters, {
+		subscription = ndk.subscribe(filters, {
 			closeOnEose: false,
 			groupable: false, // Important for real-time updates
 		});
@@ -190,14 +190,11 @@ export function createThreadView(
 			// Create a targeted subscription for the missing event
 			const filters = [{ ids: [node.id] }];
 
-			// Add relay hint if available
-			const relayUrls = node.relayHint ? [node.relayHint] : undefined;
-
-			const sub = resolvedNDK.subscribe(filters, {
+			const sub = ndk.subscribe(filters, {
 				closeOnEose: true,
 				groupable: false,
-				// TODO: Add relay hint support when NDK supports it
-				// relays: relayUrls
+				// Use relay hint if available (supported since NDK 2.13.0)
+				...(node.relayHint && { relayUrls: [node.relayHint] }),
 			});
 
 			sub.on("event", (event: NDKEvent) => {
@@ -238,7 +235,7 @@ export function createThreadView(
 		if (descendantFilters.length === 0) return;
 
 		// Subscribe to descendants
-		const descendantSub = resolvedNDK.subscribe(descendantFilters, {
+		const descendantSub = ndk.subscribe(descendantFilters, {
 			closeOnEose: true,
 			groupable: false,
 		});
@@ -266,7 +263,7 @@ export function createThreadView(
 			// Check if we already have it in our cache
 			newMainEvent = eventMap.get(event) || null;
 			if (!newMainEvent) {
-				const fetchedEvent = await resolvedNDK.fetchEvent(event);
+				const fetchedEvent = await ndk.fetchEvent(event);
 				if (fetchedEvent) {
 					newMainEvent = fetchedEvent;
 					eventMap.set(fetchedEvent.id, fetchedEvent);

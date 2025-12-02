@@ -25,10 +25,8 @@ export function useProfileSearch(options: UseProfileSearchOptions) {
 	// Update cached search results when query changes
 	$effect(() => {
 		const query = searchQuery().trim();
-		console.log('[useProfileSearch] Search query:', query);
 
 		if (!query) {
-			console.log('[useProfileSearch] Empty query, clearing results');
 			cachedResults = new Set();
 			return;
 		}
@@ -39,14 +37,12 @@ export function useProfileSearch(options: UseProfileSearchOptions) {
 			return;
 		}
 
-		console.log('[useProfileSearch] Searching profiles with query:', query);
 
 		// Use cache adapter to search profiles
 		ndk.cacheAdapter.getProfiles({
 			fields: ['name', 'displayName', 'nip05'],
 			contains: query
 		}).then((profiles) => {
-			console.log('[useProfileSearch] Search results count:', profiles?.size || 0);
 			cachedResults = new Set(profiles?.keys() || []);
 		}).catch(err => {
 			console.error('[useProfileSearch] Failed to search profiles:', err);

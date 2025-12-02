@@ -11,12 +11,11 @@
 </script>
 
 <script lang="ts">
-  import { getContext } from 'svelte';
+  import { NDKUser } from '@nostr-dev-kit/ndk';
   import { createProfileFetcher } from '../../builders/profile/index.svelte.js';
   import { User } from '../../ui/user';
   import { Popover } from 'bits-ui';
   import { cn } from '../../utils/cn';
-  import { ENTITY_CLICK_CONTEXT_KEY, type EntityClickContext } from '../../ui/entity-click-context.js';
   import Portal from '../../ui/portal/portal.svelte';
 
   interface Props {
@@ -24,16 +23,18 @@
 
     bech32: string;
 
+    onclick?: (user: NDKUser) => void;
+
     class?: string;
   }
 
   let {
     ndk,
     bech32,
+    onclick,
     class: className = ''
   }: Props = $props();
 
-  const entityClickContext = getContext<EntityClickContext | undefined>(ENTITY_CLICK_CONTEXT_KEY);
   const profileFetcher = createProfileFetcher(() => ({ user: bech32 }), ndk);
   const pubkey = $derived(profileFetcher.user?.pubkey);
 
@@ -55,9 +56,9 @@
   }
 
   function handleClick(e: MouseEvent | KeyboardEvent) {
-    if (entityClickContext?.onUserClick && pubkey) {
+    if (onclick && profileFetcher.user) {
       e.stopPropagation();
-      entityClickContext.onUserClick(pubkey);
+      onclick(profileFetcher.user);
     }
   }
 </script>
@@ -83,8 +84,8 @@
           )}
           onclick={handleClick}
           onkeydown={(e) => e.key === 'Enter' && handleClick(e)}
-          role={entityClickContext?.onUserClick ? "button" : undefined}
-          tabindex={entityClickContext?.onUserClick ? 0 : undefined}
+          role={onclick ? "button" : undefined}
+          tabindex={onclick ? 0 : undefined}
         >
           <User.Avatar class="w-5 h-5 inline-block" />
           <span>@<User.Name class="inline" field="name" /></span>

@@ -1,7 +1,5 @@
 <script lang="ts">
-  import { ndk } from '$lib/ndk.svelte';
-
-  const wallet = ndk.$wallet;
+  import { walletStore, formatSats } from '$lib/features/wallet';
 
   let amount = $state('');
   let memo = $state('');
@@ -10,17 +8,13 @@
   let token = $state<string | null>(null);
   let error = $state('');
 
-  const balance = $derived(wallet?.balance || 0);
+  const balance = $derived(walletStore.getBalanceAmount() ?? 0);
   const amountNum = $derived(Number(amount) || 0);
   const canSend = $derived(amountNum > 0 && amountNum <= balance && !isSending);
 
-  function formatBalance(sats: number): string {
-    return new Intl.NumberFormat('en-US').format(sats);
-  }
-
   async function handleSend() {
     if (!canSend) return;
-    if (!wallet) {
+    if (!walletStore.wallet) {
       error = 'Wallet not available';
       return;
     }
@@ -29,8 +23,13 @@
     error = '';
 
     try {
-      // Use wallet to generate token
-      token = await wallet.send(amountNum, memo || undefined);
+      // Use wallet to generate token (Cashu-specific for NIP-60)
+      if ('send' in walletStore.wallet) {
+        token = await walletStore.wallet.send(amountNum, memo || undefined);
+      } else {
+        error = 'Token generation not supported with NWC wallet';
+        return;
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         error = err.message;
@@ -75,7 +74,7 @@
           <span class="amount-unit">sats</span>
         </div>
         <div class="balance-info">
-          Available: {formatBalance(balance)} sats
+          Available: {formatSats(balance)} sats
         </div>
       </div>
 
@@ -110,7 +109,7 @@
     <div class="token-result">
       <div class="success-icon">✓</div>
       <h3>Token Generated!</h3>
-      <p class="success-message">{formatBalance(amountNum)} sats ready to send</p>
+      <p class="success-message">{formatSats(amountNum)} sats ready to send</p>
 
       <div class="token-display">
         <div class="token-text">{token}</div>

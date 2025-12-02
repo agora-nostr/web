@@ -1,12 +1,19 @@
 <script lang="ts">
-  import { ndk } from '$lib/ndk.svelte';
+  import { walletStore } from '$lib/features/wallet';
 
-  const mints = $derived(ndk.$wallet?.mints ?? []);
+  // Mints and mintBalances only available on NIP-60 Cashu wallets
+  const wallet = $derived(walletStore.isNip60 && walletStore.wallet && 'mints' in walletStore.wallet ? walletStore.wallet : null);
+  const mints = $derived(wallet?.mints ?? []);
   const mintBalances = $derived.by(() => {
     const balances = new Map<string, number>();
-    ndk.$wallet?.mintBalances.forEach(mint => {
-      balances.set(mint.url, mint.balance);
-    });
+    if (wallet && 'mintBalances' in wallet) {
+      const mintBalancesData = wallet.mintBalances;
+      if (Array.isArray(mintBalancesData)) {
+        mintBalancesData.forEach((mint: any) => {
+          balances.set(mint.url, mint.balance);
+        });
+      }
+    }
     return balances;
   });
 
@@ -15,8 +22,8 @@
   let error = $state<string | null>(null);
 
   async function addMint() {
-    if (!ndk.$wallet) {
-      error = 'Wallet not available';
+    if (!wallet) {
+      error = 'Cashu wallet not available';
       return;
     }
 
@@ -34,10 +41,12 @@
       const currentMints = mints;
       const updatedMints = [...currentMints, newMintUrl.trim()];
 
-      await ndk.$wallet.save({
-        mints: updatedMints,
-        relays: ndk.$wallet.relays
-      });
+      if ('save' in wallet && typeof wallet.save === 'function') {
+        await wallet.save({
+          mints: updatedMints,
+          relays: 'relaySet' in wallet && wallet.relaySet ? Array.from(wallet.relaySet.relays).map(r => r.url) : undefined
+        });
+      }
 
       newMintUrl = '';
       error = null;
@@ -48,17 +57,19 @@
   }
 
   async function removeMint(mint: string) {
-    if (!ndk.$wallet) return;
+    if (!wallet) return;
 
     if (confirm(`Remove mint: ${mint}?`)) {
       try {
         const currentMints = mints;
         const updatedMints = currentMints.filter(m => m !== mint);
 
-        await ndk.$wallet.save({
-          mints: updatedMints,
-          relays: ndk.$wallet.relays
-        });
+        if ('save' in wallet && typeof wallet.save === 'function') {
+          await wallet.save({
+            mints: updatedMints,
+            relays: 'relaySet' in wallet && wallet.relaySet ? Array.from(wallet.relaySet.relays).map(r => r.url) : undefined
+          });
+        }
       } catch (e) {
         error = e instanceof Error ? e.message : String(e);
       }

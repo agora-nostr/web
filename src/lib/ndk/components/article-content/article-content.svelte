@@ -7,8 +7,16 @@
   import type { NDKSvelte } from '@nostr-dev-kit/svelte';
   import { SvelteMap } from 'svelte/reactivity';
   import { getContext, setContext } from 'svelte';
-  import { getNDKFromContext } from '../../utils/ndk-context.svelte.js';
-  import { defaultContentRenderer, type ContentRenderer } from '../../ui/content-renderer';
+  import { getNDK } from '../../utils/ndk';
+  import {
+    defaultContentRenderer,
+    ContentRenderer,
+    type UserClickCallback,
+    type EventClickCallback,
+    type HashtagClickCallback,
+    type LinkClickCallback,
+    type MediaClickCallback
+  } from '../../ui/content-renderer';
   import { CONTENT_RENDERER_CONTEXT_KEY, type ContentRendererContext } from '../../ui/content-renderer/content-renderer.context.js';
   import { User } from '../../ui/user';
   import HighlightToolbar from './highlight-toolbar.svelte';
@@ -20,6 +28,11 @@
     renderer?: ContentRenderer;
     highlightFilter?: (highlight: NDKHighlight) => boolean;
     onHighlightClick?: (highlight: NDKHighlight) => void;
+    onUserClick?: UserClickCallback;
+    onEventClick?: EventClickCallback;
+    onHashtagClick?: HashtagClickCallback;
+    onLinkClick?: LinkClickCallback;
+    onMediaClick?: MediaClickCallback;
     class?: string;
   }
 
@@ -29,17 +42,51 @@
     renderer: providedRenderer,
     highlightFilter,
     onHighlightClick,
+    onUserClick,
+    onEventClick,
+    onHashtagClick,
+    onLinkClick,
+    onMediaClick,
     class: className = ''
   }: Props = $props();
 
-  const ndk = getNDKFromContext(providedNdk);
+  const ndk = getNDK(providedNdk);
+
+  // Get parent context
+  const parentContext = getContext<ContentRendererContext | undefined>(CONTENT_RENDERER_CONTEXT_KEY);
 
   // Use renderer from prop, or from context, or fallback to default
-  const rendererContext = getContext<ContentRendererContext | undefined>(CONTENT_RENDERER_CONTEXT_KEY);
-  const renderer = $derived(providedRenderer ?? rendererContext?.renderer ?? defaultContentRenderer);
+  const renderer = $derived.by(() => {
+    const base = providedRenderer ?? parentContext?.renderer ?? defaultContentRenderer;
 
-  // Set renderer in context so nested components can access it
-  setContext(CONTENT_RENDERER_CONTEXT_KEY, { get renderer() { return renderer } });
+    // If custom callbacks are provided as props, create a new renderer with those callbacks
+    if (onUserClick || onEventClick || onHashtagClick || onLinkClick || onMediaClick) {
+      const customRenderer = new ContentRenderer();
+      // Copy all properties from base renderer
+      customRenderer.mentionComponent = base.mentionComponent;
+      customRenderer.hashtagComponent = base.hashtagComponent;
+      customRenderer.linkComponent = base.linkComponent;
+      customRenderer.mediaComponent = base.mediaComponent;
+      customRenderer.fallbackComponent = base.fallbackComponent;
+      customRenderer.blockNsfw = base.blockNsfw;
+
+      // Set custom callbacks or fall back to base renderer callbacks
+      customRenderer.onUserClick = onUserClick ?? base.onUserClick;
+      customRenderer.onEventClick = onEventClick ?? base.onEventClick;
+      customRenderer.onHashtagClick = onHashtagClick ?? base.onHashtagClick;
+      customRenderer.onLinkClick = onLinkClick ?? base.onLinkClick;
+      customRenderer.onMediaClick = onMediaClick ?? base.onMediaClick;
+
+      return customRenderer;
+    }
+
+    return base;
+  });
+
+  // Set ContentRendererContext for nested components
+  setContext(CONTENT_RENDERER_CONTEXT_KEY, {
+    get renderer() { return renderer; }
+  });
 
   let contentElement = $state<HTMLDivElement>();
   let avatarData = $state<Array<{ pubkey: string; top: number; right: string }>>([]);

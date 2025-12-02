@@ -13,23 +13,29 @@
 
 	const { notification }: Props = $props();
 
+	// Get the first invitee event to display
+	const inviteeEvent = $derived(notification.inviteeEvents[0]);
+	const inviteePubkey = $derived(inviteeEvent?.pubkey ?? '');
+
 	let profile = $state<NDKUserProfile | null>(null);
 
 	$effect(() => {
-		ndk.fetchUser(notification.inviteePubkey).then(u => {
-			u?.fetchProfile().then(p => { profile = p; });
-		});
+		if (inviteePubkey) {
+			ndk.fetchUser(inviteePubkey).then(u => {
+				u?.fetchProfile().then(p => { profile = p; });
+			});
+		}
 	});
 
 	const follows = $derived(ndk.$sessions?.follows ?? new Set());
-	const isFollowing = $derived.by(() => follows.has(notification.inviteePubkey));
+	const isFollowing = $derived.by(() => follows.has(inviteePubkey));
 </script>
 
 <NotificationBase testId="invite-acceptance-notification" timestamp={notification.timestamp}>
 	{#snippet avatar()}
 		<div class="flex-1 min-w-0">
 			<User
-				pubkey={notification.inviteePubkey}
+				pubkey={inviteePubkey}
 				variant="avatar-name-meta"
 				avatarSize="w-10 h-10"
 				nameSize="text-base font-semibold"
@@ -72,7 +78,7 @@
 
 		<div class="flex items-center gap-2 mt-2 ml-[54px]">
 			{#if !isFollowing}
-				<FollowButton {ndk} target={notification.inviteePubkey} />
+				<FollowButton {ndk} target={inviteePubkey} />
 			{/if}
 		</div>
 	{/snippet}

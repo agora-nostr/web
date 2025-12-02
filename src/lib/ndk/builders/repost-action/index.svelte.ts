@@ -4,7 +4,7 @@
 
 import { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import type { NDKSvelte } from "@nostr-dev-kit/svelte";
-import { resolveNDK } from "../resolve-ndk/index.svelte.js";
+import { getNDK } from "../../utils/ndk/index.svelte.js";
 
 export interface RepostStats {
 	count: number;
@@ -42,9 +42,9 @@ export type QuoteIntentCallback = (event: NDKEvent) => void;
  */
 export function createRepostAction(
 	config: () => RepostActionConfig,
-	ndk?: NDKSvelte,
+	ndkParam?: NDKSvelte,
 ) {
-	const resolvedNDK = resolveNDK(ndk);
+	const ndk = getNDK(ndkParam);
 
 	// Subscribe to reposts and quotes for this event
 	let repostsSub = $state<ReturnType<NDKSvelte["$subscribe"]> | null>(null);
@@ -56,7 +56,7 @@ export function createRepostAction(
 			return;
 		}
 
-		repostsSub = resolvedNDK.$subscribe(() => ({
+		repostsSub = ndk.$subscribe(() => ({
 			filters: [
 				// Regular reposts (kind 6 & 16) - use e.filter() for correct tag handling
 				{
@@ -85,10 +85,7 @@ export function createRepostAction(
 		// Collect all unique pubkeys and check if user has reposted
 		for (const r of reposts) {
 			uniquePubkeys.add(r.pubkey);
-			if (
-				resolvedNDK.$currentPubkey &&
-				r.pubkey === resolvedNDK.$currentPubkey
-			) {
+			if (ndk.$currentPubkey && r.pubkey === ndk.$currentPubkey) {
 				userRepost = r;
 			}
 		}
@@ -110,7 +107,7 @@ export function createRepostAction(
 			throw new Error("No event to repost");
 		}
 
-		if (!resolvedNDK.$currentPubkey) {
+		if (!ndk.$currentPubkey) {
 			throw new Error("User must be logged in to repost");
 		}
 
@@ -132,7 +129,7 @@ export function createRepostAction(
 			throw new Error("No event to quote");
 		}
 
-		if (!resolvedNDK.$currentPubkey) {
+		if (!ndk.$currentPubkey) {
 			throw new Error("User must be logged in to quote");
 		}
 

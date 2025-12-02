@@ -209,8 +209,7 @@
           bind:currentIndex={currentImageIndex}
           disabled={isPublishing}
           autoOpenOnMobile={true}
-        >
-          {#snippet triggerFileInput(triggerFn)}
+        />
             <MediaPostFormFields
               bind:content
               bind:location
@@ -224,7 +223,6 @@
                   type="button"
                   variant="ghost"
                   size="icon"
-                  onclick={triggerFn}
                   disabled={isPublishing}
                   title="Add more images to your post"
                   class="h-8 w-8"
@@ -304,8 +302,6 @@
                 </div>
               </div>
             {/if}
-          {/snippet}
-        </ImageUploadCarousel>
       </div>
     </Dialog.Content>
   </Dialog.Root

@@ -341,7 +341,7 @@
 
     {#if activeTab === 'media'}
       <div class="sm:p-4">
-        <MediaGrid events={allMediaEvents} />
+        <MediaGrid {ndk} subscriptionProps={{ authors: pubkey ? [pubkey] : [] }} />
       </div>
       <LoadMoreTrigger
         onIntersect={handleLoadMore}

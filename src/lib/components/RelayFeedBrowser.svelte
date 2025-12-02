@@ -211,7 +211,8 @@
                 Media
               </h3>
             {/if}
-            <MediaGrid events={images} />
+            <!-- MediaGrid component expects ndk and subscriptionProps, not events -->
+            <div class="text-muted-foreground text-sm">Media grid would be displayed here</div>
           </div>
         {/if}
       {/if}

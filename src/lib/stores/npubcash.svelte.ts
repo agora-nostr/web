@@ -151,12 +151,10 @@ class NpubCashStore {
 
 		try {
 			const balance = await this.getBalance();
-			console.log('npub.cash balance:', balance, 'sats');
 
 			if (balance > 0) {
 				const token = await this.getClaim();
 				if (token) {
-					console.log('Claimed token from npub.cash');
 					this.lastCheck = Date.now();
 					return token;
 				}

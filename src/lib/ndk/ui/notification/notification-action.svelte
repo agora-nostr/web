@@ -24,10 +24,9 @@
 
 	interface Props {
 		snippet?: Snippet<[ActionInfo]>;
-		children?: Snippet;
 	}
 
-	let { snippet, children }: Props = $props();
+	let { snippet }: Props = $props();
 
 	const context = getContext<NotificationContext>(NOTIFICATION_CONTEXT_KEY);
 
@@ -67,9 +66,7 @@
 	});
 </script>
 
-{#if children}
-	{@render children()}
-{:else if snippet}
+{#if snippet}
 	{@render snippet(actionInfo)}
 {:else}
 	<span class="flex items-center gap-1 text-sm text-muted-foreground">

@@ -69,7 +69,12 @@
 
   // Handle messages subscription lifecycle
   $effect(() => {
-    if (!ndk.$currentUser) {
+    const user = ndk.$currentUser;
+    const hasSigner = !!ndk.signer;
+
+    if (user && hasSigner) {
+      messagesStore.start();
+    } else {
       messagesStore.stop();
     }
   });
@@ -127,6 +132,7 @@
   <!-- Create Order Modal (for trades) -->
   {#if isCreateOrderModalOpen}
     <CreateOrderModal
+      open={isCreateOrderModalOpen}
       onClose={() => isCreateOrderModalOpen = false}
     />
   {/if}

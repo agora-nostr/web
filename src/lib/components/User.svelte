@@ -135,6 +135,8 @@
 		</Popover.Trigger>
 	{:else if variant === 'avatar-name-meta'}
 		<div
+			role="button"
+			tabindex="0"
 			onmouseenter={handleMouseEnter}
 			onmouseleave={handleMouseLeave}
 			class={cn("flex items-center gap-3", className)}
@@ -181,6 +183,7 @@
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}

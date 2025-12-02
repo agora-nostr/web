@@ -256,7 +256,7 @@
             Loading {selectedFilter}...
           </div>
         {:else}
-          <MediaGrid events={mediaEvents} />
+          <MediaGrid {ndk} subscriptionProps={{ hashtags: hashtag ? [hashtag] : [] }} />
         {/if}
       </div>
     {:else}
