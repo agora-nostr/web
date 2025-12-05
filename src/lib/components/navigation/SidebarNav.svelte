@@ -165,7 +165,7 @@
   <!-- Header: Logo and Toggle -->
   <div class="mb-6 flex items-center {collapsed ? 'justify-center' : 'justify-between'} gap-2">
     <!-- Agora Branding -->
-    <div class="px-2 {collapsed ? 'hidden' : 'flex-1'} transition-opacity duration-300 text-foreground">
+    <a href="/" class="px-2 {collapsed ? 'hidden' : 'flex-1'} transition-opacity duration-300 text-foreground hover:opacity-80">
       <svg viewBox="0 0 686 250" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
         <style>
           .st0{fill:#F68E1D;}
@@ -212,7 +212,7 @@
           v-29.2h2.6V157z M147.2,157h-2.6v-29.2h2.6V157z"/>
         <path class="st1" d="M284.4,150.2h-2.6v0.1C282.7,150.3,283.6,150.3,284.4,150.2z"/>
       </svg>
-    </div>
+    </a>
 
     <!-- Toggle Button -->
     <button

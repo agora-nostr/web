@@ -9,7 +9,7 @@
 
   const { relayUrl, size = 'md', class: className = '' }: Props = $props();
 
-  const relayInfo = useRelayInfoCached(relayUrl);
+  const relayInfo = $derived.by(() => useRelayInfoCached(relayUrl));
 
   const sizeClasses = $derived({
     xs: 'w-3 h-3',
